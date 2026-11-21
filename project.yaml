@@ -1,0 +1,17 @@
+name: DoriaxJam
+canvasWidth: 1280
+canvasHeight: 720
+scalingMode: fitwidth
+textureStrategy: none
+vsync: true
+windowMode: windowed
+windowWidth: 1280
+windowHeight: 720
+windowResizable: true
+assetsDir: assets
+luaDir: scripts
+startSceneId: 2184184001
+scenes:
+  - filepath: Fase Teste.scene
+standaloneBundles:
+  - bundles/Projetil.bundle
