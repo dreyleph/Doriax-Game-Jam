@@ -29,9 +29,17 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | `scripts/player/Player.lua` | movimento, pulo, descer de plataforma, tiro |
 | `scripts/enemy/Enemy.lua` | inimigo comum (patrulha, dano por contato) |
 | `scripts/projectile/Projectile.lua` | projétil do jogador |
+| `HUD.scene` | cena de UI (pontos, vidas, GAME OVER) anexada como cena filha da fase |
+| `scripts/game/GameState.lua` | vidas e pontuação da partida |
+| `scripts/ui/HUD.lua` | atualiza os textos do HUD |
 | `scripts/camera/CameraFollow.lua` | câmera lateral |
 | `scripts/game/Combat.lua` | categorias de colisão e regras de combate compartilhadas |
 
+## Vidas e pontuação (provisório)
+- Começa com 3 vidas e 0 pontos. Cada inimigo abatido vale 500 pontos.
+- Morrer (encostar em inimigo ou cair do mapa) tira 1 vida e metade dos pontos; o jogador renasce no último chão seguro com 2 s de invencibilidade.
+- Sem vidas: GAME OVER e a fase recomeça do zero após 3 s.
+- Tudo ajustável no Inspector do Jogador (vidas, penalidade, tempos) e do inimigo (pontos).
+
 ## Estado atual
-- Encostar em um inimigo reinicia a fase (ainda não há sistema de vida).
 - Gráficos são retângulos provisórios.

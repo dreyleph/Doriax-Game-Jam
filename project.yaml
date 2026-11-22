@@ -13,5 +13,6 @@ luaDir: scripts
 startSceneId: 2184184001
 scenes:
   - filepath: Fase Teste.scene
+  - filepath: HUD.scene
 standaloneBundles:
   - bundles/Projetil.bundle

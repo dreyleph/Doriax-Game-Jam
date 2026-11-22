@@ -8,8 +8,13 @@
 --   J                               -> atirar
 --   W / Seta para cima (segurando)  -> mirar para cima (+ andando = diagonal)
 --   S / Seta para baixo no ar       -> mirar para baixo (+ andando = diagonal)
+--
+-- Vidas (estilo arcade): ao morrer perde 1 vida e parte dos pontos, renasce
+-- no ultimo chao seguro com invencibilidade temporaria (piscando).
+-- Sem vidas: GAME OVER e a fase recomeca do zero.
 
 local Combat = require("game.Combat")
+local GameState = require("game.GameState")
 
 local Player = {
     properties = {
@@ -17,11 +22,16 @@ local Player = {
         { name = "jumpSpeed",     displayName = "Velocidade do pulo (px/s)",    type = "float", default = 860.0 },
         { name = "gravityScale",  displayName = "Escala da gravidade",          type = "float", default = 3.0 },
         { name = "maxFallSpeed",  displayName = "Queda maxima (px/s)",          type = "float", default = 1400.0 },
-        { name = "respawnY",      displayName = "Y de respawn (caiu do mapa)",  type = "float", default = -400.0 },
+        { name = "respawnY",      displayName = "Y limite (abaixo disso morre)", type = "float", default = -400.0 },
         { name = "fireCooldown",  displayName = "Intervalo entre tiros (s)",    type = "float", default = 0.15 },
         { name = "autoFire",      displayName = "Tiro automatico (segurar J)",  type = "bool",  default = false },
         { name = "dropTime",      displayName = "Tempo atravessando (s)",       type = "float", default = 0.35 },
         { name = "allowDiagonal", displayName = "Permitir tiro na diagonal",    type = "bool",  default = true },
+        { name = "startLives",        displayName = "Vidas iniciais",                     type = "int",   default = 3 },
+        { name = "deathScorePenalty", displayName = "Pontos perdidos ao morrer (0 a 1)",  type = "float", default = 0.5 },
+        { name = "respawnDelay",      displayName = "Tempo ate renascer (s)",             type = "float", default = 0.8 },
+        { name = "invincibleTime",    displayName = "Invencibilidade ao renascer (s)",    type = "float", default = 2.0 },
+        { name = "gameOverDelay",     displayName = "Tempo na tela de game over (s)",     type = "float", default = 3.0 },
     }
 }
 
@@ -40,6 +50,13 @@ end
 
 function Player:init()
     Combat.resetLevelState()
+    Combat.registerPlayer(self)
+
+    GameState.startLives = self.startLives
+    GameState.deathScorePenalty = self.deathScorePenalty
+    if GameState.needsNewGame then
+        GameState.newGame()
+    end
 
     self.object = Object(self.scene, self.entity)
     self.body = Body2D(self.scene, self.entity)
@@ -50,6 +67,11 @@ function Player:init()
 
     local p = self.object.position
     self.spawn = Vector2(p.x, p.y)
+    self.lastSafe = Vector2(p.x, p.y)   -- ultimo ponto em que estava no chao
+
+    self.state = "alive"         -- "alive" | "dead" (esperando renascer) | "gameover"
+    self.stateTimer = 0
+    self.invincibleTimer = 0
 
     self.facing = 1              -- 1 = direita, -1 = esquerda
     self.grounded = false
@@ -147,17 +169,85 @@ function Player:shoot(aimUp, aimDown, moving)
     Combat.spawnProjectile(self.scene, x, y, dx, dy)
 end
 
-function Player:respawn()
-    self.body.position = self.spawn
+-- Vidas -----------------------------------------------------------------
+
+function Player:isInvincible()
+    return self.invincibleTimer > 0
+end
+
+-- Dano recebido. "force" ignora a invencibilidade (ex.: cair no buraco).
+function Player:hurt(force)
+    if self.state ~= "alive" then return end
+    if self:isInvincible() and not force then return end
+
+    local hasLivesLeft = GameState.loseLife()
+    Log.print(string.format("Jogador morreu. Vidas: %d  Pontos: %d", GameState.lives, GameState.score))
+
+    -- "congela" e esconde o jogador enquanto espera
+    self.body.gravityScale = 0
     self.body.linearVelocity = Vector2(0, 0)
+    self.object.visible = false
+    self.invincibleTimer = 0
+
+    if hasLivesLeft then
+        self.state = "dead"
+        self.stateTimer = self.respawnDelay
+    else
+        self.state = "gameover"
+        self.stateTimer = self.gameOverDelay
+        Log.print("GAME OVER")
+    end
+end
+
+function Player:respawn()
+    self.state = "alive"
+    self.body.position = Vector2(self.lastSafe.x, self.lastSafe.y + 4)
+    self.body.linearVelocity = Vector2(0, 0)
+    self.body.gravityScale = self.gravityScale
+    self.object.visible = true
+    self.invincibleTimer = self.invincibleTime
+    self.dropTimer = 0
+end
+
+-- Retorna true se o jogador esta fora de jogo (morto / game over) neste passo
+function Player:updateLifeState(dt)
+    if self.state == "alive" then
+        if self.invincibleTimer > 0 then
+            self.invincibleTimer = self.invincibleTimer - dt
+            if self.invincibleTimer <= 0 then
+                self.object.visible = true
+            else
+                -- pisca 10 vezes por segundo
+                self.object.visible = math.floor(self.invincibleTimer * 10) % 2 == 0
+            end
+        end
+        return false
+    end
+
+    self.body.linearVelocity = Vector2(0, 0)
+    self.stateTimer = self.stateTimer - dt
+    if self.stateTimer <= 0 then
+        if self.state == "dead" then
+            self:respawn()
+        elseif self.state == "gameover" then
+            Combat.restartLevel()
+        end
+    end
+    return true
 end
 
 function Player:onFixedUpdate()
     local dt = Engine.updateTime
+    if self:updateLifeState(dt) then return end
+
     if self.dropTimer > 0 then self.dropTimer = self.dropTimer - dt end
     if self.fireTimer > 0 then self.fireTimer = self.fireTimer - dt end
 
     self.grounded, self.groundEntity, self.groundIsPlatform = self:checkGround()
+    if self.grounded then
+        local pos = self.body.position
+        self.lastSafe = Vector2(pos.x, pos.y)
+    end
 
     -- Entrada
     local left   = anyKey(Input.KEY_A, Input.KEY_LEFT)
@@ -202,9 +292,9 @@ function Player:onFixedUpdate()
         self:shoot(up, down, dir ~= 0)
     end
 
-    -- Caiu para fora do mapa
+    -- Caiu para fora do mapa: perde vida mesmo se estiver invencivel
     if self.body.position.y < self.respawnY then
-        self:respawn()
+        self:hurt(true)
     end
 end
 

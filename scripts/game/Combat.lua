@@ -59,18 +59,31 @@ end
 
 -- Jogador ---------------------------------------------------------------
 
--- Chamado pelo Player:init a cada (re)início da cena
--- (o registro de inimigos não é limpo aqui: os inimigos podem iniciar antes
+local player = nil   -- instancia do script Player (registrada no Player:init)
+
+function Combat.registerPlayer(instance)
+    player = instance
+end
+
+-- Chamado pelo Player:init a cada (re)inicio da cena
+-- (o registro de inimigos nao e limpo aqui: os inimigos podem iniciar antes
 -- do jogador, e cada um se registra de novo com o id da sua entidade)
 function Combat.resetLevelState()
     restarting = false
 end
 
--- Sem sistema de vida por enquanto: qualquer dano reinicia a fase
+-- Inimigo (ou outra fonte de dano) acertou o jogador.
+-- O Player decide se a morte conta (ignora se ja estiver morto ou invencivel).
 function Combat.playerHit()
+    if player and player.hurt then
+        player:hurt()
+    end
+end
+
+-- Recarrega a fase atual (usado no game over)
+function Combat.restartLevel()
     if restarting then return end
     restarting = true
-    Log.print("Jogador atingido! Reiniciando a fase...")
     SceneManager.loadScene(SceneManager.currentSceneId)
 end
 

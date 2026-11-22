@@ -1,0 +1,106 @@
+id: 2184184002
+name: HUD
+scene:
+  backgroundColor: [0, 0, 0, 0]
+  lightState: off
+  enableUIEvents: not_set
+sceneType: scene_ui
+mainCamera: 0
+visibilityInherited: true
+entities:
+  - type: Entity
+    entity: 1001
+    name: HUD
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      script:
+        scripts:
+          - type: lua
+            path: ui/HUD.lua
+            className: HUD
+            enabled: true
+            properties:
+              - name: scoreText
+                displayName: Texto dos pontos
+                type: EntityReference
+                ptrTypeName: Text
+                value: 1002
+                defaultValue: 0
+              - name: livesText
+                displayName: Texto das vidas
+                type: EntityReference
+                ptrTypeName: Text
+                value: 1003
+                defaultValue: 0
+              - name: gameOverText
+                displayName: Texto de game over
+                type: EntityReference
+                ptrTypeName: Text
+                value: 1004
+                defaultValue: 0
+              - name: scoreDigits
+                displayName: Digitos da pontuacao
+                type: Int
+                value: 6
+                defaultValue: 6
+  - type: Entity
+    entity: 1002
+    name: Pontos
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        anchorPreset: TOP_LEFT
+        usingAnchors: true
+        positionOffset: [32, 24]
+      ui:
+        color: [1, 0.85, 0.25, 1]
+      text:
+        text: PONTOS 000000
+        fontSize: 32
+  - type: Entity
+    entity: 1003
+    name: Vidas
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        anchorPreset: TOP_LEFT
+        usingAnchors: true
+        positionOffset: [32, 66]
+      ui:
+        color: [1, 1, 1, 1]
+      text:
+        text: VIDAS x3
+        fontSize: 28
+  - type: Entity
+    entity: 1004
+    name: GameOver
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: false
+      uilayout:
+        anchorPreset: CENTER
+        usingAnchors: true
+      ui:
+        color: [0.95, 0.25, 0.2, 1]
+      text:
+        text: GAME OVER
+        fontSize: 80
+shaderKeys:
+  - type: ui
+    properties: 2
+  - type: blit

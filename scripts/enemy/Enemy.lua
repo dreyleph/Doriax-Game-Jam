@@ -1,12 +1,14 @@
 -- Enemy.lua
 -- Inimigo comum: patrulha de um lado para o outro em volta do ponto inicial.
--- Encostar no jogador reinicia a fase; um tiro (ou mais, conforme "Vida") o elimina.
+-- Encostar no jogador tira uma vida dele; um tiro (ou mais, conforme "Vida") o elimina
+-- e soma "Pontos ao abater" a pontuacao.
 --
 -- Shapes esperados no Body2D do inimigo:
 --   0 = corpo (categoria ENEMY): colide com chão/plataformas e recebe tiros
 --   1 = área de dano (sensor, categoria ENEMY_HURTBOX): detecta o jogador
 
 local Combat = require("game.Combat")
+local GameState = require("game.GameState")
 
 local Enemy = {
     properties = {
@@ -15,6 +17,7 @@ local Enemy = {
         { name = "startDirection", displayName = "Direcao inicial (-1 ou 1)",     type = "int",   default = -1 },
         { name = "health",         displayName = "Vida (tiros para eliminar)",    type = "int",   default = 1 },
         { name = "gravityScale",   displayName = "Escala da gravidade",           type = "float", default = 3.0 },
+        { name = "scoreValue",     displayName = "Pontos ao abater",              type = "int",   default = 500 },
     }
 }
 
@@ -28,16 +31,24 @@ function Enemy:init()
     self.dir = (self.startDirection >= 0) and 1 or -1
     self.hp = self.health
     self.dead = false
+    self.touchingPlayer = 0   -- contatos ativos entre a area de dano e o jogador
 
     Combat.registerHittable(self.entity, self)
 
     local physics = self.scene:getPhysicsSystem()
     RegisterEvent(self, physics.beginSensorContact2D, "onSensorBegin")
+    RegisterEvent(self, physics.endSensorContact2D, "onSensorEnd")
     RegisterEngineEvent(self, "onFixedUpdate")
 end
 
 function Enemy:onFixedUpdate()
     if self.dead then return end
+
+    -- Dano continuo: se o jogador continuar encostado quando a invencibilidade
+    -- acabar, ele leva dano de novo (o Player ignora enquanto esta invencivel)
+    if self.touchingPlayer > 0 then
+        Combat.playerHit()
+    end
 
     local x = self.body.position.x
     if x <= self.startX - self.patrolDistance then
@@ -50,11 +61,19 @@ function Enemy:onFixedUpdate()
     self.body.linearVelocity = Vector2(self.dir * self.speed, vy)
 end
 
--- Sensor de dano encostou em algo
+-- Area de dano encostou / deixou de encostar em algo
 function Enemy:onSensorBegin(sensorBody, sensorShape, visitorBody, visitorShape)
     if self.dead or sensorBody.entity ~= self.entity then return end
     if Combat.hasCategory(visitorBody, visitorShape, Combat.CAT.PLAYER) then
+        self.touchingPlayer = self.touchingPlayer + 1
         Combat.playerHit()
+    end
+end
+
+function Enemy:onSensorEnd(sensorBody, sensorShape, visitorBody, visitorShape)
+    if sensorBody.entity ~= self.entity then return end
+    if Combat.hasCategory(visitorBody, visitorShape, Combat.CAT.PLAYER) then
+        self.touchingPlayer = math.max(self.touchingPlayer - 1, 0)
     end
 end
 
@@ -69,7 +88,9 @@ end
 
 function Enemy:die()
     self.dead = true
+    self.touchingPlayer = 0
     Combat.unregisterHittable(self.entity)
+    GameState.addScore(self.scoreValue)
     -- Desativar em vez de destruir: seguro dentro de callbacks de física
     -- e permite reaproveitar o inimigo no futuro (respawn, animação de morte etc.)
     self.body.enabled = false

@@ -52,6 +52,9 @@ shaderKeys:
   - type: depth
     properties: 128
   - type: blit
+childScenes:
+  - id: 2184184002
+    startActive: true
 entities:
   - type: Entity
     entity: 1001
@@ -557,7 +560,7 @@ entities:
                 value: 1400
                 defaultValue: 1400
               - name: respawnY
-                displayName: Y de respawn (caiu do mapa)
+                displayName: Y limite (abaixo disso morre)
                 type: Float
                 value: -400
                 defaultValue: -400
@@ -581,6 +584,31 @@ entities:
                 type: Bool
                 value: true
                 defaultValue: true
+              - name: startLives
+                displayName: Vidas iniciais
+                type: Int
+                value: 3
+                defaultValue: 3
+              - name: deathScorePenalty
+                displayName: Pontos perdidos ao morrer (0 a 1)
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: respawnDelay
+                displayName: Tempo ate renascer (s)
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: invincibleTime
+                displayName: Invencibilidade ao renascer (s)
+                type: Float
+                value: 2
+                defaultValue: 2
+              - name: gameOverDelay
+                displayName: Tempo na tela de game over (s)
+                type: Float
+                value: 3
+                defaultValue: 3
       body2d:
         type: dynamic
         numShapes: 1
@@ -721,6 +749,11 @@ entities:
                 type: Float
                 value: 3
                 defaultValue: 3
+              - name: scoreValue
+                displayName: Pontos ao abater
+                type: Int
+                value: 500
+                defaultValue: 500
       body2d:
         type: dynamic
         numShapes: 2
@@ -885,6 +918,11 @@ entities:
                 type: Float
                 value: 3
                 defaultValue: 3
+              - name: scoreValue
+                displayName: Pontos ao abater
+                type: Int
+                value: 500
+                defaultValue: 500
       body2d:
         type: dynamic
         numShapes: 2
@@ -937,4 +975,4 @@ entities:
               - [22, -30]
               - [22, 30]
               - [-22, 30]
-shaderKeysHash: 485142811d5f1ad060f3c70aab733b7bbc5ce663
+shaderKeysHash: 6b55eaeb49fdb646e28d902d252f99a2f2282aae
