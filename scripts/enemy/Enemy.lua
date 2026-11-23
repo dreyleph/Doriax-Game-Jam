@@ -12,6 +12,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Itens = require("itens.Itens")
 
 local Enemy = {
     properties = {
@@ -111,6 +112,9 @@ function Enemy:die(givePoints)
     Combat.unregisterHittable(self.entity)
     if givePoints ~= false then
         GameState.addScore(self.scoreValue)
+        -- sorteia um item no pe do inimigo
+        local pos = self.body.position
+        Itens.tryDrop(self.scene, pos.x, pos.y - (self.halfHeight or 32))
     end
     -- Desativar em vez de destruir: seguro dentro de callbacks de física
     -- e permite reaproveitar o inimigo no futuro (respawn, animação de morte etc.)

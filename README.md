@@ -40,12 +40,24 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | `scripts/ui/HUD.lua` | atualiza os textos do HUD |
 | `scripts/camera/CameraFollow.lua` | câmera lateral |
 | `scripts/game/Combat.lua` | categorias de colisão e regras de combate compartilhadas |
+| `scripts/itens/Itens.lua` | itens que caem dos inimigos (chances, cores e efeitos) |
 
 ## Vidas e pontuação (provisório)
 - Começa com 3 vidas e 0 pontos. Cada inimigo abatido vale 500 pontos.
 - Morrer (encostar em inimigo ou cair do mapa) tira 1 vida e metade dos pontos; o jogador renasce no último chão seguro com 2 s de invencibilidade.
 - Sem vidas: GAME OVER e a fase recomeça do zero após 3 s.
 - Tudo ajustável no Inspector do Jogador (vidas, penalidade, tempos) e do inimigo (pontos).
+
+## Itens (provisório)
+Cada inimigo abatido sorteia no máximo 1 item; o jogador pega encostando. O item some após 10 s (pisca antes).
+
+| Item | Cor | Chance | Efeito |
+|---|---|---|---|
+| Pisa Macio | amarelo | 5% | +1 vida (até o máximo inicial) |
+| Charuto | preto | 1% | 10 s de tiro automático e rápido segurando J |
+| Caranguejo | laranja | 0,1% | recupera todas as vidas e dano x2 por 10 s |
+
+Os efeitos temporários acabam ao morrer. Chances, cores e durações ficam no topo de `scripts/itens/Itens.lua`.
 
 ## Mapa procedural (protótipo)
 - Cada tela (1280 px) é montada com **4 módulos de 320 px** sorteados de `scripts/level/Chunks.lua` (buracos, plataformas, degraus, caixas, grupos de inimigos...). A corrida começa sempre por uma tela segura.
