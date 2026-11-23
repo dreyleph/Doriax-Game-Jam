@@ -1,11 +1,11 @@
 name: DoriaxJam
-canvasWidth: 1280
+canvasWidth: 960
 canvasHeight: 720
-scalingMode: fitwidth
+scalingMode: letterbox
 textureStrategy: none
 vsync: true
 windowMode: windowed
-windowWidth: 1280
+windowWidth: 960
 windowHeight: 720
 windowResizable: true
 assetsDir: assets

@@ -3,7 +3,7 @@
 -- jogador e gerador via require("game.Run").
 
 local Run = {
-    viewWidth = 1280,     -- largura da tela em pixels (canvas do projeto)
+    viewWidth = 960,      -- largura da tela em pixels (o CameraFollow atualiza com Engine.canvasWidth)
     cameraLeft = nil,     -- borda esquerda da camera; nil = sem limite (cena sem CameraFollow travada)
     lockBackwards = false -- true: a camera nao volta e o jogador nao sai pela esquerda
 }

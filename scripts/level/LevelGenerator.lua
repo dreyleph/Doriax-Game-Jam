@@ -27,13 +27,19 @@ local LevelGenerator = {
         { name = "minEnemies",      displayName = "Inimigos garantidos por tela",       type = "int",   default = 2 },
         { name = "minEnemiesEvery", displayName = "+1 inimigo garantido a cada N telas", type = "int",   default = 3 },
         { name = "minEnemiesMax",   displayName = "Maximo de inimigos garantidos",      type = "int",   default = 6 },
+        { name = "terrainLayer",    displayName = "Camada do terreno (entidade pai)",   type = "Object" },
         { name = "groundDepth",     displayName = "Espessura do chao (px)",             type = "float", default = 600.0 },
     }
 }
 
-local COLOR_GROUND   = { 0.45, 0.32, 0.20 }
-local COLOR_BLOCK    = { 0.38, 0.27, 0.17 }
-local COLOR_PLATFORM = { 0.55, 0.42, 0.28 }
+-- Cores provisorias (ate chegar a arte do cenario). Escuras para contrastar
+-- com o fundo (ceu azul e casario bege/ocre); a "borda" clara no topo marca
+-- onde da para pisar.
+local COLOR_GROUND   = { 0.157, 0.122, 0.102 }
+local COLOR_BLOCK    = { 0.250, 0.200, 0.170 }
+local COLOR_PLATFORM = { 0.149, 0.118, 0.102 }
+local COLOR_LIP      = { 0.910, 0.667, 0.235 }   -- ocre
+local LIP_HEIGHT = 5
 local PLATFORM_THICKNESS = 32
 
 function LevelGenerator:init()
@@ -128,6 +134,27 @@ function LevelGenerator:pickModules()
 end
 
 -- Construcao --------------------------------------------------------------------
+-- Retangulo so visual (sem colisao); (x0, y0) = canto inferior esquerdo
+function LevelGenerator:makeDecor(x0, y0, w, h, color)
+    local sprite = Sprite(self.scene)
+    sprite.entityOwned = false
+    sprite:setSize(w, h)
+    sprite.color = Vector4(color[1], color[2], color[3], 1)
+    sprite.position = Vector3(x0, y0, 0)
+    if self.terrainLayer then
+        self.terrainLayer:addChild(sprite)
+    else
+        sprite:moveToBottom()
+    end
+    return sprite.entity
+end
+
+-- Bloco/plataforma com a borda clara no topo; devolve as entidades criadas
+function LevelGenerator:makeSurface(list, x0, y0, w, h, color, isPlatform)
+    list[#list + 1] = self:makeBlock(x0, y0, w, h, color, isPlatform)
+    list[#list + 1] = self:makeDecor(x0, y0 + h - LIP_HEIGHT, w, LIP_HEIGHT, COLOR_LIP)
+end
+
 -- Retangulo estatico com colisao; (x0, y0) = canto inferior esquerdo
 function LevelGenerator:makeBlock(x0, y0, w, h, color, isPlatform)
     local sprite = Sprite(self.scene)
@@ -139,7 +166,13 @@ function LevelGenerator:makeBlock(x0, y0, w, h, color, isPlatform)
     sprite:setSize(w, h)
     sprite.color = Vector4(color[1], color[2], color[3], 1)
     sprite.position = Vector3(x0, y0, 0)
-    sprite:moveToBottom()   -- desenha atras do jogador e dos inimigos
+    -- Ordem de desenho segue a hierarquia: os blocos ficam dentro da camada
+    -- "Terreno" (antes do Jogador na cena) -> atras do jogador, na frente do fundo
+    if self.terrainLayer then
+        self.terrainLayer:addChild(sprite)
+    else
+        sprite:moveToBottom()
+    end
 
     local body = sprite:getBody2D()   -- estatico por padrao
     body:createCenteredBoxShape(w, h, Vector2(w / 2, h / 2), 0)
@@ -192,11 +225,10 @@ function LevelGenerator:spawnChunk(modules, isStart)
             groundRanges[#groundRanges + 1] = { mx + g[1], mx + g[2] }
         end
         for _, b in ipairs(m.blocks or {}) do
-            chunk.blocks[#chunk.blocks + 1] = self:makeBlock(mx + b[1], b[2], b[3], b[4], COLOR_BLOCK, false)
+            self:makeSurface(chunk.blocks, mx + b[1], b[2], b[3], b[4], COLOR_BLOCK, false)
         end
         for _, p in ipairs(m.platforms or {}) do
-            chunk.blocks[#chunk.blocks + 1] =
-                self:makeBlock(mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, COLOR_PLATFORM, true)
+            self:makeSurface(chunk.blocks, mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, COLOR_PLATFORM, true)
         end
         for _, e in ipairs(m.enemies or {}) do
             candidates[#candidates + 1] = { mx + e[1], e[2], e[3] }
@@ -204,8 +236,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
     end
 
     for _, g in ipairs(mergeRanges(groundRanges)) do
-        chunk.blocks[#chunk.blocks + 1] =
-            self:makeBlock(g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, COLOR_GROUND, false)
+        self:makeSurface(chunk.blocks, g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, COLOR_GROUND, false)
     end
 
     -- Inimigos: embaralha os pontos; os primeiros "garantidos" sempre aparecem,
