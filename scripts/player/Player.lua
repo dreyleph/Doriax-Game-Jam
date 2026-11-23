@@ -16,6 +16,7 @@
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
 local Run = require("game.Run")
+local Itens = require("itens.Itens")
 
 local Player = {
     properties = {
@@ -52,6 +53,7 @@ end
 function Player:init()
     Combat.resetLevelState()
     Combat.registerPlayer(self)
+    Itens.reset()
 
     GameState.startLives = self.startLives
     GameState.deathScorePenalty = self.deathScorePenalty
@@ -181,6 +183,7 @@ function Player:hurt(force)
     if self.state ~= "alive" then return end
     if self:isInvincible() and not force then return end
 
+    Itens.clearEffects()
     local hasLivesLeft = GameState.loseLife()
     Log.print(string.format("Jogador morreu. Vidas: %d  Pontos: %d", GameState.lives, GameState.score))
 
@@ -298,12 +301,17 @@ function Player:onFixedUpdate()
 
     self.body.linearVelocity = Vector2(vx, vy)
 
-    -- Tiro
-    local wantsFire = firePressed or (self.autoFire and fire)
+    -- Tiro (o Charuto deixa automatico e mais rapido)
+    local autoFire, cooldown = Itens.fireModifiers(self.autoFire, self.fireCooldown)
+    local wantsFire = firePressed or (autoFire and fire)
     if wantsFire and self.fireTimer <= 0 then
-        self.fireTimer = self.fireCooldown
+        self.fireTimer = cooldown
         self:shoot(up, down, dir ~= 0)
     end
+
+    -- Itens: efeitos temporarios e coleta
+    local pos = self.body.position
+    Itens.update(self, dt, pos.x, pos.y, HALF_W, HALF_H)
 
     -- Caiu para fora do mapa: perde vida mesmo se estiver invencivel
     if self.body.position.y < self.respawnY then

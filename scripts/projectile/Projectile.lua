@@ -4,6 +4,7 @@
 -- Some ao acertar um inimigo, ao bater no chão/parede ou ao fim do tempo de vida.
 
 local Combat = require("game.Combat")
+local Itens = require("itens.Itens")
 
 local Projectile = {
     properties = {
@@ -44,7 +45,7 @@ function Projectile:onSensorBegin(sensorBody, sensorShape, visitorBody, visitorS
     if self.dead or sensorBody.entity ~= self.entity then return end
 
     if Combat.hasCategory(visitorBody, visitorShape, Combat.CAT.ENEMY) then
-        Combat.hit(visitorBody.entity, self.damage)
+        Combat.hit(visitorBody.entity, self.damage * Itens.damageMultiplier())
         self:kill()
     elseif Combat.hasCategory(visitorBody, visitorShape, Combat.CAT.WORLD) then
         self:kill()
