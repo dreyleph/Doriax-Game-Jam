@@ -128,6 +128,11 @@ entities:
                 type: Float
                 value: 1920
                 defaultValue: 1920
+              - name: lockBackwards
+                displayName: Nao voltar (modo corrida)
+                type: Bool
+                value: false
+                defaultValue: false
   - type: Entity
     entity: 1002
     name: Chao
@@ -754,6 +759,11 @@ entities:
                 type: Int
                 value: 500
                 defaultValue: 500
+              - name: fallLimitY
+                displayName: Y limite (abaixo disso some)
+                type: Float
+                value: -400
+                defaultValue: -400
       body2d:
         type: dynamic
         numShapes: 2
@@ -923,6 +933,11 @@ entities:
                 type: Int
                 value: 500
                 defaultValue: 500
+              - name: fallLimitY
+                displayName: Y limite (abaixo disso some)
+                type: Float
+                value: -400
+                defaultValue: -400
       body2d:
         type: dynamic
         numShapes: 2
@@ -975,4 +990,4 @@ entities:
               - [22, -30]
               - [22, 30]
               - [-22, 30]
-shaderKeysHash: 6b55eaeb49fdb646e28d902d252f99a2f2282aae
+shaderKeysHash: 808ce66edd17ad06db9e62a3f84b309cc26c3bfa

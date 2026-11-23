@@ -3,6 +3,9 @@
 -- Encostar no jogador tira uma vida dele; um tiro (ou mais, conforme "Vida") o elimina
 -- e soma "Pontos ao abater" a pontuacao.
 --
+-- Pode ser colocado direto na cena ou criado pelo gerador (Combat.spawnEnemy,
+-- bundle "bundles/Inimigo"); nesse caso a posicao e a patrulha vem do gerador.
+--
 -- Shapes esperados no Body2D do inimigo:
 --   0 = corpo (categoria ENEMY): colide com chão/plataformas e recebe tiros
 --   1 = área de dano (sensor, categoria ENEMY_HURTBOX): detecta o jogador
@@ -18,6 +21,7 @@ local Enemy = {
         { name = "health",         displayName = "Vida (tiros para eliminar)",    type = "int",   default = 1 },
         { name = "gravityScale",   displayName = "Escala da gravidade",           type = "float", default = 3.0 },
         { name = "scoreValue",     displayName = "Pontos ao abater",              type = "int",   default = 500 },
+        { name = "fallLimitY",     displayName = "Y limite (abaixo disso some)",  type = "float", default = -400.0 },
     }
 }
 
@@ -27,7 +31,16 @@ function Enemy:init()
     self.body.fixedRotation = true
     self.body.gravityScale = self.gravityScale
 
-    self.startX = self.object.position.x
+    -- Criado pelo gerador: aplica posicao e propriedades do trecho
+    local spawn = Combat.pendingEnemy
+    if spawn then
+        for k, v in pairs(spawn.overrides or {}) do self[k] = v end
+        self.halfHeight = 32
+        self.body.position = Vector2(spawn.x, spawn.y + self.halfHeight)
+        self.startX = spawn.x
+    else
+        self.startX = self.object.position.x
+    end
     self.dir = (self.startDirection >= 0) and 1 or -1
     self.hp = self.health
     self.dead = false
@@ -50,7 +63,13 @@ function Enemy:onFixedUpdate()
         Combat.playerHit()
     end
 
-    local x = self.body.position.x
+    local pos = self.body.position
+    if pos.y < self.fallLimitY then
+        self:die(false)   -- caiu do mapa: some sem dar pontos
+        return
+    end
+
+    local x = pos.x
     if x <= self.startX - self.patrolDistance then
         self.dir = 1
     elseif x >= self.startX + self.patrolDistance then
@@ -86,11 +105,13 @@ function Enemy:takeHit(damage)
     end
 end
 
-function Enemy:die()
+function Enemy:die(givePoints)
     self.dead = true
     self.touchingPlayer = 0
     Combat.unregisterHittable(self.entity)
-    GameState.addScore(self.scoreValue)
+    if givePoints ~= false then
+        GameState.addScore(self.scoreValue)
+    end
     -- Desativar em vez de destruir: seguro dentro de callbacks de física
     -- e permite reaproveitar o inimigo no futuro (respawn, animação de morte etc.)
     self.body.enabled = false

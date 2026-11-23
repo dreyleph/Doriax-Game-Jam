@@ -15,6 +15,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Run = require("game.Run")
 
 local Player = {
     properties = {
@@ -283,6 +284,18 @@ function Player:onFixedUpdate()
     end
 
     if vy < -self.maxFallSpeed then vy = -self.maxFallSpeed end
+
+    -- Modo corrida: a camera nao volta, entao o jogador nao sai pela esquerda
+    if Run.lockBackwards and Run.cameraLeft then
+        local minX = Run.cameraLeft + HALF_W
+        local pos = self.body.position
+        if pos.x < minX then
+            self.body.position = Vector2(minX, pos.y)
+        end
+        -- encostado na borda: nao deixa andar para a esquerda (evita tremer)
+        if pos.x <= minX + 0.5 and vx < 0 then vx = 0 end
+    end
+
     self.body.linearVelocity = Vector2(vx, vy)
 
     -- Tiro

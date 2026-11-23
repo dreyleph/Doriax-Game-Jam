@@ -17,6 +17,7 @@ Combat.CAT = {
 }
 
 Combat.PROJECTILE_BUNDLE = "bundles/Projetil"
+Combat.ENEMY_BUNDLE = "bundles/Inimigo"
 
 local hittables = {}     -- entity -> instância de script com :takeHit(dano)
 local restarting = false
@@ -54,6 +55,18 @@ function Combat.spawnProjectile(scene, x, y, dirX, dirY)
     Combat.pendingShot = { x = x, y = y, dirX = dirX, dirY = dirY }
     local root = BundleManager.createBundle(Combat.PROJECTILE_BUNDLE, scene)
     Combat.pendingShot = nil
+    return root
+end
+
+-- Inimigos gerados -----------------------------------------------------
+
+-- Parametros lidos pelo Enemy:init() (x, y = pe do inimigo; overrides = propriedades)
+Combat.pendingEnemy = nil
+
+function Combat.spawnEnemy(scene, x, y, overrides)
+    Combat.pendingEnemy = { x = x, y = y, overrides = overrides }
+    local root = BundleManager.createBundle(Combat.ENEMY_BUNDLE, scene)
+    Combat.pendingEnemy = nil
     return root
 end
 

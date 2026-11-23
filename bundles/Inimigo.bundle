@@ -1,0 +1,161 @@
+type: Entity
+entity: 1
+name: Inimigo
+components:
+  transform:
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    visible: true
+    billboardRotation: [1, 0, 0, 0]
+    billboard: false
+    fakeBillboard: false
+    cylindricalBillboard: false
+  mesh:
+    submeshes:
+    - material:
+        baseColorFactor: [0.3, 0.62, 0.25, 1]
+        metallicFactor: 1
+        roughnessFactor: 1
+        alphaCutoff: 0.5
+        foliageTransmission: 0
+        alphaMode: AUTO
+        emissiveFactor: [0, 0, 0]
+        baseColorTexCoord: 0
+        metallicRoughnessTexCoord: 0
+        occlusionTexCoord: 0
+        emissiveTexCoord: 0
+        normalTexCoord: 0
+        name: ''
+      textureRect: [0, 0, 1, 1]
+      primitiveType: triangles
+      vertexCount: 6
+      faceCulling: false
+      textureShadow: true
+      hasTexCoord1: true
+      hasTexCoord2: false
+      hasNormalMap: false
+      hasTangent: true
+      hasVertexColor3: false
+      hasVertexColor4: true
+      hasTextureRect: true
+      hasSkinning: false
+      hasMorphTarget: false
+      hasMorphNormal: false
+      hasMorphTangent: false
+    normAdjustJoint: 1
+    normAdjustWeight: 1
+    aabb:
+      min: [-24, -32, 0]
+      max: [24, 32, 0]
+    verticesAABB:
+      min: [-24, -32, 0]
+      max: [24, 32, 0]
+    worldAABB:
+      min: [1126, 80, 0]
+      max: [1174, 144, 0]
+    receiveLights: true
+    receiveIBL: false
+    castShadows: true
+    receiveShadows: true
+    lodEnabled: true
+    lodBias: 1
+    renderInReflectionProbes: true
+    shadowsBillboard: true
+    transparent: false
+    cullingMode: back
+    windingOrder: ccw
+  sprite:
+    width: 48
+    height: 64
+    automaticFlipY: true
+    flipY: true
+    textureScaleFactor: 0
+    pivotPreset: center
+  script:
+    scripts:
+    - type: lua
+      path: enemy/Enemy.lua
+      className: Enemy
+      enabled: true
+      properties:
+      - name: speed
+        displayName: Velocidade (px/s)
+        type: Float
+        value: 90
+        defaultValue: 90
+      - name: patrolDistance
+        displayName: Distancia da patrulha (px)
+        type: Float
+        value: 160
+        defaultValue: 160
+      - name: startDirection
+        displayName: Direcao inicial (-1 ou 1)
+        type: Int
+        value: -1
+        defaultValue: -1
+      - name: health
+        displayName: Vida (tiros para eliminar)
+        type: Int
+        value: 1
+        defaultValue: 1
+      - name: gravityScale
+        displayName: Escala da gravidade
+        type: Float
+        value: 3
+        defaultValue: 3
+      - name: scoreValue
+        displayName: Pontos ao abater
+        type: Int
+        value: 500
+        defaultValue: 500
+      - name: fallLimitY
+        displayName: Y limite (abaixo disso some)
+        type: Float
+        value: -400
+        defaultValue: -400
+  body2d:
+    type: dynamic
+    numShapes: 2
+    shapes:
+    - type: polygon
+      source: none
+      pointA: [0, 0]
+      pointB: [0, 0]
+      radius: 4
+      loop: false
+      density: 1
+      friction: 0
+      restitution: 0
+      rollingResistance: 0
+      tangentSpeed: 0
+      sensor: false
+      enableHitEvents: false
+      contactEvents: false
+      preSolveEvents: false
+      sensorEvents: true
+      categoryBits: 8
+      maskBits: 19
+      groupIndex: 0
+      vertices: [[-20, -28], [20, -28], [20, 28], [-20, 28]]
+    - type: polygon
+      source: none
+      pointA: [0, 0]
+      pointB: [0, 0]
+      radius: 0
+      loop: false
+      density: 0
+      friction: 0.6
+      restitution: 0
+      rollingResistance: 0
+      tangentSpeed: 0
+      sensor: true
+      enableHitEvents: false
+      contactEvents: false
+      preSolveEvents: false
+      sensorEvents: false
+      categoryBits: 32
+      maskBits: 4
+      groupIndex: 0
+      vertices: [[-22, -30], [22, -30], [22, 30], [-22, 30]]
+visibilityInherited: true
