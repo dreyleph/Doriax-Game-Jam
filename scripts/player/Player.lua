@@ -15,6 +15,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Pause = require("game.Pause")
 local Run = require("game.Run")
 local Itens = require("itens.Itens")
 local Animator = require("game.Animator")
@@ -65,6 +66,7 @@ function Player:init()
 
     Combat.resetLevelState()
     Combat.registerPlayer(self)
+    Pause.setGameScene(self.scene)
     Itens.reset()
 
     GameState.startLives = self.startLives
@@ -283,6 +285,7 @@ function Player:updateLifeState(dt)
 end
 
 function Player:onFixedUpdate()
+    if Pause.paused then return end
     local dt = Engine.updateTime
     if self:updateLifeState(dt) then return end
 

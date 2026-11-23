@@ -4,6 +4,7 @@
 -- Some ao acertar um inimigo, ao bater no chão/parede ou ao fim do tempo de vida.
 
 local Combat = require("game.Combat")
+local Pause = require("game.Pause")
 local Itens = require("itens.Itens")
 
 local Projectile = {
@@ -58,6 +59,7 @@ function Projectile:kill()
 end
 
 function Projectile:onFixedUpdate()
+    if Pause.paused then return end
     if self.removed then return end
 
     self.timeLeft = self.timeLeft - Engine.updateTime

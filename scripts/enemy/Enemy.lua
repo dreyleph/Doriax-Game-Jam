@@ -12,6 +12,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Pause = require("game.Pause")
 local Itens = require("itens.Itens")
 
 local Enemy = {
@@ -56,6 +57,7 @@ function Enemy:init()
 end
 
 function Enemy:onFixedUpdate()
+    if Pause.paused then return end
     if self.dead then return end
 
     -- Dano continuo: se o jogador continuar encostado quando a invencibilidade

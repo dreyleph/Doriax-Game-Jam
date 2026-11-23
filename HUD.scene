@@ -42,6 +42,12 @@ entities:
                 ptrTypeName: Text
                 value: 1004
                 defaultValue: 0
+              - name: pausedText
+                displayName: Texto de pausa
+                type: EntityReference
+                ptrTypeName: Text
+                value: 1005
+                defaultValue: 0
               - name: scoreDigits
                 displayName: Digitos da pontuacao
                 type: Int
@@ -99,6 +105,23 @@ entities:
         color: [0.95, 0.25, 0.2, 1]
       text:
         text: GAME OVER
+        fontSize: 80
+  - type: Entity
+    entity: 1005
+    name: Pausado
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: false
+      uilayout:
+        anchorPreset: CENTER
+        usingAnchors: true
+      ui:
+        color: [1, 1, 1, 1]
+      text:
+        text: PAUSED
         fontSize: 80
 shaderKeys:
   - type: ui
