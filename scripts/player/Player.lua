@@ -17,9 +17,14 @@ local Combat = require("game.Combat")
 local GameState = require("game.GameState")
 local Run = require("game.Run")
 local Itens = require("itens.Itens")
+local Animator = require("game.Animator")
+local PlayerAnimations = require("player.PlayerAnimations")
 
 local Player = {
     properties = {
+        { name = "visual",        displayName = "Sprite do personagem (filho)", type = "Sprite" },
+        { name = "visualOffsetX", displayName = "Desenho: deslocamento X (px)", type = "float", default = -9.0 },
+        { name = "visualOffsetY", displayName = "Desenho: deslocamento Y (px)", type = "float", default = 4.0 },
         { name = "moveSpeed",     displayName = "Velocidade (px/s)",            type = "float", default = 320.0 },
         { name = "jumpSpeed",     displayName = "Velocidade do pulo (px/s)",    type = "float", default = 860.0 },
         { name = "gravityScale",  displayName = "Escala da gravidade",          type = "float", default = 3.0 },
@@ -39,7 +44,9 @@ local Player = {
 
 local GROUND_NORMAL_MIN = 0.6   -- contato conta como chao
 local LAND_NORMAL_MIN   = 0.7   -- pouso valido em plataforma atravessavel
-local HALF_W, HALF_H    = 24, 40
+-- Metade da hitbox (Body2D do Jogador): 40 x 104 px, so o corpo, sem o casaco.
+-- Se mudar a hitbox no editor, atualize aqui (usado na origem dos tiros e no limite da tela).
+local HALF_W, HALF_H    = 20, 52
 
 local function anyKey(...)
     for i = 1, select("#", ...) do
@@ -51,6 +58,11 @@ local function anyKey(...)
 end
 
 function Player:init()
+    -- propriedades novas ainda nao gravadas na cena chegam como nil
+    for _, p in ipairs(Player.properties) do
+        if self[p.name] == nil and p.default ~= nil then self[p.name] = p.default end
+    end
+
     Combat.resetLevelState()
     Combat.registerPlayer(self)
     Itens.reset()
@@ -89,6 +101,14 @@ function Player:init()
     local physics = self.scene:getPhysicsSystem()
     -- unico filtro de preSolve do jogo: com varios inscritos so o primeiro decide
     RegisterEvent(self, physics.preSolve2D, "onPreSolve")
+
+    -- Desenho do personagem: entidade filha com a sprite sheet. O corpo fisico
+    -- fica no Jogador; o filho so e espelhado e animado (nao afeta a fisica).
+    self.visualFacing = nil
+    if self.visual then
+        self.animator = Animator.new(self.visual, PlayerAnimations)
+        self:updateVisual(0, false)
+    end
     RegisterEngineEvent(self, "onFixedUpdate")
 end
 
@@ -170,6 +190,28 @@ function Player:shoot(aimUp, aimDown, moving)
         x, y, dx, dy = pos.x + f * (HALF_W + 14), pos.y + 10, f, 0
     end
     Combat.spawnProjectile(self.scene, x, y, dx, dy)
+end
+
+-- Visual ------------------------------------------------------------------
+function Player:updateVisual(dt, moving)
+    if not self.visual then return end
+
+    local f = self.facing
+    if f ~= self.visualFacing then
+        -- espelha o desenho e o deslocamento (a arte olha para a direita)
+        self.visual.scale = Vector3(f, 1, 1)
+        self.visual.position = Vector3(self.visualOffsetX * f, self.visualOffsetY, 0)
+        self.visualFacing = f
+    end
+
+    local anim = "idle"
+    if not self.grounded then
+        anim = "jump"
+    elseif moving then
+        anim = "run"
+    end
+    self.animator:play(anim)
+    self.animator:update(dt)
 end
 
 -- Vidas -----------------------------------------------------------------
@@ -312,6 +354,8 @@ function Player:onFixedUpdate()
     -- Itens: efeitos temporarios e coleta
     local pos = self.body.position
     Itens.update(self, dt, pos.x, pos.y, HALF_W, HALF_H)
+
+    self:updateVisual(dt, dir ~= 0)
 
     -- Caiu para fora do mapa: perde vida mesmo se estiver invencivel
     if self.body.position.y < self.respawnY then

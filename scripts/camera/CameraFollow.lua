@@ -7,7 +7,7 @@ local Run = require("game.Run")
 local CameraFollow = {
     properties = {
         { name = "target",    displayName = "Alvo",                               type = "Object" },
-        { name = "offsetX",   displayName = "Distancia do alvo a borda esquerda", type = "float", default = 420.0 },
+        { name = "offsetX",   displayName = "Distancia do alvo a borda esquerda", type = "float", default = 320.0 },
         { name = "smoothing", displayName = "Suavizacao",                         type = "float", default = 8.0 },
         { name = "minX",      displayName = "X minimo da camera",                 type = "float", default = 0.0 },
         { name = "maxX",      displayName = "X maximo da camera",                 type = "float", default = 1920.0 },
@@ -17,6 +17,7 @@ local CameraFollow = {
 
 function CameraFollow:init()
     self.camera = Camera(self.scene, self.entity)
+    Run.viewWidth = Engine.canvasWidth   -- largura da tela do projeto (960 em 4:3)
     Run.lockBackwards = self.lockBackwards
     Run.cameraLeft = self.camera.position.x
     RegisterEngineEvent(self, "onUpdate")
