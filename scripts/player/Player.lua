@@ -9,7 +9,7 @@
 --   W / Seta para cima (segurando)  -> mirar para cima (+ andando = diagonal)
 --   S / Seta para baixo no ar       -> mirar para baixo (+ andando = diagonal)
 --
--- Vidas (estilo arcade): ao morrer perde 1 vida e parte dos pontos, renasce
+-- Vidas (estilo arcade): ao morrer perde 1 vida (os pontos ficam), renasce
 -- no ultimo chao seguro com invencibilidade temporaria (piscando).
 -- Sem vidas: GAME OVER e a fase recomeca do zero.
 
@@ -35,7 +35,8 @@ local Player = {
         { name = "dropTime",      displayName = "Tempo atravessando (s)",       type = "float", default = 0.35 },
         { name = "allowDiagonal", displayName = "Permitir tiro na diagonal",    type = "bool",  default = true },
         { name = "startLives",        displayName = "Vidas iniciais",                     type = "int",   default = 3 },
-        { name = "deathScorePenalty", displayName = "Pontos perdidos ao morrer (0 a 1)",  type = "float", default = 0.5 },
+        { name = "respawnFreezeTime", displayName = "Animacao de reviver, parado (s)",  type = "float", default = 1.0 },
+        { name = "shootAnimTime",     displayName = "Pose de tiro apos atirar (s)",     type = "float", default = 0.3 },
         { name = "respawnDelay",      displayName = "Tempo ate renascer (s)",             type = "float", default = 0.8 },
         { name = "invincibleTime",    displayName = "Invencibilidade ao renascer (s)",    type = "float", default = 2.0 },
         { name = "gameOverDelay",     displayName = "Tempo na tela de game over (s)",     type = "float", default = 3.0 },
@@ -47,6 +48,7 @@ local LAND_NORMAL_MIN   = 0.7   -- pouso valido em plataforma atravessavel
 -- Metade da hitbox (Body2D do Jogador): 40 x 104 px, so o corpo, sem o casaco.
 -- Se mudar a hitbox no editor, atualize aqui (usado na origem dos tiros e no limite da tela).
 local HALF_W, HALF_H    = 20, 52
+local RESPAWN_EDGE_MARGIN = 24  -- renasce a pelo menos HALF_W + isso da borda da superficie
 
 local function anyKey(...)
     for i = 1, select("#", ...) do
@@ -68,7 +70,6 @@ function Player:init()
     Itens.reset()
 
     GameState.startLives = self.startLives
-    GameState.deathScorePenalty = self.deathScorePenalty
     if GameState.needsNewGame then
         GameState.newGame()
     end
@@ -84,7 +85,7 @@ function Player:init()
     self.spawn = Vector2(p.x, p.y)
     self.lastSafe = Vector2(p.x, p.y)   -- ultimo ponto em que estava no chao
 
-    self.state = "alive"         -- "alive" | "dead" (esperando renascer) | "gameover"
+    self.state = "alive"         -- "alive" | "dead" (escondido) | "respawning" (reaparecendo, parado) | "gameover"
     self.stateTimer = 0
     self.invincibleTimer = 0
 
@@ -95,6 +96,8 @@ function Player:init()
     self.dropEntity = nil        -- plataforma que estamos atravessando
     self.dropTimer = 0
     self.fireTimer = 0
+    self.shootAnimTimer = 0      -- > 0: mostra a pose de tiro
+    self.visualOffsetApplied = nil
     self.jumpWasDown = false
     self.fireWasDown = false
 
@@ -190,28 +193,46 @@ function Player:shoot(aimUp, aimDown, moving)
         x, y, dx, dy = pos.x + f * (HALF_W + 14), pos.y + 10, f, 0
     end
     Combat.spawnProjectile(self.scene, x, y, dx, dy)
+    self.shootAnimTimer = self.shootAnimTime
 end
 
 -- Visual ------------------------------------------------------------------
+-- Qual animacao mostrar agora (as que ainda nao tem arte usam a reserva,
+-- ver PlayerAnimations.lua)
+function Player:chooseAnimation(moving)
+    if self.state == "respawning" then return "respawn" end
+    local shooting = self.shootAnimTimer > 0
+    if not self.grounded then
+        return shooting and "jump_shoot" or "jump"
+    elseif moving then
+        return shooting and "run_shoot" or "run"
+    end
+    return shooting and "idle_shoot" or "idle"
+end
+
 function Player:updateVisual(dt, moving)
     if not self.visual then return end
 
-    local f = self.facing
-    if f ~= self.visualFacing then
-        -- espelha o desenho e o deslocamento (a arte olha para a direita)
-        self.visual.scale = Vector3(f, 1, 1)
-        self.visual.position = Vector3(self.visualOffsetX * f, self.visualOffsetY, 0)
-        self.visualFacing = f
-    end
-
-    local anim = "idle"
-    if not self.grounded then
-        anim = "jump"
-    elseif moving then
-        anim = "run"
-    end
-    self.animator:play(anim)
+    self.animator:play(self:chooseAnimation(moving))
     self.animator:update(dt)
+
+    -- espelha o desenho (a arte olha para a direita) e aplica o deslocamento
+    -- que alinha o desenho a hitbox + o ajuste de altura da animacao atual
+    local f = self.facing
+    local def = self.animator.current or {}
+    local ox = self.visualOffsetX + (def.offsetX or 0)
+    local oy = self.visualOffsetY + (def.offsetY or 0)
+    local key = ox * 10000 + oy
+    if f ~= self.visualFacing or key ~= self.visualOffsetApplied then
+        self.visual.scale = Vector3(f, 1, 1)
+        self.visual.position = Vector3(ox * f, oy, 0)
+        self.visualFacing = f
+        self.visualOffsetApplied = key
+    end
+end
+
+function Player:setVisualAlpha(a)
+    if self.visual then self.visual.color = Vector4(1, 1, 1, a) end
 end
 
 -- Vidas -----------------------------------------------------------------
@@ -226,6 +247,7 @@ function Player:hurt(force)
     if self:isInvincible() and not force then return end
 
     Itens.clearEffects()
+    self.deathX = self.body.position.x   -- referencia para achar onde renascer
     local hasLivesLeft = GameState.loseLife()
     Log.print(string.format("Jogador morreu. Vidas: %d  Pontos: %d", GameState.lives, GameState.score))
 
@@ -245,33 +267,80 @@ function Player:hurt(force)
     end
 end
 
+-- Onde renascer: na superficie (chao, bloco ou plataforma) mais proxima de
+-- onde morreu, longe da borda e dentro da tela. Sem superficies registradas
+-- (cena sem gerador, ex.: Fase Teste) usa o ultimo ponto em que estava no chao.
+function Player:findRespawnPoint()
+    local deathX = self.deathX or self.body.position.x
+    if Run.surfacesSceneId == SceneManager.currentSceneId and #Run.surfaces > 0 then
+        local margin = HALF_W + RESPAWN_EDGE_MARGIN
+        local minX, maxX
+        if Run.cameraLeft then
+            minX = Run.cameraLeft + HALF_W + 16
+            maxX = Run.cameraLeft + Run.viewWidth - HALF_W - 120
+        end
+        local x, top = Run.findSafeSpot(deathX, margin, minX, maxX)
+        if not x then x, top = Run.findSafeSpot(deathX, margin) end   -- nada visivel: o mais proximo
+        if x then
+            return Vector2(x, top + HALF_H + 1)
+        end
+    end
+    return Vector2(self.lastSafe.x, self.lastSafe.y + 4)
+end
+
+-- Reaparece parado: toca a animacao de reviver por "respawnFreezeTime" sem
+-- aceitar comandos; depois volta ao controle ainda invencivel por um tempo
 function Player:respawn()
-    self.state = "alive"
-    self.body.position = Vector2(self.lastSafe.x, self.lastSafe.y + 4)
+    self.state = "respawning"
+    self.stateTimer = self.respawnFreezeTime
+    self.body.position = self:findRespawnPoint()
     self.body.linearVelocity = Vector2(0, 0)
     self.body.gravityScale = self.gravityScale
     self.object.visible = true
-    self.invincibleTimer = self.invincibleTime
+    self.invincibleTimer = self.respawnFreezeTime + self.invincibleTime
     self.dropTimer = 0
+    self.shootAnimTimer = 0
+    self.jumpWasDown, self.fireWasDown = true, true   -- botao segurado nao dispara ao voltar
+    self:setVisualAlpha(0)
 end
 
--- Retorna true se o jogador esta fora de jogo (morto / game over) neste passo
+-- Retorna true se o jogador esta fora de controle (morto, revivendo, game over)
 function Player:updateLifeState(dt)
+    if self.invincibleTimer > 0 then
+        self.invincibleTimer = self.invincibleTimer - dt
+    end
+
     if self.state == "alive" then
         if self.invincibleTimer > 0 then
-            self.invincibleTimer = self.invincibleTimer - dt
-            if self.invincibleTimer <= 0 then
-                self.object.visible = true
-            else
-                -- pisca 10 vezes por segundo
-                self.object.visible = math.floor(self.invincibleTimer * 10) % 2 == 0
-            end
+            -- pisca 10 vezes por segundo
+            self.object.visible = math.floor(self.invincibleTimer * 10) % 2 == 0
+        else
+            self.object.visible = true
         end
         return false
     end
 
-    self.body.linearVelocity = Vector2(0, 0)
     self.stateTimer = self.stateTimer - dt
+
+    if self.state == "respawning" then
+        -- parado no lugar (a gravidade continua, para assentar no chao)
+        local vy = self.body.linearVelocity.y
+        self.body.linearVelocity = Vector2(0, vy)
+        -- aparece aos poucos, piscando rapido no comeco
+        local t = 1 - math.max(self.stateTimer, 0) / math.max(self.respawnFreezeTime, 0.001)
+        self:setVisualAlpha(math.min(1, t * 1.5))
+        self.object.visible = t > 0.5 or math.floor(t * 40) % 2 == 0
+        self.grounded = true
+        self:updateVisual(dt, false)
+        if self.stateTimer <= 0 then
+            self.state = "alive"
+            self:setVisualAlpha(1)
+            self.object.visible = true
+        end
+        return true
+    end
+
+    self.body.linearVelocity = Vector2(0, 0)
     if self.stateTimer <= 0 then
         if self.state == "dead" then
             self:respawn()
@@ -288,6 +357,7 @@ function Player:onFixedUpdate()
 
     if self.dropTimer > 0 then self.dropTimer = self.dropTimer - dt end
     if self.fireTimer > 0 then self.fireTimer = self.fireTimer - dt end
+    if self.shootAnimTimer > 0 then self.shootAnimTimer = self.shootAnimTimer - dt end
 
     self.grounded, self.groundEntity, self.groundIsPlatform = self:checkGround()
     if self.grounded then

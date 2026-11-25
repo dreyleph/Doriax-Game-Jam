@@ -44,9 +44,16 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 
 ## Vidas e pontuação (provisório)
 - Começa com 3 vidas e 0 pontos. Cada inimigo abatido vale 500 pontos.
-- Morrer (encostar em inimigo ou cair do mapa) tira 1 vida e metade dos pontos; o jogador renasce no último chão seguro com 2 s de invencibilidade.
+- Morrer (encostar em inimigo ou cair do mapa) tira 1 vida (os pontos são mantidos); o jogador renasce na superfície segura mais próxima com 2 s de invencibilidade.
 - Sem vidas: GAME OVER e a fase recomeça do zero após 3 s.
-- Tudo ajustável no Inspector do Jogador (vidas, penalidade, tempos) e do inimigo (pontos).
+- Tudo ajustável no Inspector do Jogador (vidas, tempos) e do inimigo (pontos).
+
+## Personagem (John Drinkwater)
+- Sheets em `assets/John Drinkwater/` (quadros de 128×128, virado para a direita). Mapeamento em `scripts/player/PlayerAnimations.lua`:
+  parado = 1º quadro da `IdleShooting-Sheet`, parado atirando = `IdleShooting-Sheet` (5 quadros); a `Idle-Sheet` antiga não é usada, andando = `Running-Sheet`, andando atirando = `Running&Shooting-Sheet`.
+  O jogo usa um atlas único, `assets/John Drinkwater/Jogador-Atlas.png`, gerado a partir dessas sheets por `python tools/montar_atlas_jogador.py` (rode de novo quando a arte mudar). Trocar de imagem durante o jogo fazia o personagem sumir/"bugar" por alguns quadros.
+- Ainda sem arte (usam uma animação reserva): pulo, pulo atirando e reviver.
+- Ao morrer, o jogador reaparece na superfície mais próxima (chão, bloco ou plataforma), longe da borda e dentro da tela; fica ~1 s parado revivendo e depois volta ao controle, ainda invencível por 2 s.
 
 ## Itens (provisório)
 Cada inimigo abatido sorteia no máximo 1 item; o jogador pega encostando. O item some após 10 s (pisca antes).

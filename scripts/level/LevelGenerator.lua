@@ -60,6 +60,8 @@ function LevelGenerator:init()
     self.nextX = 0          -- onde comeca o proximo trecho
     self.generated = 0      -- quantos trechos (telas) ja foram gerados
     self.lastModule = nil
+    -- superficies de apoio para o jogador renascer (so desta cena)
+    Run.clearSurfaces(SceneManager.currentSceneId)
 
     -- primeiros trechos ja na inicializacao (a camera pode ainda nao ter iniciado)
     self:spawnChunk(Chunks.start, true)
@@ -187,6 +189,28 @@ function LevelGenerator:makeBlock(x0, y0, w, h, color, isPlatform)
     return sprite.entity
 end
 
+-- Tira de cada faixa os trechos cobertos por "cortes" ({x0, x1}); devolve as sobras
+local function subtractRanges(ranges, cuts)
+    local out = {}
+    for _, r in ipairs(ranges) do
+        local pieces = { { r[1], r[2] } }
+        for _, c in ipairs(cuts) do
+            local nextPieces = {}
+            for _, p in ipairs(pieces) do
+                if c[2] <= p[1] or c[1] >= p[2] then
+                    nextPieces[#nextPieces + 1] = p
+                else
+                    if c[1] > p[1] then nextPieces[#nextPieces + 1] = { p[1], c[1] } end
+                    if c[2] < p[2] then nextPieces[#nextPieces + 1] = { c[2], p[2] } end
+                end
+            end
+            pieces = nextPieces
+        end
+        for _, p in ipairs(pieces) do out[#out + 1] = p end
+    end
+    return out
+end
+
 -- Junta faixas de chao que se encostam (menos corpos e menos emendas)
 local function mergeRanges(ranges)
     table.sort(ranges, function(a, b) return a[1] < b[1] end)
@@ -217,6 +241,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
     local chunk = { x = x, names = {}, blocks = {}, enemies = {} }
 
     local groundRanges, candidates = {}, {}
+    local blockedGround = {}   -- faixas do chao ocupadas por blocos (nao da para renascer ali)
     for i, m in ipairs(modules) do
         local mx = x + (i - 1) * mw
         chunk.names[i] = m.name
@@ -226,17 +251,24 @@ function LevelGenerator:spawnChunk(modules, isStart)
         end
         for _, b in ipairs(m.blocks or {}) do
             self:makeSurface(chunk.blocks, mx + b[1], b[2], b[3], b[4], COLOR_BLOCK, false)
+            Run.addSurface(mx + b[1], mx + b[1] + b[3], b[2] + b[4], chunk)
+            if b[2] <= top then blockedGround[#blockedGround + 1] = { mx + b[1], mx + b[1] + b[3] } end
         end
         for _, p in ipairs(m.platforms or {}) do
             self:makeSurface(chunk.blocks, mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, COLOR_PLATFORM, true)
+            Run.addSurface(mx + p[1], mx + p[1] + p[3], p[2], chunk)
         end
         for _, e in ipairs(m.enemies or {}) do
             candidates[#candidates + 1] = { mx + e[1], e[2], e[3] }
         end
     end
 
-    for _, g in ipairs(mergeRanges(groundRanges)) do
+    local merged = mergeRanges(groundRanges)
+    for _, g in ipairs(merged) do
         self:makeSurface(chunk.blocks, g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, COLOR_GROUND, false)
+    end
+    for _, g in ipairs(subtractRanges(merged, blockedGround)) do
+        Run.addSurface(g[1], g[2], top, chunk)
     end
 
     -- Inimigos: embaralha os pontos; os primeiros "garantidos" sempre aparecem,
@@ -262,6 +294,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
 end
 
 function LevelGenerator:destroyChunk(chunk)
+    Run.removeSurfaces(chunk)
     for _, root in ipairs(chunk.enemies) do
         BundleManager.destroyBundle(self.scene, root)
     end

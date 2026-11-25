@@ -216,7 +216,7 @@ entities:
               baseColorTexture:
                 textureType: 2D
                 source: path
-                path: Idle/Background1.png
+                path: Background/Background1.png
                 minFilter: nearest
                 magFilter: nearest
                 wrapU: clamp_to_edge
@@ -241,7 +241,7 @@ entities:
               baseColorTexture:
                 textureType: 2D
                 source: path
-                path: Idle/Background_sem_cruz1_ajustado.png
+                path: Background/Background_sem_cruz1_ajustado.png
                 minFilter: nearest
                 magFilter: nearest
                 wrapU: clamp_to_edge
@@ -266,7 +266,7 @@ entities:
               baseColorTexture:
                 textureType: 2D
                 source: path
-                path: Idle/Background1.png
+                path: Background/Background1.png
                 minFilter: nearest
                 magFilter: nearest
                 wrapU: clamp_to_edge
@@ -291,7 +291,7 @@ entities:
               baseColorTexture:
                 textureType: 2D
                 source: path
-                path: Idle/Background_sem_cruz1_ajustado.png
+                path: Background/Background_sem_cruz1_ajustado.png
                 minFilter: nearest
                 magFilter: nearest
                 wrapU: clamp_to_edge
@@ -819,7 +819,7 @@ entities:
             baseColorTexture:
               textureType: 2D
               source: path
-              path: Idle/Idle-Sheet.png
+              path: John Drinkwater/Idle-Sheet.png
               minFilter: nearest
               magFilter: nearest
               wrapU: clamp_to_edge

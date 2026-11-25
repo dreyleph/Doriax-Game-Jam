@@ -6,7 +6,6 @@
 local GameState = {
     -- Regras (o Player sobrescreve com as propriedades do Inspector ao iniciar)
     startLives = 3,
-    deathScorePenalty = 0.5,   -- fracao dos pontos perdida ao morrer (0.5 = metade, 0.333 = 1/3, 0 = nada)
 
     lives = 3,
     score = 0,
@@ -26,12 +25,10 @@ function GameState.addScore(points)
     GameState.score = GameState.score + math.floor(points)
 end
 
--- Perde uma vida e aplica a penalidade de pontos.
+-- Perde uma vida. Os pontos sao mantidos (arcade: vale o quanto se foi longe).
 -- Retorna true se ainda restam vidas, false se foi game over.
 function GameState.loseLife()
     GameState.lives = math.max(GameState.lives - 1, 0)
-    local lost = math.floor(GameState.score * GameState.deathScorePenalty)
-    GameState.score = GameState.score - lost
     if GameState.lives <= 0 then
         GameState.gameOver = true
         GameState.needsNewGame = true
