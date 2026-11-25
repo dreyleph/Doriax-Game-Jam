@@ -72,7 +72,8 @@ Os efeitos temporários acabam ao morrer. Chances, cores e durações ficam no t
 - Inimigos: um mínimo garantido por tela (2 no início, +1 a cada 3 telas, até 6) e os demais pontos por chance crescente. Tudo ajustável no **Gerador**.
 - A câmera não volta e o jogador não sai pela esquerda da tela (estilo Metal Slug).
 - A semente aparece no log ("Corrida gerada com semente N"); coloque-a em **Semente** no Gerador para repetir a mesma corrida.
+- **Texturas do terreno**: chão e blocos = pedras com terra (`Tile_02` topo, `Tile_12` terra); plataformas = andaime (escada `2.png` deitada). Originais em `assets/AssetsPlataforms/` (assets gratuitos); as texturas usadas no jogo ficam em `assets/Terreno/` e são geradas por `python tools/montar_texturas_terreno.py`. O gerador recorta essas imagens no tamanho de cada peça; a colisão continua num corpo invisível separado (o desenho do andaime tem 64 px e fica pendurado abaixo dos 32 px de colisão).
 - Para criar um módulo novo, adicione uma tabela em `Chunks.lua` (é um script: pode editar com o editor aberto). As regras para ele encaixar com qualquer vizinho estão no topo do arquivo.
 
 ## Estado atual
-- Gráficos são retângulos provisórios.
+- Terreno com texturas de teste (assets gratuitos); inimigos e itens ainda são retângulos provisórios. A `Fase Teste` mantém os blocos antigos da cena.

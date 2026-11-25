@@ -10,8 +10,11 @@
 --   * numero minimo garantido de inimigos por tela, crescendo com a distancia;
 --     os demais pontos de inimigo aparecem por chance (tambem crescente)
 --
--- Chao, blocos e plataformas sao criados por codigo (retangulos provisorios);
--- os inimigos usam o bundle "bundles/Inimigo" (arte/hitbox editaveis no editor).
+-- Chao, blocos e plataformas sao criados por codigo: um corpo de colisao
+-- invisivel + o desenho por cima, recortado das texturas de assets/Terreno/
+-- (geradas por tools/montar_texturas_terreno.py a partir de assets/AssetsPlataforms).
+-- Chao e blocos = pedras com terra; plataformas = andaime (escada deitada).
+-- Os inimigos usam o bundle "bundles/Inimigo" (arte/hitbox editaveis no editor).
 
 local Chunks = require("level.Chunks")
 local Combat = require("game.Combat")
@@ -32,15 +35,19 @@ local LevelGenerator = {
     }
 }
 
--- Cores provisorias (ate chegar a arte do cenario). Escuras para contrastar
--- com o fundo (ceu azul e casario bege/ocre); a "borda" clara no topo marca
--- onde da para pisar.
-local COLOR_GROUND   = { 0.157, 0.122, 0.102 }
-local COLOR_BLOCK    = { 0.250, 0.200, 0.170 }
-local COLOR_PLATFORM = { 0.149, 0.118, 0.102 }
-local COLOR_LIP      = { 0.910, 0.667, 0.235 }   -- ocre
-local LIP_HEIGHT = 5
+-- Texturas do terreno (caminhos dentro de assets/). Todas as pecas com a mesma
+-- imagem compartilham a textura carregada (carrega uma vez so).
+local TEX = {
+    middle   = { path = "Terreno/terreno_meio.png", w = 128, h = 640 },  -- topo com musgo + terra
+    left     = { path = "Terreno/terreno_esq.png",  w = 32,  h = 640 },  -- borda esquerda
+    right    = { path = "Terreno/terreno_dir.png",  w = 32,  h = 640 },  -- borda direita
+    scaffold = { path = "Terreno/andaime.png",      w = 251, h = 64  },  -- piso de andaime
+}
+local EDGE_WIDTH = 32
 local PLATFORM_THICKNESS = 32
+-- o desenho do andaime e mais alto que a colisao: o topo coincide (onde se
+-- pisa) e o resto fica pendurado embaixo, so visual
+local SCAFFOLD_HEIGHT = 64
 
 function LevelGenerator:init()
     -- propriedades novas ainda nao gravadas na cena chegam como nil
@@ -136,29 +143,78 @@ function LevelGenerator:pickModules()
 end
 
 -- Construcao --------------------------------------------------------------------
--- Retangulo so visual (sem colisao); (x0, y0) = canto inferior esquerdo
-function LevelGenerator:makeDecor(x0, y0, w, h, color)
+-- Pedaco de desenho (sem colisao): retangulo (x0, y0) = canto inferior esquerdo,
+-- mostrando a regiao (u, v, uw, vh) da textura (0 a 1; v = 0 e o topo da imagem)
+function LevelGenerator:makePiece(list, tex, x0, y0, w, h, u, uw, vh)
     local sprite = Sprite(self.scene)
     sprite.entityOwned = false
     sprite:setSize(w, h)
-    sprite.color = Vector4(color[1], color[2], color[3], 1)
+    -- pixel art: filtro "nearest" (pixels nitidos) antes de escolher a imagem
+    if not self.filterFailed then
+        local ok = pcall(function()
+            local mat = sprite.material
+            local t = mat.baseColorTexture
+            t.minFilter = TextureFilter.NEAREST
+            t.magFilter = TextureFilter.NEAREST
+            mat.baseColorTexture = t
+            sprite.material = mat
+        end)
+        if not ok then
+            self.filterFailed = true
+            Log.print("Aviso: nao foi possivel usar filtro nearest nas texturas do terreno")
+        end
+    end
+    sprite:setTexture(tex.path)
+    sprite:setTextureRect(u, 0, uw, vh)
     sprite.position = Vector3(x0, y0, 0)
     if self.terrainLayer then
         self.terrainLayer:addChild(sprite)
     else
         sprite:moveToBottom()
     end
-    return sprite.entity
+    list[#list + 1] = sprite.entity
 end
 
--- Bloco/plataforma com a borda clara no topo; devolve as entidades criadas
-function LevelGenerator:makeSurface(list, x0, y0, w, h, color, isPlatform)
-    list[#list + 1] = self:makeBlock(x0, y0, w, h, color, isPlatform)
-    list[#list + 1] = self:makeDecor(x0, y0 + h - LIP_HEIGHT, w, LIP_HEIGHT, COLOR_LIP)
+-- Desenho de pedra com terra para um retangulo (chao ou bloco). A textura do
+-- meio e alinhada ao mundo (x), entao trechos vizinhos emendam sem costura.
+-- edgeLeft/edgeRight: desenhar a borda lateral (falso onde o chao continua no
+-- proximo trecho).
+function LevelGenerator:drawEarth(list, x0, y0, w, h, edgeLeft, edgeRight)
+    local vh = math.min(1, h / TEX.middle.h)
+    local x, x1 = x0, x0 + w
+    local lw = edgeLeft and math.min(EDGE_WIDTH, w) or 0
+    local rw = edgeRight and math.min(EDGE_WIDTH, w - lw) or 0
+    if lw > 0 then
+        self:makePiece(list, TEX.left, x, y0, lw, h, 0, lw / TEX.left.w, vh)
+        x = x + lw
+    end
+    local mEnd = x1 - rw
+    local tw = TEX.middle.w
+    while mEnd - x > 0.01 do
+        local off = x % tw
+        local pw = math.min(tw - off, mEnd - x)
+        self:makePiece(list, TEX.middle, x, y0, pw, h, off / tw, pw / tw, vh)
+        x = x + pw
+    end
+    if rw > 0 then
+        self:makePiece(list, TEX.right, mEnd, y0, rw, h, (TEX.right.w - rw) / TEX.right.w, rw / TEX.right.w, vh)
+    end
 end
 
--- Retangulo estatico com colisao; (x0, y0) = canto inferior esquerdo
-function LevelGenerator:makeBlock(x0, y0, w, h, color, isPlatform)
+-- Piso de andaime (plataforma): madeira repetida na horizontal
+function LevelGenerator:drawScaffold(list, x0, y0, w, h)
+    local tw = TEX.scaffold.w
+    local x, x1 = x0, x0 + w
+    while x1 - x > 0.01 do
+        local off = (x - x0) % tw
+        local pw = math.min(tw - off, x1 - x)
+        self:makePiece(list, TEX.scaffold, x, y0, pw, h, off / tw, pw / tw, 1)
+        x = x + pw
+    end
+end
+
+-- Corpo de colisao estatico e invisivel; (x0, y0) = canto inferior esquerdo
+function LevelGenerator:makeBlock(x0, y0, w, h, isPlatform)
     local sprite = Sprite(self.scene)
     -- Sprite(scene) e "dono" da entidade: quando o coletor de lixo do Lua
     -- recolhe o objeto, a entidade seria destruida junto (o terreno sumia).
@@ -166,10 +222,8 @@ function LevelGenerator:makeBlock(x0, y0, w, h, color, isPlatform)
     sprite.entityOwned = false
 
     sprite:setSize(w, h)
-    sprite.color = Vector4(color[1], color[2], color[3], 1)
+    sprite.visible = false      -- o desenho e feito pelas pecas texturizadas
     sprite.position = Vector3(x0, y0, 0)
-    -- Ordem de desenho segue a hierarquia: os blocos ficam dentro da camada
-    -- "Terreno" (antes do Jogador na cena) -> atras do jogador, na frente do fundo
     if self.terrainLayer then
         self.terrainLayer:addChild(sprite)
     else
@@ -250,12 +304,14 @@ function LevelGenerator:spawnChunk(modules, isStart)
             groundRanges[#groundRanges + 1] = { mx + g[1], mx + g[2] }
         end
         for _, b in ipairs(m.blocks or {}) do
-            self:makeSurface(chunk.blocks, mx + b[1], b[2], b[3], b[4], COLOR_BLOCK, false)
+            chunk.blocks[#chunk.blocks + 1] = self:makeBlock(mx + b[1], b[2], b[3], b[4], false)
+            self:drawEarth(chunk.blocks, mx + b[1], b[2], b[3], b[4], true, true)
             Run.addSurface(mx + b[1], mx + b[1] + b[3], b[2] + b[4], chunk)
             if b[2] <= top then blockedGround[#blockedGround + 1] = { mx + b[1], mx + b[1] + b[3] } end
         end
         for _, p in ipairs(m.platforms or {}) do
-            self:makeSurface(chunk.blocks, mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, COLOR_PLATFORM, true)
+            chunk.blocks[#chunk.blocks + 1] = self:makeBlock(mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, true)
+            self:drawScaffold(chunk.blocks, mx + p[1], p[2] - SCAFFOLD_HEIGHT, p[3], SCAFFOLD_HEIGHT)
             Run.addSurface(mx + p[1], mx + p[1] + p[3], p[2], chunk)
         end
         for _, e in ipairs(m.enemies or {}) do
@@ -265,7 +321,12 @@ function LevelGenerator:spawnChunk(modules, isStart)
 
     local merged = mergeRanges(groundRanges)
     for _, g in ipairs(merged) do
-        self:makeSurface(chunk.blocks, g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, COLOR_GROUND, false)
+        chunk.blocks[#chunk.blocks + 1] = self:makeBlock(g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, false)
+        -- sem borda onde o chao continua no trecho vizinho (modulos sempre
+        -- comecam e terminam com chao)
+        local edgeLeft = g[1] > x + 0.5 or x == 0
+        local edgeRight = g[2] < x + self.chunkWidth - 0.5
+        self:drawEarth(chunk.blocks, g[1], top - self.groundDepth, g[2] - g[1], self.groundDepth, edgeLeft, edgeRight)
     end
     for _, g in ipairs(subtractRanges(merged, blockedGround)) do
         Run.addSurface(g[1], g[2], top, chunk)
