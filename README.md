@@ -16,11 +16,16 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | Ação | Teclas |
 |---|---|
 | Andar | A / D ou setas ← → |
-| Pular | Espaço ou K |
+| Pular | Espaço |
 | Descer da plataforma | S / ↓ + pulo |
 | Atirar | J |
+| Arma secundária (Escopeta, se tiver pego) | K |
+| Faca (corpo a corpo, mesma mira dos tiros) | L |
+| Dash (na direção segurada; sem direção = para frente) | E |
 | Mirar para cima | segurar W / ↑ (andando = diagonal) |
 | Mirar para baixo | no ar, segurar S / ↓ (andando = diagonal) |
+
+Matar um inimigo com a faca zera a espera de 1 s do dash e, se for no ar, libera um pulo extra (até encostar no chão).
 
 ## Estrutura
 | Caminho | Conteúdo |

@@ -2,18 +2,21 @@
 -- Itens que caem dos inimigos (require("itens.Itens")).
 -- Graficos provisorios: quadrados coloridos.
 --
---   Pisa Macio       (amarelo)   5%  -> recupera 1 vida (ate o maximo de vidas iniciais)
---   Charuto          (preto)     1%  -> tiro automatico e mais rapido ao segurar J (por um tempo)
---   Caranguejo       (laranja) 0.1%  -> recupera todas as vidas e dobra o dano dos tiros (por um tempo)
+--   Pisa Macio       (amarelo)   10%  -> recupera 1 vida (ate o maximo de vidas iniciais)
+--   Charuto          (preto)      5%  -> tiro automatico e mais rapido ao segurar J (por um tempo)
+--   Caranguejo       (laranja) 0.67%  -> imortalidade e dano dos tiros dobrado (por 15s)
+--   Escopeta         (azul, 2 quadrados) 3% -> arma secundaria na tecla K (5 projeteis, alcance curto),
+--                    10 disparos; pegar outra recarrega; sem balas a arma some
 --
 -- Cada inimigo abatido sorteia no maximo 1 item. O jogador pega o item encostando nele.
--- Os efeitos temporarios acabam ao morrer (como perder a arma no Metal Slug).
+-- Os efeitos temporarios acabam ao morrer; a arma secundaria fica ate acabar a municao.
 --
 -- Ligacoes com os outros scripts:
 --   Enemy:die        -> Itens.tryDrop(scene, x, yDoPe)
 --   Player:init      -> Itens.reset()
 --   Player:hurt      -> Itens.clearEffects()
 --   Player:onFixedUpdate -> Itens.update(player, dt) e Itens.fireModifiers(...)
+--   Player (tecla K) -> Itens.secondaryWeapon ("escopeta" ou nil) e Itens.useSecondaryAmmo()
 --   Projectile       -> dano * Itens.damageMultiplier()
 
 local GameState = require("game.GameState")
@@ -27,29 +30,43 @@ local Itens = {
     CIGAR_DURATION = 10.0,  -- duracao do Charuto (s)
     CIGAR_COOLDOWN = 0.14,  -- intervalo entre tiros com o Charuto (s)
 
-    CRAB_DURATION = 10.0,   -- duracao do dano dobrado do Caranguejo (s)
+    CRAB_DURATION = 15.0,   -- duracao da imortalidade e do dano dobrado do Caranguejo (s)
     CRAB_DAMAGE_MULT = 2,
+
+    SHOTGUN_AMMO = 10,      -- disparos da Escopeta por item pego
+
+    BLOCK_GAP = 4,          -- espaco entre os quadrados de um item com varios blocos (px)
 }
 
 -- Ordem = prioridade do sorteio (o mais raro primeiro). chance = 0 a 1.
 Itens.TYPES = {
     {
-        id = "caranguejo", name = "Caranguejo", chance = 0.001,
+        id = "caranguejo", name = "Caranguejo", chance = 0.0067,
         color = { 1.00, 0.50, 0.00 },
         apply = function(player)
-            GameState.lives = GameState.startLives
             Itens.crabTimer = Itens.CRAB_DURATION
+            -- usa a invencibilidade do Player (pisca); cair no buraco ainda mata
+            player.invincibleTimer = math.max(player.invincibleTimer, Itens.CRAB_DURATION)
         end,
     },
     {
-        id = "charuto", name = "Charuto", chance = 0.01,
+        id = "escopeta", name = "Escopeta", chance = 0.03,
+        color = { 0.15, 0.40, 1.00 },
+        blocks = 2,   -- dois quadrados lado a lado
+        apply = function(player)
+            Itens.secondaryWeapon = "escopeta"
+            Itens.secondaryAmmo = Itens.SHOTGUN_AMMO   -- pegar outra recarrega
+        end,
+    },
+    {
+        id = "charuto", name = "Charuto", chance = 0.05,
         color = { 0.05, 0.05, 0.05 },
         apply = function(player)
             Itens.cigarTimer = Itens.CIGAR_DURATION
         end,
     },
     {
-        id = "pisa_macio", name = "Pisa Macio", chance = 0.05,
+        id = "pisa_macio", name = "Pisa Macio", chance = 0.10,
         color = { 1.00, 0.90, 0.10 },
         apply = function(player)
             GameState.lives = math.min(GameState.lives + 1, GameState.startLives)
@@ -57,9 +74,11 @@ Itens.TYPES = {
     },
 }
 
-local drops = {}         -- itens no chao: { sprite, entity, type, x, y, timeLeft }
+local drops = {}         -- itens no chao: { sprites, entities, type, x, y, halfW, timeLeft }
 Itens.cigarTimer = 0
 Itens.crabTimer = 0
+Itens.secondaryWeapon = nil   -- slot de arma secundaria (nil = vazio)
+Itens.secondaryAmmo = 0
 
 -- Estado -------------------------------------------------------------------
 
@@ -67,8 +86,11 @@ Itens.crabTimer = 0
 function Itens.reset()
     drops = {}
     Itens.clearEffects()
+    Itens.secondaryWeapon = nil
+    Itens.secondaryAmmo = 0
 end
 
+-- Ao morrer: so os efeitos temporarios (a arma secundaria continua)
 function Itens.clearEffects()
     Itens.cigarTimer = 0
     Itens.crabTimer = 0
@@ -76,7 +98,8 @@ end
 
 -- Drop ------------------------------------------------------------------------
 
--- Sorteia um unico numero: 0-0.1% caranguejo, 0.1-1.1% charuto, 1.1-6.1% pisa macio
+-- Sorteia um unico numero: 0-0.67% caranguejo, 0.67-3.67% escopeta,
+-- 3.67-8.67% charuto, 8.67-18.67% pisa macio
 function Itens.rollType()
     local r = math.random()
     local acc = 0
@@ -90,17 +113,25 @@ end
 -- x = centro, y = pe de quem dropou
 function Itens.spawn(scene, itemType, x, y)
     local s = Itens.SIZE
-    local sprite = Sprite(scene)
-    -- a entidade e destruida por este modulo, nao pelo coletor de lixo do Lua
-    sprite.entityOwned = false
-    sprite:setSize(s, s)
+    local n = itemType.blocks or 1
+    local width = n * s + (n - 1) * Itens.BLOCK_GAP
     local c = itemType.color
-    sprite.color = Vector4(c[1], c[2], c[3], 1)
-    sprite.position = Vector3(x - s / 2, y, 0)   -- posicao = canto inferior esquerdo
+    local sprites, entities = {}, {}
+    for i = 0, n - 1 do
+        local sprite = Sprite(scene)
+        -- a entidade e destruida por este modulo, nao pelo coletor de lixo do Lua
+        sprite.entityOwned = false
+        sprite:setSize(s, s)
+        sprite.color = Vector4(c[1], c[2], c[3], 1)
+        -- posicao = canto inferior esquerdo
+        sprite.position = Vector3(x - width / 2 + i * (s + Itens.BLOCK_GAP), y, 0)
+        sprites[#sprites + 1] = sprite
+        entities[#entities + 1] = sprite.entity
+    end
 
     drops[#drops + 1] = {
-        scene = scene, sprite = sprite, entity = sprite.entity, type = itemType,
-        x = x, y = y, timeLeft = Itens.LIFETIME,
+        scene = scene, sprites = sprites, entities = entities, type = itemType,
+        x = x, y = y, halfW = width / 2, timeLeft = Itens.LIFETIME,
     }
 end
 
@@ -111,8 +142,10 @@ end
 
 local function removeDrop(i)
     local d = drops[i]
-    if d.scene:isEntityCreated(d.entity) then
-        d.scene:destroyEntity(d.entity)
+    for _, e in ipairs(d.entities) do
+        if d.scene:isEntityCreated(e) then
+            d.scene:destroyEntity(e)
+        end
     end
     table.remove(drops, i)
 end
@@ -125,6 +158,15 @@ function Itens.fireModifiers(autoFire, cooldown)
         return true, math.min(cooldown, Itens.CIGAR_COOLDOWN)
     end
     return autoFire, cooldown
+end
+
+-- Gasta 1 disparo da arma secundaria; sem balas, esvazia o slot
+function Itens.useSecondaryAmmo()
+    Itens.secondaryAmmo = math.max(Itens.secondaryAmmo - 1, 0)
+    if Itens.secondaryAmmo == 0 then
+        Itens.secondaryWeapon = nil
+        Log.print("Escopeta sem balas")
+    end
 end
 
 function Itens.damageMultiplier()
@@ -147,9 +189,9 @@ function Itens.update(player, dt, px, py, halfW, halfH)
         -- centro do item
         local cx, cy = d.x, d.y + half
         local touching = player
-            and math.abs(px - cx) <= halfW + half
+            and math.abs(px - cx) <= halfW + d.halfW
             and math.abs(py - cy) <= halfH + half
-        local behindCamera = Run.lockBackwards and Run.cameraLeft and cx < Run.cameraLeft - Itens.SIZE
+        local behindCamera = Run.lockBackwards and Run.cameraLeft and cx + d.halfW < Run.cameraLeft
 
         if touching then
             d.type.apply(player)
@@ -158,7 +200,8 @@ function Itens.update(player, dt, px, py, halfW, halfH)
         elseif d.timeLeft <= 0 or behindCamera then
             removeDrop(i)
         elseif d.timeLeft < Itens.BLINK_TIME then
-            d.sprite.visible = math.floor(d.timeLeft * 10) % 2 == 0
+            local visible = math.floor(d.timeLeft * 10) % 2 == 0
+            for _, sprite in ipairs(d.sprites) do sprite.visible = visible end
         end
     end
 end
