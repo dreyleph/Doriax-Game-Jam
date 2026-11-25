@@ -661,6 +661,26 @@ entities:
                 type: Float
                 value: 0.15
                 defaultValue: 0.15
+              - name: shotgunCooldown
+                displayName: "Escopeta: intervalo entre tiros (s)"
+                type: Float
+                value: 0.6
+                defaultValue: 0.6
+              - name: shotgunPellets
+                displayName: "Escopeta: projeteis por tiro"
+                type: Int
+                value: 5
+                defaultValue: 5
+              - name: shotgunSpread
+                displayName: "Escopeta: abertura total (graus)"
+                type: Float
+                value: 40
+                defaultValue: 40
+              - name: shotgunLifetime
+                displayName: "Escopeta: tempo de vida do projetil (s)"
+                type: Float
+                value: 0.35
+                defaultValue: 0.35
               - name: autoFire
                 displayName: Tiro automatico (segurar J)
                 type: Bool
@@ -671,6 +691,56 @@ entities:
                 type: Float
                 value: 0.35
                 defaultValue: 0.35
+              - name: dashSpeed
+                displayName: "Dash: velocidade (px/s)"
+                type: Float
+                value: 1300
+                defaultValue: 1300
+              - name: dashTime
+                displayName: "Dash: duracao do impulso (s)"
+                type: Float
+                value: 0.15
+                defaultValue: 0.15
+              - name: dashCooldown
+                displayName: "Dash: espera entre dashes (s)"
+                type: Float
+                value: 1
+                defaultValue: 1
+              - name: dashCarryKeep
+                displayName: "Dash: embalo horizontal mantido ao fim (0-1)"
+                type: Float
+                value: 0.7
+                defaultValue: 0.7
+              - name: dashCarryDrag
+                displayName: "Dash: quanto o embalo freia no chao"
+                type: Float
+                value: 10
+                defaultValue: 10
+              - name: dashAirDrag
+                displayName: "Dash: quanto o embalo freia no ar"
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: dashUpKeep
+                displayName: "Dash: velocidade vertical mantida ao subir (0-1)"
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: knifeCooldown
+                displayName: "Faca: intervalo entre golpes (s)"
+                type: Float
+                value: 0.25
+                defaultValue: 0.25
+              - name: knifeTime
+                displayName: "Faca: duracao do golpe (s)"
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: knifeDamage
+                displayName: "Faca: dano"
+                type: Int
+                value: 1
+                defaultValue: 1
               - name: allowDiagonal
                 displayName: Permitir tiro na diagonal
                 type: Bool
@@ -901,4 +971,4 @@ entities:
                 type: Float
                 value: 600
                 defaultValue: 600
-shaderKeysHash: 1766f4e1df266e0894ee305c2d9c5b19ce8744e0
+shaderKeysHash: 0f2a599664cb44622f7600eb3f0fa6bfcd7c35c2

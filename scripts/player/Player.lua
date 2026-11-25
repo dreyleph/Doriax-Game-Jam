@@ -3,11 +3,17 @@
 --
 -- Controles:
 --   A / D ou Setas esquerda/direita -> andar
---   Espaco ou K                     -> pular
+--   Espaco                          -> pular
 --   S / Seta para baixo + pulo      -> descer da plataforma (fora do chao principal)
 --   J                               -> atirar
+--   K                               -> arma secundaria (so se tiver pego, ex.: Escopeta)
+--   L                               -> faca (corpo a corpo, mesma mira dos tiros)
+--   E                               -> dash na direcao segurada (sem direcao = para frente)
 --   W / Seta para cima (segurando)  -> mirar para cima (+ andando = diagonal)
 --   S / Seta para baixo no ar       -> mirar para baixo (+ andando = diagonal)
+--
+-- Faca + dash: eliminar um inimigo com a faca zera a espera do dash e, se
+-- estiver no ar, libera um pulo extra (ate encostar no chao).
 --
 -- Vidas (estilo arcade): ao morrer perde 1 vida (os pontos ficam), renasce
 -- no ultimo chao seguro com invencibilidade temporaria (piscando).
@@ -31,8 +37,22 @@ local Player = {
         { name = "maxFallSpeed",  displayName = "Queda maxima (px/s)",          type = "float", default = 1400.0 },
         { name = "respawnY",      displayName = "Y limite (abaixo disso morre)", type = "float", default = -400.0 },
         { name = "fireCooldown",  displayName = "Intervalo entre tiros (s)",    type = "float", default = 0.15 },
+        { name = "shotgunCooldown", displayName = "Escopeta: intervalo entre tiros (s)", type = "float", default = 0.6 },
+        { name = "shotgunPellets",  displayName = "Escopeta: projeteis por tiro",        type = "int",   default = 5 },
+        { name = "shotgunSpread",   displayName = "Escopeta: abertura total (graus)",    type = "float", default = 40.0 },
+        { name = "shotgunLifetime", displayName = "Escopeta: tempo de vida do projetil (s)", type = "float", default = 0.35 },
         { name = "autoFire",      displayName = "Tiro automatico (segurar J)",  type = "bool",  default = false },
         { name = "dropTime",      displayName = "Tempo atravessando (s)",       type = "float", default = 0.35 },
+        { name = "dashSpeed",     displayName = "Dash: velocidade (px/s)",      type = "float", default = 1300.0 },
+        { name = "dashTime",      displayName = "Dash: duracao do impulso (s)", type = "float", default = 0.15 },
+        { name = "dashCooldown",  displayName = "Dash: espera entre dashes (s)", type = "float", default = 1.0 },
+        { name = "dashCarryKeep", displayName = "Dash: embalo horizontal mantido ao fim (0-1)", type = "float", default = 0.7 },
+        { name = "dashCarryDrag", displayName = "Dash: quanto o embalo freia no chao", type = "float", default = 10.0 },
+        { name = "dashAirDrag",   displayName = "Dash: quanto o embalo freia no ar",   type = "float", default = 0.8 },
+        { name = "dashUpKeep",    displayName = "Dash: velocidade vertical mantida ao subir (0-1)", type = "float", default = 0.5 },
+        { name = "knifeCooldown", displayName = "Faca: intervalo entre golpes (s)", type = "float", default = 0.25 },
+        { name = "knifeTime",     displayName = "Faca: duracao do golpe (s)",   type = "float", default = 0.5 },
+        { name = "knifeDamage",   displayName = "Faca: dano",                   type = "int",   default = 1 },
         { name = "allowDiagonal", displayName = "Permitir tiro na diagonal",    type = "bool",  default = true },
         { name = "startLives",        displayName = "Vidas iniciais",                     type = "int",   default = 3 },
         { name = "respawnFreezeTime", displayName = "Animacao de reviver, parado (s)",  type = "float", default = 1.0 },
@@ -96,10 +116,21 @@ function Player:init()
     self.dropEntity = nil        -- plataforma que estamos atravessando
     self.dropTimer = 0
     self.fireTimer = 0
+    self.secondaryTimer = 0
+    self.knifeTimer = 0
+    self.dashTimer = 0           -- > 0: no meio do impulso do dash
+    self.dashCooldownTimer = 0   -- > 0: dash ainda indisponivel
+    self.dashVX, self.dashVY = 0, 0
+    self.dashCarry = 0           -- embalo horizontal que sobra depois do dash
+    self.airJumpAvailable = false -- pulo extra ganho ao eliminar com a faca no ar
+    self.slash = nil             -- golpe da faca ativo (acompanha o jogador)
     self.shootAnimTimer = 0      -- > 0: mostra a pose de tiro
     self.visualOffsetApplied = nil
     self.jumpWasDown = false
     self.fireWasDown = false
+    self.secondaryWasDown = false
+    self.knifeWasDown = false
+    self.dashWasDown = false
 
     local physics = self.scene:getPhysicsSystem()
     -- unico filtro de preSolve do jogo: com varios inscritos so o primeiro decide
@@ -174,7 +205,8 @@ end
 -- Tiro ------------------------------------------------------------------
 -- Direcoes: frente, cima, baixo (so no ar) e, com "allowDiagonal",
 -- diagonal para cima (cima + andando) e diagonal para baixo (baixo + andando, no ar).
-function Player:shoot(aimUp, aimDown, moving)
+-- Retorna origem (x, y) e direcao (dx, dy) do tiro conforme a mira
+function Player:aim(aimUp, aimDown, moving)
     local pos = self.body.position
     local f = self.facing
     local x, y, dx, dy
@@ -192,8 +224,143 @@ function Player:shoot(aimUp, aimDown, moving)
     else
         x, y, dx, dy = pos.x + f * (HALF_W + 14), pos.y + 10, f, 0
     end
+    return x, y, dx, dy
+end
+
+function Player:shoot(aimUp, aimDown, moving)
+    local x, y, dx, dy = self:aim(aimUp, aimDown, moving)
     Combat.spawnProjectile(self.scene, x, y, dx, dy)
     self.shootAnimTimer = self.shootAnimTime
+end
+
+-- Escopeta: varios projeteis em leque na direcao da mira, com alcance curto
+function Player:shootShotgun(aimUp, aimDown, moving)
+    local x, y, dx, dy = self:aim(aimUp, aimDown, moving)
+    local base = math.atan(dy, dx)
+    local n = math.max(self.shotgunPellets, 1)
+    local spread = math.rad(self.shotgunSpread)
+    for i = 0, n - 1 do
+        local a = base
+        if n > 1 then a = base - spread / 2 + spread * i / (n - 1) end
+        Combat.spawnProjectile(self.scene, x, y, math.cos(a), math.sin(a), self.shotgunLifetime)
+    end
+    self.shootAnimTimer = self.shootAnimTime
+end
+
+-- Faca ------------------------------------------------------------------
+-- Golpe corpo a corpo na mesma direcao da mira dos tiros. A area de acerto e
+-- um quadrado do tamanho de um item, encostado no jogador.
+-- Blocos (quadrados do tamanho de um item) em volta do jogador, em unidades
+-- de "um bloco para o lado / para cima": (-1, 1) = diagonal superior esquerda.
+--   cima (reto ou diagonal)  -> os 3 de cima
+--   baixo (reto ou diagonal) -> os 3 de baixo
+--   frente                   -> o da frente e a diagonal superior da frente
+local function slashBlocks(dx, dy)
+    if dy > 0 then return { { -1, 1 }, { 0, 1 }, { 1, 1 } } end
+    if dy < 0 then return { { -1, -1 }, { 0, -1 }, { 1, -1 } } end
+    local f = dx >= 0 and 1 or -1
+    return { { f, 0 }, { f, 1 } }
+end
+
+function Player:stab(aimUp, aimDown, moving)
+    local _, _, dx, dy = self:aim(aimUp, aimDown, moving)
+    local half = Itens.SIZE / 2
+    self:clearSlash()
+
+    -- o golpe guarda o deslocamento de cada bloco em relacao ao jogador e o acompanha
+    local blocks = {}
+    for _, b in ipairs(slashBlocks(dx, dy)) do
+        local sprite = Sprite(self.scene)
+        sprite.entityOwned = false   -- destruido por este script
+        sprite:setSize(half * 2, half * 2)
+        sprite.color = Vector4(1, 1, 1, 0.8)
+        blocks[#blocks + 1] = {
+            sprite = sprite, entity = sprite.entity,
+            offsetX = b[1] * (HALF_W + half), offsetY = b[2] * (HALF_H + half),
+        }
+    end
+
+    self.slash = {
+        blocks = blocks, half = half,
+        timeLeft = self.knifeTime,
+        hit = {},   -- inimigos ja acertados por este golpe (cada um so leva 1 vez)
+    }
+    self.shootAnimTimer = self.shootAnimTime
+    self:updateSlash(0)
+end
+
+function Player:clearSlash()
+    if not self.slash then return end
+    for _, b in ipairs(self.slash.blocks) do
+        if self.scene:isEntityCreated(b.entity) then
+            self.scene:destroyEntity(b.entity)
+        end
+    end
+    self.slash = nil
+end
+
+-- Golpe ativo: segue o jogador e acerta quem encostar enquanto durar
+-- (desenho provisorio: quadrados brancos, ate ter arte)
+function Player:updateSlash(dt)
+    local slash = self.slash
+    if not slash then return end
+    slash.timeLeft = slash.timeLeft - dt
+    if slash.timeLeft <= 0 then
+        self:clearSlash()
+        return
+    end
+
+    local pos = self.body.position
+    local half = slash.half
+    local damage = self.knifeDamage * Itens.damageMultiplier()
+    local kills = 0
+    for _, b in ipairs(slash.blocks) do
+        local cx, cy = pos.x + b.offsetX, pos.y + b.offsetY
+        b.sprite.position = Vector3(cx - half, cy - half, 0)   -- canto inferior esquerdo
+        kills = kills + Combat.hitArea(self.scene, cx, cy, half, half, damage, slash.hit)
+    end
+    if kills > 0 then
+        self.dashCooldownTimer = 0   -- matou com a faca: dash liberado de novo
+        if not self.grounded then self.airJumpAvailable = true end
+    end
+end
+
+-- Dash ------------------------------------------------------------------
+-- Impulso na direcao segurada: por "dashTime" o jogador vai reto nessa direcao
+-- (sem gravidade); depois a gravidade volta e ele segue o embalo, como num
+-- pulo: na horizontal/diagonal faz uma parabola, para cima continua subindo.
+function Player:startDash(dirX, aimUp, aimDown)
+    local dx, dy = dirX, 0
+    if aimUp then
+        dy = 1
+    elseif aimDown and not self.grounded then
+        dy = -1
+    end
+    if dx == 0 and dy == 0 then dx = self.facing end
+    -- no ar sem segurar cima/baixo: vai na diagonal para cima (para frente)
+    if dy == 0 and not self.grounded then dy = 1 end
+    local len = math.sqrt(dx * dx + dy * dy)
+    self.dashVX = dx / len * self.dashSpeed
+    self.dashVY = dy / len * self.dashSpeed
+    self.dashTimer = self.dashTime
+    self.dashCooldownTimer = self.dashCooldown
+    self.dashCarry = 0
+    self.body.gravityScale = 0
+    if dy > 0 then self.grounded = false end
+end
+
+-- Fim do impulso (ou cancelado por um pulo). Retorna a velocidade vertical que fica.
+function Player:endDash()
+    self.dashTimer = 0
+    self.body.gravityScale = self.gravityScale
+    self.dashCarry = self.dashVX * self.dashCarryKeep
+    if self.dashVY > 0 then return self.dashVY * self.dashUpKeep end
+    return self.dashVY
+end
+
+function Player:cancelDash()
+    if self.dashTimer > 0 then self:endDash() end
+    self.dashCarry = 0
 end
 
 -- Visual ------------------------------------------------------------------
@@ -247,6 +414,7 @@ function Player:hurt(force)
     if self:isInvincible() and not force then return end
 
     Itens.clearEffects()
+    self:clearSlash()
     self.deathX = self.body.position.x   -- referencia para achar onde renascer
     local hasLivesLeft = GameState.loseLife()
     Log.print(string.format("Jogador morreu. Vidas: %d  Pontos: %d", GameState.lives, GameState.score))
@@ -301,6 +469,10 @@ function Player:respawn()
     self.dropTimer = 0
     self.shootAnimTimer = 0
     self.jumpWasDown, self.fireWasDown = true, true   -- botao segurado nao dispara ao voltar
+    self.secondaryWasDown = true
+    self.knifeWasDown, self.dashWasDown = true, true
+    self:cancelDash()
+    self.airJumpAvailable = false
     self:setVisualAlpha(0)
 end
 
@@ -311,6 +483,18 @@ function Player:updateLifeState(dt)
     end
 
     if self.state == "alive" then
+        if Itens.crabTimer > 0 then
+            -- Caranguejo ativo: fade suave entre 30% e 100% (1.5 ciclos por segundo)
+            local wave = 0.5 + 0.5 * math.cos(Itens.crabTimer * math.pi * 3)
+            self:setVisualAlpha(0.3 + 0.7 * wave)
+            self.object.visible = true
+            self.crabFading = true
+            return false
+        end
+        if self.crabFading then
+            self.crabFading = false
+            self:setVisualAlpha(1)
+        end
         if self.invincibleTimer > 0 then
             -- pisca 10 vezes por segundo
             self.object.visible = math.floor(self.invincibleTimer * 10) % 2 == 0
@@ -357,12 +541,17 @@ function Player:onFixedUpdate()
 
     if self.dropTimer > 0 then self.dropTimer = self.dropTimer - dt end
     if self.fireTimer > 0 then self.fireTimer = self.fireTimer - dt end
+    if self.secondaryTimer > 0 then self.secondaryTimer = self.secondaryTimer - dt end
+    if self.knifeTimer > 0 then self.knifeTimer = self.knifeTimer - dt end
+    if self.dashCooldownTimer > 0 then self.dashCooldownTimer = self.dashCooldownTimer - dt end
+    self:updateSlash(dt)
     if self.shootAnimTimer > 0 then self.shootAnimTimer = self.shootAnimTimer - dt end
 
     self.grounded, self.groundEntity, self.groundIsPlatform = self:checkGround()
     if self.grounded then
         local pos = self.body.position
         self.lastSafe = Vector2(pos.x, pos.y)
+        self.airJumpAvailable = false
     end
 
     -- Entrada
@@ -370,13 +559,22 @@ function Player:onFixedUpdate()
     local right  = anyKey(Input.KEY_D, Input.KEY_RIGHT)
     local up     = anyKey(Input.KEY_W, Input.KEY_UP)
     local down   = anyKey(Input.KEY_S, Input.KEY_DOWN)
-    local jump   = anyKey(Input.KEY_SPACE, Input.KEY_K)
+    local jump   = anyKey(Input.KEY_SPACE)
     local fire   = anyKey(Input.KEY_J)
+    local secondary = anyKey(Input.KEY_K)
+    local knife  = anyKey(Input.KEY_L)
+    local dash   = anyKey(Input.KEY_E)
 
     local jumpPressed = jump and not self.jumpWasDown
     local firePressed = fire and not self.fireWasDown
     self.jumpWasDown = jump
     self.fireWasDown = fire
+    local secondaryPressed = secondary and not self.secondaryWasDown
+    self.secondaryWasDown = secondary
+    local knifePressed = knife and not self.knifeWasDown
+    self.knifeWasDown = knife
+    local dashPressed = dash and not self.dashWasDown
+    self.dashWasDown = dash
 
     local dir = 0
     if left  then dir = dir - 1 end
@@ -386,8 +584,35 @@ function Player:onFixedUpdate()
     local vx = dir * self.moveSpeed
     local vy = self.body.linearVelocity.y
 
-    -- Pulo / descer da plataforma
+    -- Dash (E)
+    if dashPressed and self.dashCooldownTimer <= 0 then
+        self:startDash(dir, up, down)
+    end
+    if self.dashTimer > 0 then
+        vx, vy = self.dashVX, self.dashVY
+        self.dashTimer = self.dashTimer - dt
+        if self.dashTimer <= 0 then vy = self:endDash() end
+    elseif self.dashCarry ~= 0 then
+        -- embalo do dash: freia aos poucos; andar a favor mantem o mais rapido,
+        -- andar contra freia mais
+        local carry = self.dashCarry
+        if dir == 0 or (dir > 0) == (carry > 0) then
+            if math.abs(carry) > math.abs(vx) then vx = carry end
+        else
+            vx = vx + carry
+        end
+        -- no ar o embalo quase nao freia (faz a parabola); no chao acaba rapido
+        local drag = self.grounded and self.dashCarryDrag or self.dashAirDrag
+        carry = carry * math.exp(-drag * dt)
+        if self.grounded and math.abs(carry) < self.moveSpeed * 0.25 then carry = 0 end
+        if math.abs(carry) < 1 then carry = 0 end
+        self.dashCarry = carry
+    end
+
+    -- Pulo / descer da plataforma / pulo extra da faca (no ar)
     if jumpPressed and self.grounded then
+        self:cancelDash()
+        vx = dir * self.moveSpeed
         if down and self.groundIsPlatform then
             self.dropEntity = self.groundEntity
             self.dropTimer = self.dropTime
@@ -396,6 +621,11 @@ function Player:onFixedUpdate()
             vy = self.jumpSpeed
         end
         self.grounded = false
+    elseif jumpPressed and self.airJumpAvailable then
+        -- quica: o embalo horizontal do dash continua (dash + pulo combinados)
+        if self.dashTimer > 0 then self:endDash() end
+        vy = self.jumpSpeed
+        self.airJumpAvailable = false
     end
 
     if vy < -self.maxFallSpeed then vy = -self.maxFallSpeed end
@@ -419,6 +649,19 @@ function Player:onFixedUpdate()
     if wantsFire and self.fireTimer <= 0 then
         self.fireTimer = cooldown
         self:shoot(up, down, dir ~= 0)
+    end
+
+    -- Arma secundaria (K): sem arma no slot, nao faz nada
+    if secondaryPressed and Itens.secondaryWeapon == "escopeta" and self.secondaryTimer <= 0 then
+        self.secondaryTimer = self.shotgunCooldown
+        self:shootShotgun(up, down, dir ~= 0)
+        Itens.useSecondaryAmmo()
+    end
+
+    -- Faca (L): sempre disponivel
+    if knifePressed and self.knifeTimer <= 0 then
+        self.knifeTimer = self.knifeCooldown
+        self:stab(up, down, dir ~= 0)
     end
 
     -- Itens: efeitos temporarios e coleta
