@@ -258,12 +258,12 @@ end
 -- de "um bloco para o lado / para cima": (-1, 1) = diagonal superior esquerda.
 --   cima (reto ou diagonal)  -> os 3 de cima
 --   baixo (reto ou diagonal) -> os 3 de baixo
---   frente                   -> o da frente e a diagonal superior da frente
+--   frente (esquerda/direita) -> so o bloco da frente
 local function slashBlocks(dx, dy)
     if dy > 0 then return { { -1, 1 }, { 0, 1 }, { 1, 1 } } end
     if dy < 0 then return { { -1, -1 }, { 0, -1 }, { 1, -1 } } end
     local f = dx >= 0 and 1 or -1
-    return { { f, 0 }, { f, 1 } }
+    return { { f, 0 } }
 end
 
 function Player:stab(aimUp, aimDown, moving)

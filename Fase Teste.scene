@@ -46,1120 +46,1858 @@ maxValues:
   maxShapeVertices3D: 0
   maxShapeIndices3D: 0
 shaderKeys:
-- type: mesh
-  properties: 3073
-- type: depth
-- type: depth
-  properties: 128
-- type: blit
+  - type: mesh
+    properties: 3073
+  - type: mesh
+    properties: 3075
+  - type: depth
+  - type: depth
+    properties: 128
+  - type: depth
+    properties: 129
+  - type: blit
 childScenes:
-- id: 2184184002
-  startActive: true
+  - id: 2184184002
+    startActive: true
 entities:
-- type: Entity
-  entity: 1001
-  name: Camera
-  components:
-    transform:
-      position: [0, 0, 1]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [0, 0, 1]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 1, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 1, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    camera:
-      type: camera_ortho
-      target: [0, 0, 0]
-      up: [0, 1, 0]
-      leftClip: 0
-      rightClip: 960
-      bottomClip: 0
-      topClip: 720
-      yfov: 0.75
-      aspect: 1
-      nearClip: -10
-      farClip: 10
-      renderToTexture: false
-      transparentSort: false
-      depthTest: false
-      useTarget: false
-      autoResize: true
-      framebufferWidth: 512
-      framebufferHeight: 512
-      framebufferFilter: linear
-    script:
-      scripts:
-      - type: lua
-        path: camera/CameraFollow.lua
-        className: CameraFollow
-        enabled: true
-        properties:
-        - name: target
-          displayName: Alvo
-          type: EntityReference
-          ptrTypeName: Object
-          value: 1005
-          defaultValue: 0
-        - name: offsetX
-          displayName: Distancia do alvo a borda esquerda
-          type: Float
-          value: 320
-          defaultValue: 420
-        - name: smoothing
-          displayName: Suavizacao
-          type: Float
-          value: 8
-          defaultValue: 8
-        - name: minX
-          displayName: X minimo da camera
-          type: Float
-          value: 0
-          defaultValue: 0
-        - name: maxX
-          displayName: X maximo da camera
-          type: Float
-          value: 2240
-          defaultValue: 1920
-        - name: lockBackwards
-          displayName: Nao voltar (modo corrida)
-          type: Bool
-          value: false
-          defaultValue: false
-  children:
   - type: Entity
-    entity: 1030
-    name: Fundo
+    entity: 1001
+    name: Camera
     components:
       transform:
-        position: [0, 0, 0]
+        position: [0, 0, 1]
         rotation: [1, 0, 0, 0]
         scale: [1, 1, 1]
+        worldPosition: [0, 0, 1]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 1, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 1, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
+      camera:
+        type: camera_ortho
+        target: [0, 0, 0]
+        up: [0, 1, 0]
+        leftClip: 0
+        rightClip: 960
+        bottomClip: 0
+        topClip: 720
+        yfov: 0.75
+        aspect: 1
+        nearClip: -10
+        farClip: 10
+        renderToTexture: false
+        transparentSort: false
+        depthTest: false
+        useTarget: false
+        autoResize: true
+        framebufferWidth: 512
+        framebufferHeight: 512
+        framebufferFilter: linear
       script:
         scripts:
-        - type: lua
-          path: level/ParallaxBackground.lua
-          className: ParallaxBackground
-          enabled: true
-          properties:
-          - name: tileA
-            displayName: Copia 1 do fundo (vaga par)
-            type: EntityReference
-            ptrTypeName: Sprite
-            value: 1031
-            defaultValue: 0
-          - name: tileB
-            displayName: Copia 2 do fundo (vaga impar)
-            type: EntityReference
-            ptrTypeName: Sprite
-            value: 1032
-            defaultValue: 0
-          - name: tileC
-            displayName: Copia 3 do fundo (vaga par)
-            type: EntityReference
-            ptrTypeName: Sprite
-            value: 1033
-            defaultValue: 0
-          - name: tileD
-            displayName: Copia 4 do fundo (vaga impar)
-            type: EntityReference
-            ptrTypeName: Sprite
-            value: 1034
-            defaultValue: 0
-          - name: factor
-            displayName: Parallax (0 = parado na tela, 1 = anda como o chao)
-            type: Float
-            value: 0.2
-            defaultValue: 0.2
-          - name: tileWidth
-            displayName: Largura de cada copia (px)
-            type: Float
-            value: 960
-            defaultValue: 960
-          - name: tileHeight
-            displayName: Altura de cada copia (px)
-            type: Float
-            value: 720
-            defaultValue: 720
-          - name: offsetY
-            displayName: Altura da base do fundo (px)
-            type: Float
-            value: 80
-            defaultValue: 80
-          - name: mirrorAlternate
-            displayName: Espelhar copias das vagas impares
-            type: Bool
-            value: true
-            defaultValue: true
+          - type: lua
+            path: camera/CameraFollow.lua
+            className: CameraFollow
+            enabled: true
+            properties:
+              - name: target
+                displayName: Alvo
+                type: EntityReference
+                ptrTypeName: Object
+                value: 1005
+                defaultValue: 0
+              - name: offsetX
+                displayName: Distancia do alvo a borda esquerda
+                type: Float
+                value: 320
+                defaultValue: 320
+              - name: smoothing
+                displayName: Suavizacao
+                type: Float
+                value: 8
+                defaultValue: 8
+              - name: minX
+                displayName: X minimo da camera
+                type: Float
+                value: 0
+                defaultValue: 0
+              - name: maxX
+                displayName: X maximo da camera
+                type: Float
+                value: 2240
+                defaultValue: 1920
+              - name: lockBackwards
+                displayName: Nao voltar (modo corrida)
+                type: Bool
+                value: false
+                defaultValue: false
     children:
-    - type: Entity
-      entity: 1031
-      name: FundoCopia1
-      components:
-        transform:
-          position: [480, 440, -1]
-          rotation: [1, 0, 0, 0]
-          scale: [1, 1, 1]
-          visible: true
-        mesh:
-          submeshes:
-          - material:
-              baseColorFactor: [1, 1, 1, 1]
-              baseColorTexture:
-                textureType: 2D
-                source: path
-                path: Background/Background1.png
-                minFilter: nearest
-                magFilter: nearest
-                wrapU: clamp_to_edge
-                wrapV: clamp_to_edge
-        sprite:
-          width: 960
-          height: 720
-          pivotPreset: center
-    - type: Entity
-      entity: 1032
-      name: FundoCopia2
-      components:
-        transform:
-          position: [1440, 440, -1]
-          rotation: [1, 0, 0, 0]
-          scale: [1, 1, 1]
-          visible: true
-        mesh:
-          submeshes:
-          - material:
-              baseColorFactor: [1, 1, 1, 1]
-              baseColorTexture:
-                textureType: 2D
-                source: path
-                path: Background/Background_sem_cruz1_ajustado.png
-                minFilter: nearest
-                magFilter: nearest
-                wrapU: clamp_to_edge
-                wrapV: clamp_to_edge
-        sprite:
-          width: 960
-          height: 720
-          pivotPreset: center
-    - type: Entity
-      entity: 1033
-      name: FundoCopia3
-      components:
-        transform:
-          position: [2400, 440, -1]
-          rotation: [1, 0, 0, 0]
-          scale: [1, 1, 1]
-          visible: true
-        mesh:
-          submeshes:
-          - material:
-              baseColorFactor: [1, 1, 1, 1]
-              baseColorTexture:
-                textureType: 2D
-                source: path
-                path: Background/Background1.png
-                minFilter: nearest
-                magFilter: nearest
-                wrapU: clamp_to_edge
-                wrapV: clamp_to_edge
-        sprite:
-          width: 960
-          height: 720
-          pivotPreset: center
-    - type: Entity
-      entity: 1034
-      name: FundoCopia4
-      components:
-        transform:
-          position: [3360, 440, -1]
-          rotation: [1, 0, 0, 0]
-          scale: [1, 1, 1]
-          visible: true
-        mesh:
-          submeshes:
-          - material:
-              baseColorFactor: [1, 1, 1, 1]
-              baseColorTexture:
-                textureType: 2D
-                source: path
-                path: Background/Background_sem_cruz1_ajustado.png
-                minFilter: nearest
-                magFilter: nearest
-                wrapU: clamp_to_edge
-                wrapV: clamp_to_edge
-        sprite:
-          width: 960
-          height: 720
-          pivotPreset: center
-- type: Entity
-  entity: 1002
-  name: Chao
-  components:
-    transform:
-      position: [1600, 40, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [1600, 40, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1600, 40, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1600, 40, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    mesh:
-      submeshes:
-      - material:
-          baseColorFactor: [0.157, 0.122, 0.102, 1]
-          metallicFactor: 1
-          roughnessFactor: 1
-          alphaCutoff: 0.5
-          foliageTransmission: 0
-          alphaMode: AUTO
-          emissiveFactor: [0, 0, 0]
-          baseColorTexCoord: 0
-          metallicRoughnessTexCoord: 0
-          occlusionTexCoord: 0
-          emissiveTexCoord: 0
-          normalTexCoord: 0
-          name: ''
-        textureRect: [0, 0, 1, 1]
-        primitiveType: triangles
-        vertexCount: 6
-        faceCulling: false
-        textureShadow: true
-        hasTexCoord1: true
-        hasTexCoord2: false
-        hasNormalMap: false
-        hasTangent: true
-        hasVertexColor3: false
-        hasVertexColor4: true
-        hasTextureRect: true
-        hasSkinning: false
-        hasMorphTarget: false
-        hasMorphNormal: false
-        hasMorphTangent: false
-      normAdjustJoint: 1
-      normAdjustWeight: 1
-      aabb:
-        min: [-1600, -40, 0]
-        max: [1600, 40, 0]
-      verticesAABB:
-        min: [-1600, -40, 0]
-        max: [1600, 40, 0]
-      worldAABB:
-        min: [0, 0, 0]
-        max: [3200, 80, 0]
-      receiveLights: true
-      receiveIBL: false
-      castShadows: true
-      receiveShadows: true
-      lodEnabled: true
-      lodBias: 1
-      renderInReflectionProbes: true
-      shadowsBillboard: true
-      transparent: false
-      cullingMode: back
-      windingOrder: ccw
-    sprite:
-      width: 3200
-      height: 80
-      automaticFlipY: true
-      flipY: true
-      textureScaleFactor: 0
-      pivotPreset: center
-    body2d:
-      type: static
-      numShapes: 1
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 1
-        friction: 0.6
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: true
-        categoryBits: 1
-        maskBits: 65535
-        groupIndex: 0
-        vertices: [[-1600, -40], [1600, -40], [1600, 40], [-1600, 40]]
-  children:
+      - type: Entity
+        entity: 1030
+        name: Fundo
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            worldPosition: [0, 0, 1]
+            worldRotation: [1, 0, 0, 0]
+            worldScale: [1, 1, 1]
+            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 1, 1]]
+            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            visible: true
+            billboardRotation: [1, 0, 0, 0]
+            billboard: false
+            fakeBillboard: false
+            cylindricalBillboard: false
+          script:
+            scripts:
+              - type: lua
+                path: level/ParallaxBackground.lua
+                className: ParallaxBackground
+                enabled: true
+                properties:
+                  - name: tileA
+                    displayName: Copia 1 do fundo (vaga par)
+                    type: EntityReference
+                    ptrTypeName: Sprite
+                    value: 1031
+                    defaultValue: 0
+                  - name: tileB
+                    displayName: Copia 2 do fundo (vaga impar)
+                    type: EntityReference
+                    ptrTypeName: Sprite
+                    value: 1032
+                    defaultValue: 0
+                  - name: tileC
+                    displayName: Copia 3 do fundo (vaga par)
+                    type: EntityReference
+                    ptrTypeName: Sprite
+                    value: 1033
+                    defaultValue: 0
+                  - name: tileD
+                    displayName: Copia 4 do fundo (vaga impar)
+                    type: EntityReference
+                    ptrTypeName: Sprite
+                    value: 1034
+                    defaultValue: 0
+                  - name: factor
+                    displayName: Parallax (0 = parado na tela, 1 = anda como o chao)
+                    type: Float
+                    value: 0.2
+                    defaultValue: 0.2
+                  - name: tileWidth
+                    displayName: Largura de cada copia (px)
+                    type: Float
+                    value: 960
+                    defaultValue: 960
+                  - name: tileHeight
+                    displayName: Altura de cada copia (px)
+                    type: Float
+                    value: 720
+                    defaultValue: 720
+                  - name: offsetY
+                    displayName: Altura da base do fundo (px)
+                    type: Float
+                    value: 80
+                    defaultValue: 80
+                  - name: mirrorAlternate
+                    displayName: Espelhar copias das vagas impares
+                    type: Bool
+                    value: true
+                    defaultValue: true
+        children:
+          - type: Entity
+            entity: 1031
+            name: FundoCopia1
+            components:
+              transform:
+                position: [480, 440, -1]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                worldPosition: [480, 440, 0]
+                worldRotation: [1, 0, 0, 0]
+                worldScale: [1, 1, 1]
+                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [480, 440, -1, 1]]
+                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [480, 440, 0, 1]]
+                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+                visible: true
+                billboardRotation: [1, 0, 0, 0]
+                billboard: false
+                fakeBillboard: false
+                cylindricalBillboard: false
+              mesh:
+                submeshes:
+                  - material:
+                      baseColorFactor: [1, 1, 1, 1]
+                      metallicFactor: 1
+                      roughnessFactor: 1
+                      alphaCutoff: 0.5
+                      foliageTransmission: 0
+                      alphaMode: AUTO
+                      emissiveFactor: [0, 0, 0]
+                      baseColorTexture:
+                        textureType: 2D
+                        source: path
+                        path: Background/Background1.png
+                        minFilter: nearest
+                        magFilter: nearest
+                        wrapU: clamp_to_edge
+                        wrapV: clamp_to_edge
+                        releaseDataAfterLoad: true
+                      baseColorTexCoord: 0
+                      metallicRoughnessTexCoord: 0
+                      occlusionTexCoord: 0
+                      emissiveTexCoord: 0
+                      normalTexCoord: 0
+                      name: ""
+                    textureRect: [0, 0, 1, 1]
+                    primitiveType: triangles
+                    vertexCount: 6
+                    faceCulling: false
+                    textureShadow: true
+                    hasTexCoord1: true
+                    hasTexCoord2: false
+                    hasNormalMap: false
+                    hasTangent: true
+                    hasVertexColor3: false
+                    hasVertexColor4: true
+                    hasTextureRect: true
+                    hasSkinning: false
+                    hasMorphTarget: false
+                    hasMorphNormal: false
+                    hasMorphTangent: false
+                normAdjustJoint: 1
+                normAdjustWeight: 1
+                aabb:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                verticesAABB:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                worldAABB:
+                  min: [0, 80, 0]
+                  max: [960, 800, 0]
+                receiveLights: true
+                receiveIBL: false
+                castShadows: true
+                receiveShadows: true
+                lodEnabled: true
+                lodBias: 1
+                renderInReflectionProbes: true
+                shadowsBillboard: true
+                transparent: false
+                cullingMode: back
+                windingOrder: ccw
+              sprite:
+                width: 960
+                height: 720
+                automaticFlipY: true
+                flipY: true
+                textureScaleFactor: 0
+                pivotPreset: center
+          - type: Entity
+            entity: 1032
+            name: FundoCopia2
+            components:
+              transform:
+                position: [1440, 440, -1]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                worldPosition: [1440, 440, 0]
+                worldRotation: [1, 0, 0, 0]
+                worldScale: [1, 1, 1]
+                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1440, 440, -1, 1]]
+                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1440, 440, 0, 1]]
+                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+                visible: true
+                billboardRotation: [1, 0, 0, 0]
+                billboard: false
+                fakeBillboard: false
+                cylindricalBillboard: false
+              mesh:
+                submeshes:
+                  - material:
+                      baseColorFactor: [1, 1, 1, 1]
+                      metallicFactor: 1
+                      roughnessFactor: 1
+                      alphaCutoff: 0.5
+                      foliageTransmission: 0
+                      alphaMode: AUTO
+                      emissiveFactor: [0, 0, 0]
+                      baseColorTexture:
+                        textureType: 2D
+                        source: path
+                        path: Background/Background_sem_cruz1_ajustado.png
+                        minFilter: nearest
+                        magFilter: nearest
+                        wrapU: clamp_to_edge
+                        wrapV: clamp_to_edge
+                        releaseDataAfterLoad: true
+                      baseColorTexCoord: 0
+                      metallicRoughnessTexCoord: 0
+                      occlusionTexCoord: 0
+                      emissiveTexCoord: 0
+                      normalTexCoord: 0
+                      name: ""
+                    textureRect: [0, 0, 1, 1]
+                    primitiveType: triangles
+                    vertexCount: 6
+                    faceCulling: false
+                    textureShadow: true
+                    hasTexCoord1: true
+                    hasTexCoord2: false
+                    hasNormalMap: false
+                    hasTangent: true
+                    hasVertexColor3: false
+                    hasVertexColor4: true
+                    hasTextureRect: true
+                    hasSkinning: false
+                    hasMorphTarget: false
+                    hasMorphNormal: false
+                    hasMorphTangent: false
+                normAdjustJoint: 1
+                normAdjustWeight: 1
+                aabb:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                verticesAABB:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                worldAABB:
+                  min: [960, 80, 0]
+                  max: [1920, 800, 0]
+                receiveLights: true
+                receiveIBL: false
+                castShadows: true
+                receiveShadows: true
+                lodEnabled: true
+                lodBias: 1
+                renderInReflectionProbes: true
+                shadowsBillboard: true
+                transparent: false
+                cullingMode: back
+                windingOrder: ccw
+              sprite:
+                width: 960
+                height: 720
+                automaticFlipY: true
+                flipY: true
+                textureScaleFactor: 0
+                pivotPreset: center
+          - type: Entity
+            entity: 1033
+            name: FundoCopia3
+            components:
+              transform:
+                position: [2400, 440, -1]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                worldPosition: [2400, 440, 0]
+                worldRotation: [1, 0, 0, 0]
+                worldScale: [1, 1, 1]
+                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [2400, 440, -1, 1]]
+                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [2400, 440, 0, 1]]
+                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+                visible: true
+                billboardRotation: [1, 0, 0, 0]
+                billboard: false
+                fakeBillboard: false
+                cylindricalBillboard: false
+              mesh:
+                submeshes:
+                  - material:
+                      baseColorFactor: [1, 1, 1, 1]
+                      metallicFactor: 1
+                      roughnessFactor: 1
+                      alphaCutoff: 0.5
+                      foliageTransmission: 0
+                      alphaMode: AUTO
+                      emissiveFactor: [0, 0, 0]
+                      baseColorTexture:
+                        textureType: 2D
+                        source: path
+                        path: Background/Background1.png
+                        minFilter: nearest
+                        magFilter: nearest
+                        wrapU: clamp_to_edge
+                        wrapV: clamp_to_edge
+                        releaseDataAfterLoad: true
+                      baseColorTexCoord: 0
+                      metallicRoughnessTexCoord: 0
+                      occlusionTexCoord: 0
+                      emissiveTexCoord: 0
+                      normalTexCoord: 0
+                      name: ""
+                    textureRect: [0, 0, 1, 1]
+                    primitiveType: triangles
+                    vertexCount: 6
+                    faceCulling: false
+                    textureShadow: true
+                    hasTexCoord1: true
+                    hasTexCoord2: false
+                    hasNormalMap: false
+                    hasTangent: true
+                    hasVertexColor3: false
+                    hasVertexColor4: true
+                    hasTextureRect: true
+                    hasSkinning: false
+                    hasMorphTarget: false
+                    hasMorphNormal: false
+                    hasMorphTangent: false
+                normAdjustJoint: 1
+                normAdjustWeight: 1
+                aabb:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                verticesAABB:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                worldAABB:
+                  min: [1920, 80, 0]
+                  max: [2880, 800, 0]
+                receiveLights: true
+                receiveIBL: false
+                castShadows: true
+                receiveShadows: true
+                lodEnabled: true
+                lodBias: 1
+                renderInReflectionProbes: true
+                shadowsBillboard: true
+                transparent: false
+                cullingMode: back
+                windingOrder: ccw
+              sprite:
+                width: 960
+                height: 720
+                automaticFlipY: true
+                flipY: true
+                textureScaleFactor: 0
+                pivotPreset: center
+          - type: Entity
+            entity: 1034
+            name: FundoCopia4
+            components:
+              transform:
+                position: [3360, 440, -1]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                worldPosition: [3360, 440, 0]
+                worldRotation: [1, 0, 0, 0]
+                worldScale: [1, 1, 1]
+                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [3360, 440, -1, 1]]
+                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [3360, 440, 0, 1]]
+                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+                visible: true
+                billboardRotation: [1, 0, 0, 0]
+                billboard: false
+                fakeBillboard: false
+                cylindricalBillboard: false
+              mesh:
+                submeshes:
+                  - material:
+                      baseColorFactor: [1, 1, 1, 1]
+                      metallicFactor: 1
+                      roughnessFactor: 1
+                      alphaCutoff: 0.5
+                      foliageTransmission: 0
+                      alphaMode: AUTO
+                      emissiveFactor: [0, 0, 0]
+                      baseColorTexture:
+                        textureType: 2D
+                        source: path
+                        path: Background/Background_sem_cruz1_ajustado.png
+                        minFilter: nearest
+                        magFilter: nearest
+                        wrapU: clamp_to_edge
+                        wrapV: clamp_to_edge
+                        releaseDataAfterLoad: true
+                      baseColorTexCoord: 0
+                      metallicRoughnessTexCoord: 0
+                      occlusionTexCoord: 0
+                      emissiveTexCoord: 0
+                      normalTexCoord: 0
+                      name: ""
+                    textureRect: [0, 0, 1, 1]
+                    primitiveType: triangles
+                    vertexCount: 6
+                    faceCulling: false
+                    textureShadow: true
+                    hasTexCoord1: true
+                    hasTexCoord2: false
+                    hasNormalMap: false
+                    hasTangent: true
+                    hasVertexColor3: false
+                    hasVertexColor4: true
+                    hasTextureRect: true
+                    hasSkinning: false
+                    hasMorphTarget: false
+                    hasMorphNormal: false
+                    hasMorphTangent: false
+                normAdjustJoint: 1
+                normAdjustWeight: 1
+                aabb:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                verticesAABB:
+                  min: [-480, -360, 0]
+                  max: [480, 360, 0]
+                worldAABB:
+                  min: [2880, 80, 0]
+                  max: [3840, 800, 0]
+                receiveLights: true
+                receiveIBL: false
+                castShadows: true
+                receiveShadows: true
+                lodEnabled: true
+                lodBias: 1
+                renderInReflectionProbes: true
+                shadowsBillboard: true
+                transparent: false
+                cullingMode: back
+                windingOrder: ccw
+              sprite:
+                width: 960
+                height: 720
+                automaticFlipY: true
+                flipY: true
+                textureScaleFactor: 0
+                pivotPreset: center
   - type: Entity
-    entity: 1050
-    name: ChaoBorda
+    entity: 1002
+    name: Chao
     components:
       transform:
-        position: [0, 37.5, 0]
+        position: [1600, 40, 0]
         rotation: [1, 0, 0, 0]
         scale: [1, 1, 1]
+        worldPosition: [1600, 40, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1600, 40, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1600, 40, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
       mesh:
         submeshes:
-        - material:
-            baseColorFactor: &id001 [0.91, 0.667, 0.235, 1]
+          - material:
+              baseColorFactor: [0.157, 0.122, 0.102, 1]
+              metallicFactor: 1
+              roughnessFactor: 1
+              alphaCutoff: 0.5
+              foliageTransmission: 0
+              alphaMode: AUTO
+              emissiveFactor: [0, 0, 0]
+              baseColorTexCoord: 0
+              metallicRoughnessTexCoord: 0
+              occlusionTexCoord: 0
+              emissiveTexCoord: 0
+              normalTexCoord: 0
+              name: ""
+            textureRect: [0, 0, 1, 1]
+            primitiveType: triangles
+            vertexCount: 6
+            faceCulling: false
+            textureShadow: true
+            hasTexCoord1: true
+            hasTexCoord2: false
+            hasNormalMap: false
+            hasTangent: true
+            hasVertexColor3: false
+            hasVertexColor4: true
+            hasTextureRect: true
+            hasSkinning: false
+            hasMorphTarget: false
+            hasMorphNormal: false
+            hasMorphTangent: false
+        normAdjustJoint: 1
+        normAdjustWeight: 1
+        aabb:
+          min: [-1600, -40, 0]
+          max: [1600, 40, 0]
+        verticesAABB:
+          min: [-1600, -40, 0]
+          max: [1600, 40, 0]
+        worldAABB:
+          min: [0, 0, 0]
+          max: [3200, 80, 0]
+        receiveLights: true
+        receiveIBL: false
+        castShadows: true
+        receiveShadows: true
+        lodEnabled: true
+        lodBias: 1
+        renderInReflectionProbes: true
+        shadowsBillboard: true
+        transparent: false
+        cullingMode: back
+        windingOrder: ccw
       sprite:
         width: 3200
-        height: 5
+        height: 80
+        automaticFlipY: true
+        flipY: true
+        textureScaleFactor: 0
         pivotPreset: center
-- type: Entity
-  entity: 1003
-  name: Plataforma1
-  components:
-    transform:
-      position: [800, 240, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [800, 240, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [800, 240, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [800, 240, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    mesh:
-      submeshes:
-      - material:
-          baseColorFactor: &id002 [0.149, 0.118, 0.102, 1]
-          metallicFactor: 1
-          roughnessFactor: 1
-          alphaCutoff: 0.5
-          foliageTransmission: 0
-          alphaMode: AUTO
-          emissiveFactor: [0, 0, 0]
-          baseColorTexCoord: 0
-          metallicRoughnessTexCoord: 0
-          occlusionTexCoord: 0
-          emissiveTexCoord: 0
-          normalTexCoord: 0
-          name: ''
-        textureRect: [0, 0, 1, 1]
-        primitiveType: triangles
-        vertexCount: 6
-        faceCulling: false
-        textureShadow: true
-        hasTexCoord1: true
-        hasTexCoord2: false
-        hasNormalMap: false
-        hasTangent: true
-        hasVertexColor3: false
-        hasVertexColor4: true
-        hasTextureRect: true
-        hasSkinning: false
-        hasMorphTarget: false
-        hasMorphNormal: false
-        hasMorphTangent: false
-      normAdjustJoint: 1
-      normAdjustWeight: 1
-      aabb:
-        min: [-160, -16, 0]
-        max: [160, 16, 0]
-      verticesAABB:
-        min: [-160, -16, 0]
-        max: [160, 16, 0]
-      worldAABB:
-        min: [640, 224, 0]
-        max: [960, 256, 0]
-      receiveLights: true
-      receiveIBL: false
-      castShadows: true
-      receiveShadows: true
-      lodEnabled: true
-      lodBias: 1
-      renderInReflectionProbes: true
-      shadowsBillboard: true
-      transparent: false
-      cullingMode: back
-      windingOrder: ccw
-    sprite:
-      width: 320
-      height: 32
-      automaticFlipY: true
-      flipY: true
-      textureScaleFactor: 0
-      pivotPreset: center
-    body2d:
-      type: static
-      numShapes: 1
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 1
-        friction: 0.6
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: true
-        sensorEvents: false
-        categoryBits: 2
-        maskBits: 65535
-        groupIndex: 0
-        vertices: [[-160, -16], [160, -16], [160, 16], [-160, 16]]
-  children:
+      body2d:
+        type: static
+        numShapes: 1
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 1
+            friction: 0.6
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: true
+            categoryBits: 1
+            maskBits: 65535
+            groupIndex: 0
+            vertices:
+              - [-1600, -40]
+              - [1600, -40]
+              - [1600, 40]
+              - [-1600, 40]
+    children:
+      - type: Entity
+        entity: 1050
+        name: ChaoBorda
+        components:
+          transform:
+            position: [0, 37.5, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            worldPosition: [1600, 77.5, 0]
+            worldRotation: [1, 0, 0, 0]
+            worldScale: [1, 1, 1]
+            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 37.5, 0, 1]]
+            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1600, 77.5, 0, 1]]
+            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            visible: true
+            billboardRotation: [1, 0, 0, 0]
+            billboard: false
+            fakeBillboard: false
+            cylindricalBillboard: false
+          mesh:
+            submeshes:
+              - material:
+                  baseColorFactor: [0.91, 0.667, 0.235, 1]
+                  metallicFactor: 1
+                  roughnessFactor: 1
+                  alphaCutoff: 0.5
+                  foliageTransmission: 0
+                  alphaMode: AUTO
+                  emissiveFactor: [0, 0, 0]
+                  baseColorTexCoord: 0
+                  metallicRoughnessTexCoord: 0
+                  occlusionTexCoord: 0
+                  emissiveTexCoord: 0
+                  normalTexCoord: 0
+                  name: ""
+                textureRect: [0, 0, 1, 1]
+                primitiveType: triangles
+                vertexCount: 6
+                faceCulling: false
+                textureShadow: true
+                hasTexCoord1: true
+                hasTexCoord2: false
+                hasNormalMap: false
+                hasTangent: true
+                hasVertexColor3: false
+                hasVertexColor4: true
+                hasTextureRect: true
+                hasSkinning: false
+                hasMorphTarget: false
+                hasMorphNormal: false
+                hasMorphTangent: false
+            normAdjustJoint: 1
+            normAdjustWeight: 1
+            aabb:
+              min: [-1600, -2.5, 0]
+              max: [1600, 2.5, 0]
+            verticesAABB:
+              min: [-1600, -2.5, 0]
+              max: [1600, 2.5, 0]
+            worldAABB:
+              min: [0, 75, 0]
+              max: [3200, 80, 0]
+            receiveLights: true
+            receiveIBL: false
+            castShadows: true
+            receiveShadows: true
+            lodEnabled: true
+            lodBias: 1
+            renderInReflectionProbes: true
+            shadowsBillboard: true
+            transparent: false
+            cullingMode: back
+            windingOrder: ccw
+          sprite:
+            width: 3200
+            height: 5
+            automaticFlipY: true
+            flipY: true
+            textureScaleFactor: 0
+            pivotPreset: center
   - type: Entity
-    entity: 1051
-    name: Plataforma1Borda
+    entity: 1003
+    name: Plataforma1
     components:
       transform:
-        position: [0, 13.5, 0]
+        position: [800, 240, 0]
         rotation: [1, 0, 0, 0]
         scale: [1, 1, 1]
+        worldPosition: [800, 240, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [800, 240, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [800, 240, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
       mesh:
         submeshes:
-        - material:
-            baseColorFactor: *id001
+          - material:
+              baseColorFactor: [0.149, 0.118, 0.102, 1]
+              metallicFactor: 1
+              roughnessFactor: 1
+              alphaCutoff: 0.5
+              foliageTransmission: 0
+              alphaMode: AUTO
+              emissiveFactor: [0, 0, 0]
+              baseColorTexCoord: 0
+              metallicRoughnessTexCoord: 0
+              occlusionTexCoord: 0
+              emissiveTexCoord: 0
+              normalTexCoord: 0
+              name: ""
+            textureRect: [0, 0, 1, 1]
+            primitiveType: triangles
+            vertexCount: 6
+            faceCulling: false
+            textureShadow: true
+            hasTexCoord1: true
+            hasTexCoord2: false
+            hasNormalMap: false
+            hasTangent: true
+            hasVertexColor3: false
+            hasVertexColor4: true
+            hasTextureRect: true
+            hasSkinning: false
+            hasMorphTarget: false
+            hasMorphNormal: false
+            hasMorphTangent: false
+        normAdjustJoint: 1
+        normAdjustWeight: 1
+        aabb:
+          min: [-160, -16, 0]
+          max: [160, 16, 0]
+        verticesAABB:
+          min: [-160, -16, 0]
+          max: [160, 16, 0]
+        worldAABB:
+          min: [640, 224, 0]
+          max: [960, 256, 0]
+        receiveLights: true
+        receiveIBL: false
+        castShadows: true
+        receiveShadows: true
+        lodEnabled: true
+        lodBias: 1
+        renderInReflectionProbes: true
+        shadowsBillboard: true
+        transparent: false
+        cullingMode: back
+        windingOrder: ccw
       sprite:
         width: 320
-        height: 5
+        height: 32
+        automaticFlipY: true
+        flipY: true
+        textureScaleFactor: 0
         pivotPreset: center
-- type: Entity
-  entity: 1004
-  name: Plataforma2
-  components:
-    transform:
-      position: [1300, 400, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [1300, 400, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 400, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 400, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    mesh:
-      submeshes:
-      - material:
-          baseColorFactor: *id002
-          metallicFactor: 1
-          roughnessFactor: 1
-          alphaCutoff: 0.5
-          foliageTransmission: 0
-          alphaMode: AUTO
-          emissiveFactor: [0, 0, 0]
-          baseColorTexCoord: 0
-          metallicRoughnessTexCoord: 0
-          occlusionTexCoord: 0
-          emissiveTexCoord: 0
-          normalTexCoord: 0
-          name: ''
-        textureRect: [0, 0, 1, 1]
-        primitiveType: triangles
-        vertexCount: 6
-        faceCulling: false
-        textureShadow: true
-        hasTexCoord1: true
-        hasTexCoord2: false
-        hasNormalMap: false
-        hasTangent: true
-        hasVertexColor3: false
-        hasVertexColor4: true
-        hasTextureRect: true
-        hasSkinning: false
-        hasMorphTarget: false
-        hasMorphNormal: false
-        hasMorphTangent: false
-      normAdjustJoint: 1
-      normAdjustWeight: 1
-      aabb:
-        min: [-160, -16, 0]
-        max: [160, 16, 0]
-      verticesAABB:
-        min: [-160, -16, 0]
-        max: [160, 16, 0]
-      worldAABB:
-        min: [1140, 384, 0]
-        max: [1460, 416, 0]
-      receiveLights: true
-      receiveIBL: false
-      castShadows: true
-      receiveShadows: true
-      lodEnabled: true
-      lodBias: 1
-      renderInReflectionProbes: true
-      shadowsBillboard: true
-      transparent: false
-      cullingMode: back
-      windingOrder: ccw
-    sprite:
-      width: 320
-      height: 32
-      automaticFlipY: true
-      flipY: true
-      textureScaleFactor: 0
-      pivotPreset: center
-    body2d:
-      type: static
-      numShapes: 1
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 1
-        friction: 0.6
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: true
-        sensorEvents: false
-        categoryBits: 2
-        maskBits: 65535
-        groupIndex: 0
-        vertices: [[-160, -16], [160, -16], [160, 16], [-160, 16]]
-  children:
+      body2d:
+        type: static
+        numShapes: 1
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 1
+            friction: 0.6
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: true
+            sensorEvents: false
+            categoryBits: 2
+            maskBits: 65535
+            groupIndex: 0
+            vertices:
+              - [-160, -16]
+              - [160, -16]
+              - [160, 16]
+              - [-160, 16]
+    children:
+      - type: Entity
+        entity: 1051
+        name: Plataforma1Borda
+        components:
+          transform:
+            position: [0, 13.5, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            worldPosition: [800, 253.5, 0]
+            worldRotation: [1, 0, 0, 0]
+            worldScale: [1, 1, 1]
+            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 13.5, 0, 1]]
+            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [800, 253.5, 0, 1]]
+            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            visible: true
+            billboardRotation: [1, 0, 0, 0]
+            billboard: false
+            fakeBillboard: false
+            cylindricalBillboard: false
+          mesh:
+            submeshes:
+              - material:
+                  baseColorFactor: [0.91, 0.667, 0.235, 1]
+                  metallicFactor: 1
+                  roughnessFactor: 1
+                  alphaCutoff: 0.5
+                  foliageTransmission: 0
+                  alphaMode: AUTO
+                  emissiveFactor: [0, 0, 0]
+                  baseColorTexCoord: 0
+                  metallicRoughnessTexCoord: 0
+                  occlusionTexCoord: 0
+                  emissiveTexCoord: 0
+                  normalTexCoord: 0
+                  name: ""
+                textureRect: [0, 0, 1, 1]
+                primitiveType: triangles
+                vertexCount: 6
+                faceCulling: false
+                textureShadow: true
+                hasTexCoord1: true
+                hasTexCoord2: false
+                hasNormalMap: false
+                hasTangent: true
+                hasVertexColor3: false
+                hasVertexColor4: true
+                hasTextureRect: true
+                hasSkinning: false
+                hasMorphTarget: false
+                hasMorphNormal: false
+                hasMorphTangent: false
+            normAdjustJoint: 1
+            normAdjustWeight: 1
+            aabb:
+              min: [-160, -2.5, 0]
+              max: [160, 2.5, 0]
+            verticesAABB:
+              min: [-160, -2.5, 0]
+              max: [160, 2.5, 0]
+            worldAABB:
+              min: [640, 251, 0]
+              max: [960, 256, 0]
+            receiveLights: true
+            receiveIBL: false
+            castShadows: true
+            receiveShadows: true
+            lodEnabled: true
+            lodBias: 1
+            renderInReflectionProbes: true
+            shadowsBillboard: true
+            transparent: false
+            cullingMode: back
+            windingOrder: ccw
+          sprite:
+            width: 320
+            height: 5
+            automaticFlipY: true
+            flipY: true
+            textureScaleFactor: 0
+            pivotPreset: center
   - type: Entity
-    entity: 1052
-    name: Plataforma2Borda
+    entity: 1004
+    name: Plataforma2
     components:
       transform:
-        position: [0, 13.5, 0]
+        position: [1300, 400, 0]
         rotation: [1, 0, 0, 0]
         scale: [1, 1, 1]
+        worldPosition: [1300, 400, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 400, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 400, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
       mesh:
         submeshes:
-        - material:
-            baseColorFactor: *id001
+          - material:
+              baseColorFactor: [0.149, 0.118, 0.102, 1]
+              metallicFactor: 1
+              roughnessFactor: 1
+              alphaCutoff: 0.5
+              foliageTransmission: 0
+              alphaMode: AUTO
+              emissiveFactor: [0, 0, 0]
+              baseColorTexCoord: 0
+              metallicRoughnessTexCoord: 0
+              occlusionTexCoord: 0
+              emissiveTexCoord: 0
+              normalTexCoord: 0
+              name: ""
+            textureRect: [0, 0, 1, 1]
+            primitiveType: triangles
+            vertexCount: 6
+            faceCulling: false
+            textureShadow: true
+            hasTexCoord1: true
+            hasTexCoord2: false
+            hasNormalMap: false
+            hasTangent: true
+            hasVertexColor3: false
+            hasVertexColor4: true
+            hasTextureRect: true
+            hasSkinning: false
+            hasMorphTarget: false
+            hasMorphNormal: false
+            hasMorphTangent: false
+        normAdjustJoint: 1
+        normAdjustWeight: 1
+        aabb:
+          min: [-160, -16, 0]
+          max: [160, 16, 0]
+        verticesAABB:
+          min: [-160, -16, 0]
+          max: [160, 16, 0]
+        worldAABB:
+          min: [1140, 384, 0]
+          max: [1460, 416, 0]
+        receiveLights: true
+        receiveIBL: false
+        castShadows: true
+        receiveShadows: true
+        lodEnabled: true
+        lodBias: 1
+        renderInReflectionProbes: true
+        shadowsBillboard: true
+        transparent: false
+        cullingMode: back
+        windingOrder: ccw
       sprite:
         width: 320
-        height: 5
+        height: 32
+        automaticFlipY: true
+        flipY: true
+        textureScaleFactor: 0
         pivotPreset: center
-- type: Entity
-  entity: 1005
-  name: Jogador
-  components:
-    transform:
-      position: [300, 200, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [300, 200, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [300, 200, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [300, 200, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    script:
-      scripts:
-      - type: lua
-        path: player/Player.lua
-        className: Player
-        enabled: true
-        properties:
-        - name: moveSpeed
-          displayName: Velocidade (px/s)
-          type: Float
-          value: 320
-          defaultValue: 320
-        - name: jumpSpeed
-          displayName: Velocidade do pulo (px/s)
-          type: Float
-          value: 860
-          defaultValue: 860
-        - name: gravityScale
-          displayName: Escala da gravidade
-          type: Float
-          value: 3
-          defaultValue: 3
-        - name: maxFallSpeed
-          displayName: Queda maxima (px/s)
-          type: Float
-          value: 1400
-          defaultValue: 1400
-        - name: respawnY
-          displayName: Y limite (abaixo disso morre)
-          type: Float
-          value: -400
-          defaultValue: -400
-        - name: fireCooldown
-          displayName: Intervalo entre tiros (s)
-          type: Float
-          value: 0.15
-          defaultValue: 0.15
-        - name: autoFire
-          displayName: Tiro automatico (segurar J)
-          type: Bool
-          value: false
-          defaultValue: false
-        - name: dropTime
-          displayName: Tempo atravessando (s)
-          type: Float
-          value: 0.35
-          defaultValue: 0.35
-        - name: allowDiagonal
-          displayName: Permitir tiro na diagonal
-          type: Bool
-          value: true
-          defaultValue: true
-        - name: startLives
-          displayName: Vidas iniciais
-          type: Int
-          value: 3
-          defaultValue: 3
-        - name: deathScorePenalty
-          displayName: Pontos perdidos ao morrer (0 a 1)
-          type: Float
-          value: 0.5
-          defaultValue: 0.5
-        - name: respawnDelay
-          displayName: Tempo ate renascer (s)
-          type: Float
-          value: 0.8
-          defaultValue: 0.8
-        - name: invincibleTime
-          displayName: Invencibilidade ao renascer (s)
-          type: Float
-          value: 2
-          defaultValue: 2
-        - name: gameOverDelay
-          displayName: Tempo na tela de game over (s)
-          type: Float
-          value: 3
-          defaultValue: 3
-        - name: visual
-          displayName: Sprite do personagem (filho)
-          type: EntityReference
-          ptrTypeName: Sprite
-          value: 1020
-          defaultValue: 0
-        - name: visualOffsetX
-          displayName: 'Desenho: deslocamento X (px)'
-          type: Float
-          value: -9
-          defaultValue: -9
-        - name: visualOffsetY
-          displayName: 'Desenho: deslocamento Y (px)'
-          type: Float
-          value: 4
-          defaultValue: 4
-    body2d:
-      type: dynamic
-      numShapes: 1
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 4
-        loop: false
-        density: 1
-        friction: 0
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: true
-        categoryBits: 4
-        maskBits: 35
-        groupIndex: 0
-        vertices: [[-16, -48], [16, -48], [16, 48], [-16, 48]]
-  children:
+      body2d:
+        type: static
+        numShapes: 1
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 1
+            friction: 0.6
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: true
+            sensorEvents: false
+            categoryBits: 2
+            maskBits: 65535
+            groupIndex: 0
+            vertices:
+              - [-160, -16]
+              - [160, -16]
+              - [160, 16]
+              - [-160, 16]
+    children:
+      - type: Entity
+        entity: 1052
+        name: Plataforma2Borda
+        components:
+          transform:
+            position: [0, 13.5, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            worldPosition: [1300, 413.5, 0]
+            worldRotation: [1, 0, 0, 0]
+            worldScale: [1, 1, 1]
+            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 13.5, 0, 1]]
+            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 413.5, 0, 1]]
+            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            visible: true
+            billboardRotation: [1, 0, 0, 0]
+            billboard: false
+            fakeBillboard: false
+            cylindricalBillboard: false
+          mesh:
+            submeshes:
+              - material:
+                  baseColorFactor: [0.91, 0.667, 0.235, 1]
+                  metallicFactor: 1
+                  roughnessFactor: 1
+                  alphaCutoff: 0.5
+                  foliageTransmission: 0
+                  alphaMode: AUTO
+                  emissiveFactor: [0, 0, 0]
+                  baseColorTexCoord: 0
+                  metallicRoughnessTexCoord: 0
+                  occlusionTexCoord: 0
+                  emissiveTexCoord: 0
+                  normalTexCoord: 0
+                  name: ""
+                textureRect: [0, 0, 1, 1]
+                primitiveType: triangles
+                vertexCount: 6
+                faceCulling: false
+                textureShadow: true
+                hasTexCoord1: true
+                hasTexCoord2: false
+                hasNormalMap: false
+                hasTangent: true
+                hasVertexColor3: false
+                hasVertexColor4: true
+                hasTextureRect: true
+                hasSkinning: false
+                hasMorphTarget: false
+                hasMorphNormal: false
+                hasMorphTangent: false
+            normAdjustJoint: 1
+            normAdjustWeight: 1
+            aabb:
+              min: [-160, -2.5, 0]
+              max: [160, 2.5, 0]
+            verticesAABB:
+              min: [-160, -2.5, 0]
+              max: [160, 2.5, 0]
+            worldAABB:
+              min: [1140, 411, 0]
+              max: [1460, 416, 0]
+            receiveLights: true
+            receiveIBL: false
+            castShadows: true
+            receiveShadows: true
+            lodEnabled: true
+            lodBias: 1
+            renderInReflectionProbes: true
+            shadowsBillboard: true
+            transparent: false
+            cullingMode: back
+            windingOrder: ccw
+          sprite:
+            width: 320
+            height: 5
+            automaticFlipY: true
+            flipY: true
+            textureScaleFactor: 0
+            pivotPreset: center
   - type: Entity
-    entity: 1020
-    name: JogadorVisual
+    entity: 1005
+    name: Jogador
     components:
       transform:
-        position: [-9, 4, 0]
+        position: [300, 200, 0]
         rotation: [1, 0, 0, 0]
         scale: [1, 1, 1]
+        worldPosition: [300, 200, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [300, 200, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [300, 200, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
+      script:
+        scripts:
+          - type: lua
+            path: player/Player.lua
+            className: Player
+            enabled: true
+            properties:
+              - name: visual
+                displayName: Sprite do personagem (filho)
+                type: EntityReference
+                ptrTypeName: Sprite
+                value: 1020
+                defaultValue: 0
+              - name: visualOffsetX
+                displayName: "Desenho: deslocamento X (px)"
+                type: Float
+                value: -9
+                defaultValue: -9
+              - name: visualOffsetY
+                displayName: "Desenho: deslocamento Y (px)"
+                type: Float
+                value: 4
+                defaultValue: 4
+              - name: moveSpeed
+                displayName: Velocidade (px/s)
+                type: Float
+                value: 320
+                defaultValue: 320
+              - name: jumpSpeed
+                displayName: Velocidade do pulo (px/s)
+                type: Float
+                value: 860
+                defaultValue: 860
+              - name: gravityScale
+                displayName: Escala da gravidade
+                type: Float
+                value: 3
+                defaultValue: 3
+              - name: maxFallSpeed
+                displayName: Queda maxima (px/s)
+                type: Float
+                value: 1400
+                defaultValue: 1400
+              - name: respawnY
+                displayName: Y limite (abaixo disso morre)
+                type: Float
+                value: -400
+                defaultValue: -400
+              - name: fireCooldown
+                displayName: Intervalo entre tiros (s)
+                type: Float
+                value: 0.15
+                defaultValue: 0.15
+              - name: shotgunCooldown
+                displayName: "Escopeta: intervalo entre tiros (s)"
+                type: Float
+                value: 0.6
+                defaultValue: 0.6
+              - name: shotgunPellets
+                displayName: "Escopeta: projeteis por tiro"
+                type: Int
+                value: 5
+                defaultValue: 5
+              - name: shotgunSpread
+                displayName: "Escopeta: abertura total (graus)"
+                type: Float
+                value: 40
+                defaultValue: 40
+              - name: shotgunLifetime
+                displayName: "Escopeta: tempo de vida do projetil (s)"
+                type: Float
+                value: 0.35
+                defaultValue: 0.35
+              - name: autoFire
+                displayName: Tiro automatico (segurar J)
+                type: Bool
+                value: false
+                defaultValue: false
+              - name: dropTime
+                displayName: Tempo atravessando (s)
+                type: Float
+                value: 0.35
+                defaultValue: 0.35
+              - name: dashSpeed
+                displayName: "Dash: velocidade (px/s)"
+                type: Float
+                value: 1300
+                defaultValue: 1300
+              - name: dashTime
+                displayName: "Dash: duracao do impulso (s)"
+                type: Float
+                value: 0.15
+                defaultValue: 0.15
+              - name: dashCooldown
+                displayName: "Dash: espera entre dashes (s)"
+                type: Float
+                value: 1
+                defaultValue: 1
+              - name: dashCarryKeep
+                displayName: "Dash: embalo horizontal mantido ao fim (0-1)"
+                type: Float
+                value: 0.7
+                defaultValue: 0.7
+              - name: dashCarryDrag
+                displayName: "Dash: quanto o embalo freia no chao"
+                type: Float
+                value: 10
+                defaultValue: 10
+              - name: dashAirDrag
+                displayName: "Dash: quanto o embalo freia no ar"
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: dashUpKeep
+                displayName: "Dash: velocidade vertical mantida ao subir (0-1)"
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: knifeCooldown
+                displayName: "Faca: intervalo entre golpes (s)"
+                type: Float
+                value: 0.25
+                defaultValue: 0.25
+              - name: knifeTime
+                displayName: "Faca: duracao do golpe (s)"
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: knifeDamage
+                displayName: "Faca: dano"
+                type: Int
+                value: 1
+                defaultValue: 1
+              - name: allowDiagonal
+                displayName: Permitir tiro na diagonal
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: startLives
+                displayName: Vidas iniciais
+                type: Int
+                value: 3
+                defaultValue: 3
+              - name: respawnFreezeTime
+                displayName: Animacao de reviver, parado (s)
+                type: Float
+                value: 1
+                defaultValue: 1
+              - name: shootAnimTime
+                displayName: Pose de tiro apos atirar (s)
+                type: Float
+                value: 0.3
+                defaultValue: 0.3
+              - name: respawnDelay
+                displayName: Tempo ate renascer (s)
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: invincibleTime
+                displayName: Invencibilidade ao renascer (s)
+                type: Float
+                value: 2
+                defaultValue: 2
+              - name: gameOverDelay
+                displayName: Tempo na tela de game over (s)
+                type: Float
+                value: 3
+                defaultValue: 3
+      body2d:
+        type: dynamic
+        numShapes: 1
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 4
+            loop: false
+            density: 1
+            friction: 0
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: true
+            categoryBits: 4
+            maskBits: 35
+            groupIndex: 0
+            vertices:
+              - [-16, -48]
+              - [16, -48]
+              - [16, 48]
+              - [-16, 48]
+    children:
+      - type: Entity
+        entity: 1020
+        name: JogadorVisual
+        components:
+          transform:
+            position: [-9, 4, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            worldPosition: [291, 204, 0]
+            worldRotation: [1, 0, 0, 0]
+            worldScale: [1, 1, 1]
+            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [-9, 4, 0, 1]]
+            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [291, 204, 0, 1]]
+            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            visible: true
+            billboardRotation: [1, 0, 0, 0]
+            billboard: false
+            fakeBillboard: false
+            cylindricalBillboard: false
+          mesh:
+            submeshes:
+              - material:
+                  baseColorFactor: [1, 1, 1, 1]
+                  metallicFactor: 1
+                  roughnessFactor: 1
+                  alphaCutoff: 0.5
+                  foliageTransmission: 0
+                  alphaMode: AUTO
+                  emissiveFactor: [0, 0, 0]
+                  baseColorTexture:
+                    textureType: 2D
+                    source: path
+                    path: John Drinkwater/Jogador-Atlas.png
+                    minFilter: nearest
+                    magFilter: nearest
+                    wrapU: clamp_to_edge
+                    wrapV: clamp_to_edge
+                    releaseDataAfterLoad: true
+                  baseColorTexCoord: 0
+                  metallicRoughnessTexCoord: 0
+                  occlusionTexCoord: 0
+                  emissiveTexCoord: 0
+                  normalTexCoord: 0
+                  name: ""
+                textureRect: [0, 0.6, 0.125, 0.2]
+                primitiveType: triangles
+                vertexCount: 6
+                faceCulling: false
+                textureShadow: true
+                hasTexCoord1: true
+                hasTexCoord2: false
+                hasNormalMap: false
+                hasTangent: true
+                hasVertexColor3: false
+                hasVertexColor4: true
+                hasTextureRect: true
+                hasSkinning: false
+                hasMorphTarget: false
+                hasMorphNormal: false
+                hasMorphTangent: false
+            normAdjustJoint: 1
+            normAdjustWeight: 1
+            aabb:
+              min: [-64, -64, 0]
+              max: [64, 64, 0]
+            verticesAABB:
+              min: [-64, -64, 0]
+              max: [64, 64, 0]
+            worldAABB:
+              min: [227, 140, 0]
+              max: [355, 268, 0]
+            receiveLights: true
+            receiveIBL: false
+            castShadows: true
+            receiveShadows: true
+            lodEnabled: true
+            lodBias: 1
+            renderInReflectionProbes: true
+            shadowsBillboard: true
+            transparent: true
+            cullingMode: back
+            windingOrder: ccw
+          sprite:
+            width: 128
+            height: 128
+            automaticFlipY: true
+            flipY: true
+            textureScaleFactor: 0
+            pivotPreset: center
+  - type: Entity
+    entity: 1006
+    name: Inimigo1
+    components:
+      transform:
+        position: [1150, 132, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        worldPosition: [1150, 132, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
       mesh:
         submeshes:
-        - material:
-            baseColorFactor: [1, 1, 1, 1]
-            baseColorTexture:
-              textureType: 2D
-              source: path
-              path: John Drinkwater/Jogador-Atlas.png
-              minFilter: nearest
-              magFilter: nearest
-              wrapU: clamp_to_edge
-              wrapV: clamp_to_edge
-          textureRect: [0, 0.6, 0.125, 0.2]
-          hasTextureRect: true
+          - material:
+              baseColorFactor: [0.3, 0.62, 0.25, 1]
+              metallicFactor: 1
+              roughnessFactor: 1
+              alphaCutoff: 0.5
+              foliageTransmission: 0
+              alphaMode: AUTO
+              emissiveFactor: [0, 0, 0]
+              baseColorTexCoord: 0
+              metallicRoughnessTexCoord: 0
+              occlusionTexCoord: 0
+              emissiveTexCoord: 0
+              normalTexCoord: 0
+              name: ""
+            textureRect: [0, 0, 1, 1]
+            primitiveType: triangles
+            vertexCount: 6
+            faceCulling: false
+            textureShadow: true
+            hasTexCoord1: true
+            hasTexCoord2: false
+            hasNormalMap: false
+            hasTangent: true
+            hasVertexColor3: false
+            hasVertexColor4: true
+            hasTextureRect: true
+            hasSkinning: false
+            hasMorphTarget: false
+            hasMorphNormal: false
+            hasMorphTangent: false
+        normAdjustJoint: 1
+        normAdjustWeight: 1
+        aabb:
+          min: [-20, -52, 0]
+          max: [20, 52, 0]
+        verticesAABB:
+          min: [-20, -52, 0]
+          max: [20, 52, 0]
+        worldAABB:
+          min: [1130, 80, 0]
+          max: [1170, 184, 0]
+        receiveLights: true
+        receiveIBL: false
+        castShadows: true
+        receiveShadows: true
+        lodEnabled: true
+        lodBias: 1
+        renderInReflectionProbes: true
+        shadowsBillboard: true
+        transparent: false
+        cullingMode: back
+        windingOrder: ccw
       sprite:
-        width: 128
-        height: 128
+        width: 40
+        height: 104
+        automaticFlipY: true
+        flipY: true
+        textureScaleFactor: 0
         pivotPreset: center
-- type: Entity
-  entity: 1006
-  name: Inimigo1
-  components:
-    transform:
-      position: [1150, 132, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [1150, 132, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    mesh:
-      submeshes:
-      - material:
-          baseColorFactor: [0.3, 0.62, 0.25, 1]
-          metallicFactor: 1
-          roughnessFactor: 1
-          alphaCutoff: 0.5
-          foliageTransmission: 0
-          alphaMode: AUTO
-          emissiveFactor: [0, 0, 0]
-          baseColorTexCoord: 0
-          metallicRoughnessTexCoord: 0
-          occlusionTexCoord: 0
-          emissiveTexCoord: 0
-          normalTexCoord: 0
-          name: ''
-        textureRect: [0, 0, 1, 1]
-        primitiveType: triangles
-        vertexCount: 6
-        faceCulling: false
-        textureShadow: true
-        hasTexCoord1: true
-        hasTexCoord2: false
-        hasNormalMap: false
-        hasTangent: true
-        hasVertexColor3: false
-        hasVertexColor4: true
-        hasTextureRect: true
-        hasSkinning: false
-        hasMorphTarget: false
-        hasMorphNormal: false
-        hasMorphTangent: false
-      normAdjustJoint: 1
-      normAdjustWeight: 1
-      aabb:
-        min: [-24, -32, 0]
-        max: [24, 32, 0]
-      verticesAABB:
-        min: [-24, -32, 0]
-        max: [24, 32, 0]
-      worldAABB:
-        min: [1126, 80, 0]
-        max: [1174, 144, 0]
-      receiveLights: true
-      receiveIBL: false
-      castShadows: true
-      receiveShadows: true
-      lodEnabled: true
-      lodBias: 1
-      renderInReflectionProbes: true
-      shadowsBillboard: true
-      transparent: false
-      cullingMode: back
-      windingOrder: ccw
-    sprite:
-      width: 40
-      height: 104
-      automaticFlipY: true
-      flipY: true
-      textureScaleFactor: 0
-      pivotPreset: center
-    script:
-      scripts:
-      - type: lua
-        path: enemy/Enemy.lua
-        className: Enemy
-        enabled: true
-        properties:
-        - name: speed
-          displayName: Velocidade (px/s)
-          type: Float
-          value: 90
-          defaultValue: 90
-        - name: patrolDistance
-          displayName: Distancia da patrulha (px)
-          type: Float
-          value: 160
-          defaultValue: 160
-        - name: startDirection
-          displayName: Direcao inicial (-1 ou 1)
-          type: Int
-          value: -1
-          defaultValue: -1
-        - name: health
-          displayName: Vida (tiros para eliminar)
-          type: Int
-          value: 1
-          defaultValue: 1
-        - name: gravityScale
-          displayName: Escala da gravidade
-          type: Float
-          value: 3
-          defaultValue: 3
-        - name: scoreValue
-          displayName: Pontos ao abater
-          type: Int
-          value: 500
-          defaultValue: 500
-        - name: fallLimitY
-          displayName: Y limite (abaixo disso some)
-          type: Float
-          value: -400
-          defaultValue: -400
-    body2d:
-      type: dynamic
-      numShapes: 2
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 1
-        friction: 0
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: true
-        categoryBits: 8
-        maskBits: 19
-        groupIndex: 0
-        vertices: [[-20, -52], [20, -52], [20, 52], [-20, 52]]
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 0
-        friction: 0.6
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: true
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: false
-        categoryBits: 32
-        maskBits: 4
-        groupIndex: 0
-        vertices: [[-18, -50], [18, -50], [18, 50], [-18, 50]]
-- type: Entity
-  entity: 1007
-  name: Inimigo2
-  components:
-    transform:
-      position: [1300, 468, 0]
-      rotation: [1, 0, 0, 0]
-      scale: [1, 1, 1]
-      worldPosition: [1300, 468, 0]
-      worldRotation: [1, 0, 0, 0]
-      worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
-      normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-      visible: true
-      billboardRotation: [1, 0, 0, 0]
-      billboard: false
-      fakeBillboard: false
-      cylindricalBillboard: false
-    mesh:
-      submeshes:
-      - material:
-          baseColorFactor: [0.3, 0.62, 0.25, 1]
-          metallicFactor: 1
-          roughnessFactor: 1
-          alphaCutoff: 0.5
-          foliageTransmission: 0
-          alphaMode: AUTO
-          emissiveFactor: [0, 0, 0]
-          baseColorTexCoord: 0
-          metallicRoughnessTexCoord: 0
-          occlusionTexCoord: 0
-          emissiveTexCoord: 0
-          normalTexCoord: 0
-          name: ''
-        textureRect: [0, 0, 1, 1]
-        primitiveType: triangles
-        vertexCount: 6
-        faceCulling: false
-        textureShadow: true
-        hasTexCoord1: true
-        hasTexCoord2: false
-        hasNormalMap: false
-        hasTangent: true
-        hasVertexColor3: false
-        hasVertexColor4: true
-        hasTextureRect: true
-        hasSkinning: false
-        hasMorphTarget: false
-        hasMorphNormal: false
-        hasMorphTangent: false
-      normAdjustJoint: 1
-      normAdjustWeight: 1
-      aabb:
-        min: [-24, -32, 0]
-        max: [24, 32, 0]
-      verticesAABB:
-        min: [-24, -32, 0]
-        max: [24, 32, 0]
-      worldAABB:
-        min: [1276, 416, 0]
-        max: [1324, 480, 0]
-      receiveLights: true
-      receiveIBL: false
-      castShadows: true
-      receiveShadows: true
-      lodEnabled: true
-      lodBias: 1
-      renderInReflectionProbes: true
-      shadowsBillboard: true
-      transparent: false
-      cullingMode: back
-      windingOrder: ccw
-    sprite:
-      width: 40
-      height: 104
-      automaticFlipY: true
-      flipY: true
-      textureScaleFactor: 0
-      pivotPreset: center
-    script:
-      scripts:
-      - type: lua
-        path: enemy/Enemy.lua
-        className: Enemy
-        enabled: true
-        properties:
-        - name: speed
-          displayName: Velocidade (px/s)
-          type: Float
-          value: 90
-          defaultValue: 90
-        - name: patrolDistance
-          displayName: Distancia da patrulha (px)
-          type: Float
-          value: 160
-          defaultValue: 160
-        - name: startDirection
-          displayName: Direcao inicial (-1 ou 1)
-          type: Int
-          value: -1
-          defaultValue: -1
-        - name: health
-          displayName: Vida (tiros para eliminar)
-          type: Int
-          value: 1
-          defaultValue: 1
-        - name: gravityScale
-          displayName: Escala da gravidade
-          type: Float
-          value: 3
-          defaultValue: 3
-        - name: scoreValue
-          displayName: Pontos ao abater
-          type: Int
-          value: 500
-          defaultValue: 500
-        - name: fallLimitY
-          displayName: Y limite (abaixo disso some)
-          type: Float
-          value: -400
-          defaultValue: -400
-    body2d:
-      type: dynamic
-      numShapes: 2
-      shapes:
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 1
-        friction: 0
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: false
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: true
-        categoryBits: 8
-        maskBits: 19
-        groupIndex: 0
-        vertices: [[-20, -52], [20, -52], [20, 52], [-20, 52]]
-      - type: polygon
-        source: none
-        pointA: [0, 0]
-        pointB: [0, 0]
-        radius: 0
-        loop: false
-        density: 0
-        friction: 0.6
-        restitution: 0
-        rollingResistance: 0
-        tangentSpeed: 0
-        sensor: true
-        enableHitEvents: false
-        contactEvents: false
-        preSolveEvents: false
-        sensorEvents: false
-        categoryBits: 32
-        maskBits: 4
-        groupIndex: 0
-        vertices: [[-18, -50], [18, -50], [18, 50], [-18, 50]]
-shaderKeysHash: 808ce66edd17ad06db9e62a3f84b309cc26c3bfa
+      script:
+        scripts:
+          - type: lua
+            path: enemy/Enemy.lua
+            className: Enemy
+            enabled: true
+            properties:
+              - name: wanderSpeed
+                displayName: Velocidade andando a toa (px/s)
+                type: Float
+                value: 60
+                defaultValue: 60
+              - name: chaseSpeed
+                displayName: Velocidade perseguindo (px/s)
+                type: Float
+                value: 190
+                defaultValue: 190
+              - name: visionRange
+                displayName: "Visao: alcance a frente (px)"
+                type: Float
+                value: 420
+                defaultValue: 420
+              - name: senseRange
+                displayName: "Visao: percebe atras ate (px)"
+                type: Float
+                value: 110
+                defaultValue: 110
+              - name: visionHeight
+                displayName: "Visao: diferenca de altura (px)"
+                type: Float
+                value: 150
+                defaultValue: 150
+              - name: loseRange
+                displayName: Desiste se o jogador passar de (px)
+                type: Float
+                value: 650
+                defaultValue: 650
+              - name: loseTime
+                displayName: Desiste depois de (s) sem ver
+                type: Float
+                value: 1.5
+                defaultValue: 1.5
+              - name: alertTime
+                displayName: Susto ao ver o jogador (s)
+                type: Float
+                value: 0.35
+                defaultValue: 0.35
+              - name: pauseTime
+                displayName: Pausa ao virar (s)
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: canChangeLevel
+                displayName: "Perseguindo: pula e desce niveis"
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: jumpSpeed
+                displayName: Velocidade do pulo (px/s)
+                type: Float
+                value: 860
+                defaultValue: 860
+              - name: jumpForwardSpeed
+                displayName: Velocidade para frente no pulo (px/s)
+                type: Float
+                value: 300
+                defaultValue: 300
+              - name: patrolDistance
+                displayName: Patrulha sem gerador (px)
+                type: Float
+                value: 160
+                defaultValue: 160
+              - name: startDirection
+                displayName: Direcao inicial (-1 ou 1)
+                type: Int
+                value: -1
+                defaultValue: -1
+              - name: health
+                displayName: Vida (tiros para eliminar)
+                type: Int
+                value: 1
+                defaultValue: 1
+              - name: gravityScale
+                displayName: Escala da gravidade
+                type: Float
+                value: 3
+                defaultValue: 3
+              - name: scoreValue
+                displayName: Pontos ao abater
+                type: Int
+                value: 500
+                defaultValue: 500
+              - name: fallLimitY
+                displayName: Y limite (abaixo disso some)
+                type: Float
+                value: -400
+                defaultValue: -400
+      body2d:
+        type: dynamic
+        numShapes: 2
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 1
+            friction: 0
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: true
+            categoryBits: 8
+            maskBits: 19
+            groupIndex: 0
+            vertices:
+              - [-20, -52]
+              - [20, -52]
+              - [20, 52]
+              - [-20, 52]
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 0
+            friction: 0.6
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: true
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: false
+            categoryBits: 32
+            maskBits: 4
+            groupIndex: 0
+            vertices:
+              - [-18, -50]
+              - [18, -50]
+              - [18, 50]
+              - [-18, 50]
+  - type: Entity
+    entity: 1007
+    name: Inimigo2
+    components:
+      transform:
+        position: [1300, 468, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        worldPosition: [1300, 468, 0]
+        worldRotation: [1, 0, 0, 0]
+        worldScale: [1, 1, 1]
+        localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
+        modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
+        normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        visible: true
+        billboardRotation: [1, 0, 0, 0]
+        billboard: false
+        fakeBillboard: false
+        cylindricalBillboard: false
+      mesh:
+        submeshes:
+          - material:
+              baseColorFactor: [0.3, 0.62, 0.25, 1]
+              metallicFactor: 1
+              roughnessFactor: 1
+              alphaCutoff: 0.5
+              foliageTransmission: 0
+              alphaMode: AUTO
+              emissiveFactor: [0, 0, 0]
+              baseColorTexCoord: 0
+              metallicRoughnessTexCoord: 0
+              occlusionTexCoord: 0
+              emissiveTexCoord: 0
+              normalTexCoord: 0
+              name: ""
+            textureRect: [0, 0, 1, 1]
+            primitiveType: triangles
+            vertexCount: 6
+            faceCulling: false
+            textureShadow: true
+            hasTexCoord1: true
+            hasTexCoord2: false
+            hasNormalMap: false
+            hasTangent: true
+            hasVertexColor3: false
+            hasVertexColor4: true
+            hasTextureRect: true
+            hasSkinning: false
+            hasMorphTarget: false
+            hasMorphNormal: false
+            hasMorphTangent: false
+        normAdjustJoint: 1
+        normAdjustWeight: 1
+        aabb:
+          min: [-20, -52, 0]
+          max: [20, 52, 0]
+        verticesAABB:
+          min: [-20, -52, 0]
+          max: [20, 52, 0]
+        worldAABB:
+          min: [1280, 416, 0]
+          max: [1320, 520, 0]
+        receiveLights: true
+        receiveIBL: false
+        castShadows: true
+        receiveShadows: true
+        lodEnabled: true
+        lodBias: 1
+        renderInReflectionProbes: true
+        shadowsBillboard: true
+        transparent: false
+        cullingMode: back
+        windingOrder: ccw
+      sprite:
+        width: 40
+        height: 104
+        automaticFlipY: true
+        flipY: true
+        textureScaleFactor: 0
+        pivotPreset: center
+      script:
+        scripts:
+          - type: lua
+            path: enemy/Enemy.lua
+            className: Enemy
+            enabled: true
+            properties:
+              - name: wanderSpeed
+                displayName: Velocidade andando a toa (px/s)
+                type: Float
+                value: 60
+                defaultValue: 60
+              - name: chaseSpeed
+                displayName: Velocidade perseguindo (px/s)
+                type: Float
+                value: 190
+                defaultValue: 190
+              - name: visionRange
+                displayName: "Visao: alcance a frente (px)"
+                type: Float
+                value: 420
+                defaultValue: 420
+              - name: senseRange
+                displayName: "Visao: percebe atras ate (px)"
+                type: Float
+                value: 110
+                defaultValue: 110
+              - name: visionHeight
+                displayName: "Visao: diferenca de altura (px)"
+                type: Float
+                value: 150
+                defaultValue: 150
+              - name: loseRange
+                displayName: Desiste se o jogador passar de (px)
+                type: Float
+                value: 650
+                defaultValue: 650
+              - name: loseTime
+                displayName: Desiste depois de (s) sem ver
+                type: Float
+                value: 1.5
+                defaultValue: 1.5
+              - name: alertTime
+                displayName: Susto ao ver o jogador (s)
+                type: Float
+                value: 0.35
+                defaultValue: 0.35
+              - name: pauseTime
+                displayName: Pausa ao virar (s)
+                type: Float
+                value: 0.8
+                defaultValue: 0.8
+              - name: canChangeLevel
+                displayName: "Perseguindo: pula e desce niveis"
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: jumpSpeed
+                displayName: Velocidade do pulo (px/s)
+                type: Float
+                value: 860
+                defaultValue: 860
+              - name: jumpForwardSpeed
+                displayName: Velocidade para frente no pulo (px/s)
+                type: Float
+                value: 300
+                defaultValue: 300
+              - name: patrolDistance
+                displayName: Patrulha sem gerador (px)
+                type: Float
+                value: 160
+                defaultValue: 160
+              - name: startDirection
+                displayName: Direcao inicial (-1 ou 1)
+                type: Int
+                value: -1
+                defaultValue: -1
+              - name: health
+                displayName: Vida (tiros para eliminar)
+                type: Int
+                value: 1
+                defaultValue: 1
+              - name: gravityScale
+                displayName: Escala da gravidade
+                type: Float
+                value: 3
+                defaultValue: 3
+              - name: scoreValue
+                displayName: Pontos ao abater
+                type: Int
+                value: 500
+                defaultValue: 500
+              - name: fallLimitY
+                displayName: Y limite (abaixo disso some)
+                type: Float
+                value: -400
+                defaultValue: -400
+      body2d:
+        type: dynamic
+        numShapes: 2
+        shapes:
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 1
+            friction: 0
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: false
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: true
+            categoryBits: 8
+            maskBits: 19
+            groupIndex: 0
+            vertices:
+              - [-20, -52]
+              - [20, -52]
+              - [20, 52]
+              - [-20, 52]
+          - type: polygon
+            source: none
+            pointA: [0, 0]
+            pointB: [0, 0]
+            radius: 0
+            loop: false
+            density: 0
+            friction: 0.6
+            restitution: 0
+            rollingResistance: 0
+            tangentSpeed: 0
+            sensor: true
+            enableHitEvents: false
+            contactEvents: false
+            preSolveEvents: false
+            sensorEvents: false
+            categoryBits: 32
+            maskBits: 4
+            groupIndex: 0
+            vertices:
+              - [-18, -50]
+              - [18, -50]
+              - [18, 50]
+              - [-18, 50]
+shaderKeysHash: f183308e5c17407e0096445aaee45d3e680b6a0a
