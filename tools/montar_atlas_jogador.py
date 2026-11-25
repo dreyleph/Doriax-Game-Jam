@@ -20,9 +20,11 @@ QUADRO = 128
 COLUNAS = 8
 # (arquivo, quantidade de quadros) - a ordem define a linha no atlas
 LINHAS = [
-    ("IdleShooting-Sheet.png", 5),       # linha 0 -> first = 0
-    ("Running-Sheet.png", 8),            # linha 1 -> first = 8
-    ("Running&Shooting-Sheet.png", 8),   # linha 2 -> first = 16
+    ("IdleShooting-Sheet.png", 5),       # linha 0 -> first = 0   parado atirando
+    ("Running-Sheet.png", 8),            # linha 1 -> first = 8   correndo
+    ("Running&Shooting-Sheet.png", 8),   # linha 2 -> first = 16  correndo atirando
+    ("Idle-Sheet.png", 7),               # linha 3 -> first = 24  parado (quadro 0) + tomando dano (1 a 6)
+    ("Jumping-Sheet.png", 3),            # linha 4 -> first = 32  pulo
 ]
 SAIDA = "Jogador-Atlas.png"
 

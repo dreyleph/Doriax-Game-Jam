@@ -819,12 +819,12 @@ entities:
             baseColorTexture:
               textureType: 2D
               source: path
-              path: John Drinkwater/Idle-Sheet.png
+              path: John Drinkwater/Jogador-Atlas.png
               minFilter: nearest
               magFilter: nearest
               wrapU: clamp_to_edge
               wrapV: clamp_to_edge
-          textureRect: [0, 0, 0.16666667, 1]
+          textureRect: [0, 0.6, 0.125, 0.2]
           hasTextureRect: true
       sprite:
         width: 128
@@ -835,14 +835,14 @@ entities:
   name: Inimigo1
   components:
     transform:
-      position: [1150, 112, 0]
+      position: [1150, 132, 0]
       rotation: [1, 0, 0, 0]
       scale: [1, 1, 1]
-      worldPosition: [1150, 112, 0]
+      worldPosition: [1150, 132, 0]
       worldRotation: [1, 0, 0, 0]
       worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 112, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 112, 0, 1]]
+      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
+      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1150, 132, 0, 1]]
       normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
       visible: true
       billboardRotation: [1, 0, 0, 0]
@@ -904,8 +904,8 @@ entities:
       cullingMode: back
       windingOrder: ccw
     sprite:
-      width: 48
-      height: 64
+      width: 40
+      height: 104
       automaticFlipY: true
       flipY: true
       textureScaleFactor: 0
@@ -975,7 +975,7 @@ entities:
         categoryBits: 8
         maskBits: 19
         groupIndex: 0
-        vertices: [[-24, -32], [24, -32], [24, 32], [-24, 32]]
+        vertices: [[-20, -52], [20, -52], [20, 52], [-20, 52]]
       - type: polygon
         source: none
         pointA: [0, 0]
@@ -995,20 +995,20 @@ entities:
         categoryBits: 32
         maskBits: 4
         groupIndex: 0
-        vertices: [[-22, -30], [22, -30], [22, 30], [-22, 30]]
+        vertices: [[-18, -50], [18, -50], [18, 50], [-18, 50]]
 - type: Entity
   entity: 1007
   name: Inimigo2
   components:
     transform:
-      position: [1300, 448, 0]
+      position: [1300, 468, 0]
       rotation: [1, 0, 0, 0]
       scale: [1, 1, 1]
-      worldPosition: [1300, 448, 0]
+      worldPosition: [1300, 468, 0]
       worldRotation: [1, 0, 0, 0]
       worldScale: [1, 1, 1]
-      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 448, 0, 1]]
-      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 448, 0, 1]]
+      localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
+      modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [1300, 468, 0, 1]]
       normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
       visible: true
       billboardRotation: [1, 0, 0, 0]
@@ -1070,8 +1070,8 @@ entities:
       cullingMode: back
       windingOrder: ccw
     sprite:
-      width: 48
-      height: 64
+      width: 40
+      height: 104
       automaticFlipY: true
       flipY: true
       textureScaleFactor: 0
@@ -1141,7 +1141,7 @@ entities:
         categoryBits: 8
         maskBits: 19
         groupIndex: 0
-        vertices: [[-24, -32], [24, -32], [24, 32], [-24, 32]]
+        vertices: [[-20, -52], [20, -52], [20, 52], [-20, 52]]
       - type: polygon
         source: none
         pointA: [0, 0]
@@ -1161,5 +1161,5 @@ entities:
         categoryBits: 32
         maskBits: 4
         groupIndex: 0
-        vertices: [[-22, -30], [22, -30], [22, 30], [-22, 30]]
+        vertices: [[-18, -50], [18, -50], [18, 50], [-18, 50]]
 shaderKeysHash: 808ce66edd17ad06db9e62a3f84b309cc26c3bfa

@@ -12,7 +12,9 @@
 --     fallback = "idle",                 -- opcional: animacao usada enquanto esta nao tiver arte
 --     sync = "corrida",                  -- opcional: animacoes com o mesmo "sync" trocam entre si
 --                                        --   sem voltar ao quadro 0 (ex.: correr <-> correr atirando)
---     offsetY = 2 }                      -- opcional: ajuste de altura do desenho (px) nesta animacao
+--     offsetY = 2,                       -- opcional: ajuste de altura do desenho (px) nesta animacao
+--     durations = { 2.0, 0.12, ... } }  -- opcional: tempo (s) de cada quadro; substitui o fps
+--                                        --   (ex.: segurar o quadro de repouso antes de um gesto)
 
 local Animator = {}
 Animator.__index = Animator
@@ -72,6 +74,22 @@ end
 function Animator.frameAt(def, time)
     local count = def.count or 1
     if count <= 1 then return 0 end
+    if def.durations then
+        -- tempo de cada quadro definido um a um
+        local total = 0
+        for i = 1, count do total = total + (def.durations[i] or 0.1) end
+        local t = time + 1e-6
+        if def.loop == false then
+            if t >= total then return count - 1 end
+        else
+            t = t % total
+        end
+        for i = 1, count do
+            t = t - (def.durations[i] or 0.1)
+            if t < 0 then return i - 1 end
+        end
+        return count - 1
+    end
     -- tolerancia: somar 1/60 varias vezes da 0.4999... em vez de 0.5
     local f = math.floor(time * (def.fps or 8) + 1e-6)
     if def.loop == false then

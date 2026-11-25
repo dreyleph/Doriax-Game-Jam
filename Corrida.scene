@@ -837,7 +837,7 @@ entities:
                   baseColorTexture:
                     textureType: 2D
                     source: path
-                    path: John Drinkwater/Idle-Sheet.png
+                    path: John Drinkwater/Jogador-Atlas.png
                     minFilter: nearest
                     magFilter: nearest
                     wrapU: clamp_to_edge
@@ -849,7 +849,7 @@ entities:
                   emissiveTexCoord: 0
                   normalTexCoord: 0
                   name: ""
-                textureRect: [0, 0, 0.16666667, 1]
+                textureRect: [0, 0.6, 0.125, 0.2]
                 primitiveType: triangles
                 vertexCount: 6
                 faceCulling: false
@@ -971,4 +971,9 @@ entities:
                 type: Float
                 value: 600
                 defaultValue: 600
-shaderKeysHash: 0f2a599664cb44622f7600eb3f0fa6bfcd7c35c2
+              - name: enemyBehindMargin
+                displayName: Inimigo some quando fica atras da tela (px)
+                type: Float
+                value: 150
+                defaultValue: 150
+shaderKeysHash: f790e4ef9fffdbfa63256c6a156a78b26af5d647

@@ -15,8 +15,9 @@
 -- Faca + dash: eliminar um inimigo com a faca zera a espera do dash e, se
 -- estiver no ar, libera um pulo extra (ate encostar no chao).
 --
--- Vidas (estilo arcade): ao morrer perde 1 vida (os pontos ficam), renasce
--- no ultimo chao seguro com invencibilidade temporaria (piscando).
+-- Vidas (estilo arcade): ao levar dano toca a animacao de dano, perde 1 vida
+-- (os pontos ficam) e renasce na superficie segura mais proxima, com
+-- invencibilidade temporaria (piscando).
 -- Sem vidas: GAME OVER e a fase recomeca do zero.
 
 local Combat = require("game.Combat")
@@ -69,6 +70,7 @@ local LAND_NORMAL_MIN   = 0.7   -- pouso valido em plataforma atravessavel
 -- Se mudar a hitbox no editor, atualize aqui (usado na origem dos tiros e no limite da tela).
 local HALF_W, HALF_H    = 20, 52
 local RESPAWN_EDGE_MARGIN = 24  -- renasce a pelo menos HALF_W + isso da borda da superficie
+local HURT_HOLD_TIME = 0.15     -- depois da animacao de dano, ultimo quadro fica isso antes de sumir
 
 local function anyKey(...)
     for i = 1, select("#", ...) do
@@ -105,7 +107,7 @@ function Player:init()
     self.spawn = Vector2(p.x, p.y)
     self.lastSafe = Vector2(p.x, p.y)   -- ultimo ponto em que estava no chao
 
-    self.state = "alive"         -- "alive" | "dead" (escondido) | "respawning" (reaparecendo, parado) | "gameover"
+    self.state = "alive"         -- "alive" | "dead" (animacao de dano, depois escondido) | "respawning" (reaparecendo, parado) | "gameover"
     self.stateTimer = 0
     self.invincibleTimer = 0
 
@@ -156,7 +158,9 @@ function Player:onPreSolve(bodyA, shapeA, bodyB, shapeB, manifold)
     elseif bodyB.entity == self.entity then
         other, otherShape, sign = bodyA, shapeA, 1
     else
-        return true   -- contato que nao envolve o jogador (ex.: inimigo na plataforma)
+        -- contato que nao envolve o jogador: inimigos tambem atravessam
+        -- plataformas por baixo e descem por elas (Combat.oneWayFilter)
+        return Combat.oneWayFilter(bodyA, shapeA, bodyB, shapeB, manifold)
     end
 
     if not other:isShapePreSolveEvents(otherShape) then
@@ -368,6 +372,7 @@ end
 -- ver PlayerAnimations.lua)
 function Player:chooseAnimation(moving)
     if self.state == "respawning" then return "respawn" end
+    if self.state == "dead" or self.state == "gameover" then return "hurt" end
     local shooting = self.shootAnimTimer > 0
     if not self.grounded then
         return shooting and "jump_shoot" or "jump"
@@ -398,6 +403,10 @@ function Player:updateVisual(dt, moving)
     end
 end
 
+function Player:hasHurtAnimation()
+    return self.animator ~= nil and self.animator:has("hurt")
+end
+
 function Player:setVisualAlpha(a)
     if self.visual then self.visual.color = Vector4(1, 1, 1, a) end
 end
@@ -419,11 +428,18 @@ function Player:hurt(force)
     local hasLivesLeft = GameState.loseLife()
     Log.print(string.format("Jogador morreu. Vidas: %d  Pontos: %d", GameState.lives, GameState.score))
 
-    -- "congela" e esconde o jogador enquanto espera
+    -- "congela" o jogador no lugar; a animacao de dano toca uma vez e depois
+    -- ele some ate renascer (ver updateLifeState)
+    self:cancelDash()
     self.body.gravityScale = 0
     self.body.linearVelocity = Vector2(0, 0)
-    self.object.visible = false
     self.invincibleTimer = 0
+    self.shootAnimTimer = 0
+    self.crabFading = false
+    self.hurtHold = 0
+    -- com arte de dano: fica visivel tocando a animacao; sem arte: some na hora
+    self.object.visible = self:hasHurtAnimation()
+    self:setVisualAlpha(1)
 
     if hasLivesLeft then
         self.state = "dead"
@@ -433,6 +449,7 @@ function Player:hurt(force)
         self.stateTimer = self.gameOverDelay
         Log.print("GAME OVER")
     end
+    self:updateVisual(0, false)   -- comeca a animacao "hurt" do primeiro quadro
 end
 
 -- Onde renascer: na superficie (chao, bloco ou plataforma) mais proxima de
@@ -525,6 +542,18 @@ function Player:updateLifeState(dt)
     end
 
     self.body.linearVelocity = Vector2(0, 0)
+    -- animacao de dano: toca uma vez, segura o ultimo quadro um instante e some
+    if self.object.visible then
+        if self:hasHurtAnimation() then
+            self:updateVisual(dt, false)
+            if self.animator:finished() then
+                self.hurtHold = (self.hurtHold or 0) + dt
+                if self.hurtHold >= HURT_HOLD_TIME then self.object.visible = false end
+            end
+        else
+            self.object.visible = false
+        end
+    end
     if self.stateTimer <= 0 then
         if self.state == "dead" then
             self:respawn()

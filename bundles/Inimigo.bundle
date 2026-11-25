@@ -46,11 +46,11 @@ components:
     normAdjustJoint: 1
     normAdjustWeight: 1
     aabb:
-      min: [-24, -32, 0]
-      max: [24, 32, 0]
+      min: [-20, -52, 0]
+      max: [20, 52, 0]
     verticesAABB:
-      min: [-24, -32, 0]
-      max: [24, 32, 0]
+      min: [-20, -52, 0]
+      max: [20, 52, 0]
     worldAABB:
       min: [1126, 80, 0]
       max: [1174, 144, 0]
@@ -66,8 +66,8 @@ components:
     cullingMode: back
     windingOrder: ccw
   sprite:
-    width: 48
-    height: 64
+    width: 40
+    height: 104
     automaticFlipY: true
     flipY: true
     textureScaleFactor: 0
@@ -137,7 +137,7 @@ components:
       categoryBits: 8
       maskBits: 19
       groupIndex: 0
-      vertices: [[-20, -28], [20, -28], [20, 28], [-20, 28]]
+      vertices: [[-16, -48], [16, -48], [16, 48], [-16, 48]]
     - type: polygon
       source: none
       pointA: [0, 0]
@@ -157,5 +157,5 @@ components:
       categoryBits: 32
       maskBits: 4
       groupIndex: 0
-      vertices: [[-22, -30], [22, -30], [22, 30], [-22, 30]]
+      vertices: [[-18, -50], [18, -50], [18, 50], [-18, 50]]
 visibilityInherited: true

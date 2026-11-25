@@ -32,6 +32,7 @@ local LevelGenerator = {
         { name = "minEnemiesMax",   displayName = "Maximo de inimigos garantidos",      type = "int",   default = 6 },
         { name = "terrainLayer",    displayName = "Camada do terreno (entidade pai)",   type = "Object" },
         { name = "groundDepth",     displayName = "Espessura do chao (px)",             type = "float", default = 600.0 },
+        { name = "enemyBehindMargin", displayName = "Inimigo some quando fica atras da tela (px)", type = "float", default = 150.0 },
     }
 }
 
@@ -64,6 +65,8 @@ function LevelGenerator:init()
 
     self.modulesPerChunk = math.max(1, math.floor(self.chunkWidth / Chunks.MODULE_WIDTH + 0.5))
     self.chunks = {}        -- trechos ativos: { x, names, blocks = {entity...}, enemies = {root...} }
+    self.enemies = {}       -- inimigos vivos/mortos ainda na cena: { root, inst } (sao do gerador, nao do trecho:
+                            -- perseguindo, um inimigo pode sair do trecho onde nasceu)
     self.nextX = 0          -- onde comeca o proximo trecho
     self.generated = 0      -- quantos trechos (telas) ja foram gerados
     self.lastModule = nil
@@ -102,6 +105,29 @@ end
 function LevelGenerator:onUpdate()
     self:fillAhead()
     self:removeBehind()
+    self:cleanupEnemies()
+end
+
+-- Libera da cena os inimigos abatidos e elimina (sem dar pontos) os que
+-- ficaram para tras da tela: a camera nao volta, entao nao fazem mais falta
+function LevelGenerator:cleanupEnemies()
+    local limit = Run.cameraLeft and (Run.cameraLeft - self.enemyBehindMargin)
+    for i = #self.enemies, 1, -1 do
+        local en = self.enemies[i]
+        local inst = en.inst
+        local remove = (inst == nil) or inst.dead
+        if not remove and limit then
+            local ok, pos = pcall(function() return inst.body.position end)
+            if not ok or not pos or pos.x < limit then
+                inst:die(false, "ficou para tras da tela")
+                remove = true
+            end
+        end
+        if remove then
+            BundleManager.destroyBundle(self.scene, en.root)
+            table.remove(self.enemies, i)
+        end
+    end
 end
 
 -- Sorteio ---------------------------------------------------------------------
@@ -312,7 +338,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
         for _, p in ipairs(m.platforms or {}) do
             chunk.blocks[#chunk.blocks + 1] = self:makeBlock(mx + p[1], p[2] - PLATFORM_THICKNESS, p[3], PLATFORM_THICKNESS, true)
             self:drawScaffold(chunk.blocks, mx + p[1], p[2] - SCAFFOLD_HEIGHT, p[3], SCAFFOLD_HEIGHT)
-            Run.addSurface(mx + p[1], mx + p[1] + p[3], p[2], chunk)
+            Run.addSurface(mx + p[1], mx + p[1] + p[3], p[2], chunk, true)
         end
         for _, e in ipairs(m.enemies or {}) do
             candidates[#candidates + 1] = { mx + e[1], e[2], e[3] }
@@ -343,8 +369,9 @@ function LevelGenerator:spawnChunk(modules, isStart)
         local chance = math.min(1, self.enemyChance + self.generated * self.enemyChanceRamp)
         for i, e in ipairs(candidates) do
             if i <= guaranteed or math.random() < chance then
-                chunk.enemies[#chunk.enemies + 1] =
-                    Combat.spawnEnemy(self.scene, e[1], e[2], { patrolDistance = e[3] })
+                local root, inst = Combat.spawnEnemy(self.scene, e[1], e[2], { patrolDistance = e[3] })
+                chunk.enemies[#chunk.enemies + 1] = root
+                self.enemies[#self.enemies + 1] = { root = root, inst = inst }
             end
         end
     end
@@ -356,9 +383,8 @@ end
 
 function LevelGenerator:destroyChunk(chunk)
     Run.removeSurfaces(chunk)
-    for _, root in ipairs(chunk.enemies) do
-        BundleManager.destroyBundle(self.scene, root)
-    end
+    -- os inimigos nao sao destruidos aqui: cleanupEnemies cuida deles
+    -- (quem ficou para tras ja foi eliminado; quem esta perseguindo continua)
     for _, entity in ipairs(chunk.blocks) do
         if self.scene:isEntityCreated(entity) then
             self.scene:destroyEntity(entity)

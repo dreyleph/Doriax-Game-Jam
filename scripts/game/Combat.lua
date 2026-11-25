@@ -94,14 +94,44 @@ end
 
 -- Inimigos gerados -----------------------------------------------------
 
--- Parametros lidos pelo Enemy:init() (x, y = pe do inimigo; overrides = propriedades)
+-- Parametros lidos pelo Enemy:init() (x, y = pe do inimigo; overrides = propriedades).
+-- O Enemy:init() devolve a propria instancia no bilhete (campo "instance").
 Combat.pendingEnemy = nil
 
+-- Retorna a entidade raiz do bundle e a instancia do script Enemy
 function Combat.spawnEnemy(scene, x, y, overrides)
-    Combat.pendingEnemy = { x = x, y = y, overrides = overrides }
+    local ticket = { x = x, y = y, overrides = overrides }
+    Combat.pendingEnemy = ticket
     local root = BundleManager.createBundle(Combat.ENEMY_BUNDLE, scene)
     Combat.pendingEnemy = nil
-    return root
+    return root, ticket.instance
+end
+
+-- Plataformas atravessaveis para outros corpos alem do jogador ----------
+-- O filtro de preSolve e um so no jogo (Player:onPreSolve; com varios
+-- inscritos so o primeiro decide). Para contatos que nao envolvem o jogador
+-- ele pergunta aqui. Quem se registra (ex.: inimigo) precisa ter "body" e
+-- "dropTimer" (> 0 = descendo pela plataforma, atravessa).
+local oneWayUsers = {}
+
+function Combat.registerOneWay(entity, instance) oneWayUsers[entity] = instance end
+function Combat.unregisterOneWay(entity) oneWayUsers[entity] = nil end
+
+function Combat.oneWayFilter(bodyA, shapeA, bodyB, shapeB, manifold)
+    local user, other, otherShape, sign
+    if oneWayUsers[bodyA.entity] then
+        user, other, otherShape, sign = oneWayUsers[bodyA.entity], bodyB, shapeB, -1
+    elseif oneWayUsers[bodyB.entity] then
+        user, other, otherShape, sign = oneWayUsers[bodyB.entity], bodyA, shapeA, 1
+    else
+        return true
+    end
+    if not other:isShapePreSolveEvents(otherShape) then return true end
+    if (user.dropTimer or 0) > 0 then return false end
+    -- so apoia caindo/parado por cima (normal apontando da plataforma para ele)
+    if sign * manifold:getNormal().y < 0.7 then return false end
+    if user.body.linearVelocity.y > 20 then return false end
+    return true
 end
 
 -- Jogador ---------------------------------------------------------------
@@ -110,6 +140,11 @@ local player = nil   -- instancia do script Player (registrada no Player:init)
 
 function Combat.registerPlayer(instance)
     player = instance
+end
+
+-- Jogador atual (ou nil). Usado pelos inimigos para enxergar/perseguir.
+function Combat.getPlayer()
+    return player
 end
 
 -- Chamado pelo Player:init a cada (re)inicio da cena
