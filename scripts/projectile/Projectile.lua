@@ -31,6 +31,7 @@ function Projectile:init()
         self.body.linearVelocity = Vector2(dx * self.speed, dy * self.speed)
         -- o angulo do Body2D e em graus (Engine usa graus por padrao)
         self.body.angle = math.deg(math.atan(dy, dx))
+        if shot.lifetime then self.timeLeft = shot.lifetime end
     else
         Log.warn("Projectile criado sem Combat.spawnProjectile; removendo")
         self.dead = true

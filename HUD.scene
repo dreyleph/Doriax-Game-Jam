@@ -42,6 +42,12 @@ entities:
                 ptrTypeName: Text
                 value: 1004
                 defaultValue: 0
+              - name: ammoText
+                displayName: Texto da municao
+                type: EntityReference
+                ptrTypeName: Text
+                value: 1005
+                defaultValue: 0
               - name: scoreDigits
                 displayName: Digitos da pontuacao
                 type: Int
@@ -82,6 +88,24 @@ entities:
         color: [1, 1, 1, 1]
       text:
         text: VIDAS x3
+        fontSize: 28
+  - type: Entity
+    entity: 1005
+    name: Municao
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        anchorPreset: TOP_LEFT
+        usingAnchors: true
+        positionOffset: [32, 104]
+      ui:
+        color: [0.55, 0.75, 1, 1]
+      text:
+        text: PISTOLA INF
         fontSize: 28
   - type: Entity
     entity: 1004
