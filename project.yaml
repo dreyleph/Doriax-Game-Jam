@@ -10,12 +10,11 @@ windowHeight: 720
 windowResizable: true
 assetsDir: assets
 luaDir: scripts
-startSceneId: 2184184004
+startSceneId: 2184184003
+standaloneBundles:
+  - bundles/Projetil.bundle
+  - bundles/Inimigo.bundle
 scenes:
   - filepath: Fase Teste.scene
   - filepath: HUD.scene
   - filepath: Corrida.scene
-  - filepath: Menu.scene
-standaloneBundles:
-  - bundles/Projetil.bundle
-  - bundles/Inimigo.bundle

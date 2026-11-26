@@ -78,6 +78,7 @@ Todo caminho que troca de cena chama `Combat.clearRegistries()` antes, para nenh
   **parado** = `Idle-Sheet` inteira em loop contínuo a 8 fps (começa assim que ele para e a cabeça não para de mexer); parado atirando = `IdleShooting-Sheet`; andando = `Running-Sheet`; andando atirando = `Running&Shooting-Sheet`; **pulo** = `Jumping-Sheet` (3 quadros, uma vez, o último fica até pousar).
   O jogo usa um atlas único, `assets/John Drinkwater/Jogador-Atlas.png`, gerado a partir dessas sheets por `python tools/montar_atlas_jogador.py` (rode de novo quando a arte mudar). Trocar de imagem durante o jogo fazia o personagem sumir/"bugar" por alguns quadros.
 - Ainda sem arte: **dano** (o jogador some na hora ao levar dano; quando a sheet chegar, já há lugar para ela em `PlayerAnimations.lua`), pulo atirando (usa o pulo) e reviver (usa o parado).
+- **Som do tiro**: `assets/Sons/tiro.wav`, tocado a cada tiro (J) e, mais grave, na Escopeta (K). É gerado a partir do original `assets/Sons/tiro_original.mp3` por `python tools/montar_som_tiro.py` (corta o silêncio do começo e a cauda longa; requer `pip install miniaudio`). Volume na propriedade "Som do tiro: volume" do Jogador.
 - Ao morrer, o jogador reaparece na superfície mais próxima (chão, bloco ou plataforma), longe da borda e dentro da tela; fica ~1 s parado revivendo e depois volta ao controle, ainda invencível por 2 s.
 
 ## Inimigos

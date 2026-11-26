@@ -46,6 +46,7 @@ local Player = {
         { name = "shotgunSpread",   displayName = "Escopeta: abertura total (graus)",    type = "float", default = 40.0 },
         { name = "shotgunLifetime", displayName = "Escopeta: tempo de vida do projetil (s)", type = "float", default = 0.35 },
         { name = "autoFire",      displayName = "Tiro automatico (segurar J)",  type = "bool",  default = false },
+        { name = "shotVolume",    displayName = "Som do tiro: volume (0-1)",    type = "float", default = 0.7 },
         { name = "dropTime",      displayName = "Tempo atravessando (s)",       type = "float", default = 0.35 },
         { name = "dashSpeed",     displayName = "Dash: velocidade (px/s)",      type = "float", default = 1300.0 },
         { name = "dashTime",      displayName = "Dash: duracao do impulso (s)", type = "float", default = 0.15 },
@@ -82,6 +83,8 @@ local LAND_NORMAL_MIN   = 0.7   -- pouso valido em plataforma atravessavel
 local HALF_W, HALF_H    = 20, 52
 local RESPAWN_EDGE_MARGIN = 24  -- renasce a pelo menos HALF_W + isso da borda da superficie
 local HURT_HOLD_TIME = 0.15     -- depois da animacao de dano, ultimo quadro fica isso antes de sumir
+-- Som de tiro: gerado por tools/montar_som_tiro.py a partir de Sons/tiro_original.mp3
+local SHOT_SOUND = "Sons/tiro.wav"
 
 local function anyKey(...)
     for i = 1, select("#", ...) do
@@ -103,6 +106,21 @@ function Player:init()
     Pause.setGameScene(self.scene)
     Itens.reset()
     EnemyShots.reset()
+
+    if self.scene then
+        pcall(function()
+            self.meleeSound = Sound(self.scene)
+            self.meleeSound:loadSound("melee_sound.wav")
+            -- no Lua, volume/looping sao propriedades (nao existem setVolume/setLooping)
+            self.meleeSound.volume = 1
+        end)
+
+        self.backgroundMusic = Sound(self.scene)
+        self.backgroundMusic:loadSound("background_music.wav")
+        self.backgroundMusic.volume = 0.12
+        self.backgroundMusic.looping = true
+        self.backgroundMusic:play()
+    end
 
     GameState.startLives = self.startLives
     if GameState.needsNewGame then
@@ -146,6 +164,7 @@ function Player:init()
     self.secondaryWasDown = false
     self.knifeWasDown = false
     self.dashWasDown = false
+    self:createSounds()
 
     local physics = self.scene:getPhysicsSystem()
     -- unico filtro de preSolve do jogo: com varios inscritos so o primeiro decide
@@ -257,10 +276,26 @@ function Player:aim(aimUp, aimDown, moving)
     return x, y, dx, dy
 end
 
+-- Sons ---------------------------------------------------------------------
+-- Cada play() abre uma voz nova: tiros seguidos (Charuto) se sobrepoem sem
+-- cortar o anterior. A Escopeta usa o mesmo som, mais grave e mais alto.
+function Player:createSounds()
+    local function make(volume, speed)
+        local sound = Sound(self.scene)
+        sound:loadSound(SHOT_SOUND)
+        sound.volume = volume
+        sound.speed = speed
+        return sound
+    end
+    self.shotSound = make(self.shotVolume, 1.0)
+    self.shotgunSound = make(math.min(self.shotVolume * 1.4, 1.0), 0.8)
+end
+
 function Player:shoot(aimUp, aimDown, moving)
     local x, y, dx, dy = self:aim(aimUp, aimDown, moving)
     Combat.spawnProjectile(self.scene, x, y, dx, dy)
     self.shootAnimTimer = self.shootAnimTime
+    if self.shotSound then self.shotSound:play() end
 end
 
 -- Escopeta: varios projeteis em leque na direcao da mira, com alcance curto
@@ -275,6 +310,7 @@ function Player:shootShotgun(aimUp, aimDown, moving)
         Combat.spawnProjectile(self.scene, x, y, math.cos(a), math.sin(a), self.shotgunLifetime)
     end
     self.shootAnimTimer = self.shootAnimTime
+    if self.shotgunSound then self.shotgunSound:play() end
 end
 
 -- Faca ------------------------------------------------------------------
@@ -309,6 +345,13 @@ function Player:stab(aimUp, aimDown, moving)
     local _, _, dx, dy = self:aim(aimUp, aimDown, moving)
     local half = self.knifeArea / 2
     self:clearSlash()
+
+    if self.meleeSound then
+        -- cada play() abre uma voz nova (stop + play no mesmo quadro nao
+        -- reinicia: o play cancela o stop e o seek voltava a voz antiga,
+        -- tocando o golpe dobrado)
+        pcall(function() self.meleeSound:play() end)
+    end
 
     -- o golpe guarda o deslocamento de cada bloco de acerto em relacao ao
     -- jogador e o acompanha; o desenho e um efeito so, sobre a area toda
