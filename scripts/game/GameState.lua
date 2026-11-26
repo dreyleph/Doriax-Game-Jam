@@ -18,6 +18,8 @@ local GameState = {
     originX = nil,             -- x onde a corrida comecou
     gameOver = false,
     needsNewGame = true,       -- true no primeiro inicio e depois de um game over
+    gameOverMenu = false,      -- true quando a cena tem a tela de GAME OVER com botoes
+                               -- (ui/GameOverMenu.lua): ai o jogo espera o jogador escolher
 }
 
 function GameState.newGame()

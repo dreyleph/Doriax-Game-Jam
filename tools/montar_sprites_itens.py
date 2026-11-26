@@ -23,6 +23,7 @@ ITENS = {
     "Kraby1.png":    ("caranguejo.png", 52, 48),
     "Musket.png":    ("escopeta.png",   72, 40),
     "PisaMacio.png": ("pisa_macio.png", 48, 48),
+    "Charuto.png":   ("charuto.png",    48, 48),
 }
 
 os.makedirs(SAIDA, exist_ok=True)

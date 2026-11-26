@@ -52,7 +52,8 @@ entities:
       ui:
         color: [1, 0.85, 0.25, 1]
       text:
-        text: MENU
+        font: [Fonte/BoldPixels.ttf]
+        text: "MENU"
         fontSize: 96
   - type: Entity
     entity: 1003
@@ -64,7 +65,7 @@ entities:
         scale: [1, 1, 1]
         visible: true
       uilayout:
-        width: 260
+        width: 300
         height: 56
         anchorPreset: CENTER
         usingAnchors: true
@@ -96,7 +97,59 @@ entities:
           ui:
             color: [1, 1, 1, 1]
           text:
-            text: JOGAR
+            font: [Fonte/BoldPixels.ttf]
+            text: "JOGAR"
+            fontSize: 28
+  - type: Entity
+    entity: 1007
+    name: BotaoSom
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 300
+        height: 56
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, 20]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      button:
+        label: 1008
+        colorNormal: [0.25, 0.2, 0.17, 1]
+        colorHovered: [0.91, 0.667, 0.235, 1]
+        colorPressed: [0.6, 0.44, 0.15, 1]
+        scaleHovered: 1.05
+      script:
+        scripts:
+          - type: lua
+            path: ui/SoundToggle.lua
+            className: SoundToggle
+            enabled: true
+    children:
+      - type: Entity
+        entity: 1008
+        name: Texto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            ignoreEvents: true
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            font: [Fonte/BoldPixels.ttf]
+            text: "SOM: LIGADO"
             fontSize: 28
   - type: Entity
     entity: 1005
@@ -108,11 +161,11 @@ entities:
         scale: [1, 1, 1]
         visible: true
       uilayout:
-        width: 260
+        width: 300
         height: 56
         anchorPreset: CENTER
         usingAnchors: true
-        positionOffset: [0, 20]
+        positionOffset: [0, 100]
       ui:
         color: [0.25, 0.2, 0.17, 1]
       image:
@@ -140,159 +193,9 @@ entities:
           ui:
             color: [1, 1, 1, 1]
           text:
-            text: SAIR
+            font: [Fonte/BoldPixels.ttf]
+            text: "SAIR"
             fontSize: 28
-  - type: Entity
-    entity: 1007
-    name: VolumeTexto
-    components:
-      transform:
-        position: [0, 0, 0]
-        rotation: [1, 0, 0, 0]
-        scale: [1, 1, 1]
-        visible: true
-      uilayout:
-        anchorPreset: CENTER
-        usingAnchors: true
-        positionOffset: [0, 120]
-      ui:
-        color: [1, 1, 1, 1]
-      text:
-        text: VOLUME
-        fontSize: 24
-  - type: Entity
-    entity: 1008
-    name: VolumeMenos
-    components:
-      transform:
-        position: [0, 0, 0]
-        rotation: [1, 0, 0, 0]
-        scale: [1, 1, 1]
-        visible: true
-      uilayout:
-        width: 48
-        height: 48
-        anchorPreset: CENTER
-        usingAnchors: true
-        positionOffset: [-170, 170]
-      ui:
-        color: [0.25, 0.2, 0.17, 1]
-      image:
-        patchMarginLeft: 0
-      button:
-        label: 1009
-        colorNormal: [0.25, 0.2, 0.17, 1]
-        colorHovered: [0.91, 0.667, 0.235, 1]
-        colorPressed: [0.6, 0.44, 0.15, 1]
-        scaleHovered: 1.05
-    children:
-      - type: Entity
-        entity: 1009
-        name: Texto
-        components:
-          transform:
-            position: [0, 0, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            visible: true
-          uilayout:
-            anchorPreset: CENTER
-            usingAnchors: true
-            ignoreEvents: true
-          ui:
-            color: [1, 1, 1, 1]
-          text:
-            text: "-"
-            fontSize: 32
-  - type: Entity
-    entity: 1010
-    name: VolumeBarra
-    components:
-      transform:
-        position: [0, 0, 0]
-        rotation: [1, 0, 0, 0]
-        scale: [1, 1, 1]
-        visible: true
-      uilayout:
-        width: 240
-        height: 24
-        anchorPreset: CENTER
-        usingAnchors: true
-        positionOffset: [0, 170]
-      ui:
-        color: [0.25, 0.2, 0.17, 1]
-      image:
-        patchMarginLeft: 0
-      progressbar:
-        value: 1
-      script:
-        scripts:
-          - type: lua
-            path: ui/VolumeControl.lua
-            className: VolumeControl
-            enabled: true
-            properties:
-              - name: downButton
-                displayName: Botao -
-                type: EntityReference
-                ptrTypeName: Button
-                value: 1008
-                defaultValue: 0
-              - name: upButton
-                displayName: Botao +
-                type: EntityReference
-                ptrTypeName: Button
-                value: 1011
-                defaultValue: 0
-              - name: step
-                displayName: Passo (0 a 1)
-                type: Float
-                value: 0.1
-                defaultValue: 0.1
-  - type: Entity
-    entity: 1011
-    name: VolumeMais
-    components:
-      transform:
-        position: [0, 0, 0]
-        rotation: [1, 0, 0, 0]
-        scale: [1, 1, 1]
-        visible: true
-      uilayout:
-        width: 48
-        height: 48
-        anchorPreset: CENTER
-        usingAnchors: true
-        positionOffset: [170, 170]
-      ui:
-        color: [0.25, 0.2, 0.17, 1]
-      image:
-        patchMarginLeft: 0
-      button:
-        label: 1012
-        colorNormal: [0.25, 0.2, 0.17, 1]
-        colorHovered: [0.91, 0.667, 0.235, 1]
-        colorPressed: [0.6, 0.44, 0.15, 1]
-        scaleHovered: 1.05
-    children:
-      - type: Entity
-        entity: 1012
-        name: Texto
-        components:
-          transform:
-            position: [0, 0, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            visible: true
-          uilayout:
-            anchorPreset: CENTER
-            usingAnchors: true
-            ignoreEvents: true
-          ui:
-            color: [1, 1, 1, 1]
-          text:
-            text: +
-            fontSize: 32
 shaderKeys:
   - type: ui
     properties: 2

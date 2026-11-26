@@ -1,8 +1,10 @@
 -- PauseMenu.lua
 -- Menu de pausa (dentro do HUD). Esc ou P abre e fecha.
 -- Vai na entidade raiz do menu: mostrar/esconder ela mostra/esconde tudo.
+-- Botoes: CONTINUAR, SOM (ui/SoundToggle.lua, no proprio botao), MENU, SAIR.
 
 local Pause = require("game.Pause")
+local Combat = require("game.Combat")
 
 local PauseMenu = {
     properties = {
@@ -41,6 +43,11 @@ function PauseMenu:onContinue()
 end
 
 function PauseMenu:onMenu()
+    if self.leaving then return end
+    self.leaving = true
+    -- sem limpar, inimigos da cena que vai ser destruida ficam no registro e
+    -- derrubam o jogo na proxima corrida (ver Combat.clearRegistries)
+    Combat.clearRegistries()
     Pause.leave()
     SceneManager.loadScene("Menu")
 end

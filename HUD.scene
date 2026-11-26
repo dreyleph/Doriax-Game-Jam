@@ -391,6 +391,134 @@ entities:
         pivotBaseline: false
         pivotCentered: false
   - type: Entity
+    entity: 1030
+    name: TelaGameOver
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: false
+      uilayout:
+        width: 960
+        height: 720
+        anchorPreset: CENTER
+        usingAnchors: true
+      ui:
+        color: [0, 0, 0, 1]
+      image:
+        patchMarginLeft: 0
+      script:
+        scripts:
+          - type: lua
+            path: ui/GameOverMenu.lua
+            className: GameOverMenu
+            enabled: true
+            properties:
+              - name: restartButton
+                displayName: Botao Reiniciar
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1031
+                defaultValue: 0
+              - name: menuButton
+                displayName: Botao Menu
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1033
+                defaultValue: 0
+    children:
+      - type: Entity
+        entity: 1031
+        name: BotaoReiniciar
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 60]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1032
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1032
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                font: [Fonte/BoldPixels.ttf]
+                text: "REINICIAR"
+                fontSize: 28
+      - type: Entity
+        entity: 1033
+        name: BotaoMenu
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 140]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1034
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1034
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                font: [Fonte/BoldPixels.ttf]
+                text: "MENU"
+                fontSize: 28
+  - type: Entity
     entity: 1004
     name: GameOver
     components:
@@ -447,14 +575,12 @@ entities:
         pivot: [0, 0]
         anchorPreset: CENTER
         usingAnchors: true
-        panel: 0
-        containerBoxIndex: -1
-        scissor: [0, 0, 0, 0]
-        ignoreScissor: false
-        ignoreEvents: false
+        positionOffset: [0, -150]
+      ui:
+        color: [0.95, 0.25, 0.2, 1]
       text:
-        font: []
-        text: GAME OVER
+        font: [Fonte/BoldPixels.ttf]
+        text: "GAME OVER"
         fontSize: 80
         multiline: true
         maxTextSize: 100
@@ -611,8 +737,8 @@ entities:
             ignoreScissor: false
             ignoreEvents: false
           text:
-            font: []
-            text: PAUSED
+            font: [Fonte/BoldPixels.ttf]
+            text: "PAUSADO"
             fontSize: 80
             multiline: true
             maxTextSize: 100
@@ -635,10 +761,12 @@ entities:
             modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [350, 252, 0, 1]]
             normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
             visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, -80]
           ui:
             primitiveType: triangles
             vertexCount: 54
@@ -759,8 +887,59 @@ entities:
                 ignoreScissor: false
                 ignoreEvents: true
               text:
-                font: []
-                text: CONTINUAR
+                font: [Fonte/BoldPixels.ttf]
+                text: "CONTINUAR"
+                fontSize: 28
+      - type: Entity
+        entity: 1017
+        name: BotaoSom
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, -10]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1018
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+          script:
+            scripts:
+              - type: lua
+                path: ui/SoundToggle.lua
+                className: SoundToggle
+                enabled: true
+        children:
+          - type: Entity
+            entity: 1018
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                font: [Fonte/BoldPixels.ttf]
+                text: "SOM: LIGADO"
                 fontSize: 28
                 multiline: true
                 maxTextSize: 100
@@ -783,10 +962,12 @@ entities:
             modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [350, 322, 0, 1]]
             normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
             visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 60]
           ui:
             primitiveType: triangles
             vertexCount: 54
@@ -907,8 +1088,8 @@ entities:
                 ignoreScissor: false
                 ignoreEvents: true
               text:
-                font: []
-                text: MENU
+                font: [Fonte/BoldPixels.ttf]
+                text: "MENU"
                 fontSize: 28
                 multiline: true
                 maxTextSize: 100
@@ -931,10 +1112,12 @@ entities:
             modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [350, 392, 0, 1]]
             normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
             visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
+          uilayout:
+            width: 300
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 130]
           ui:
             primitiveType: triangles
             vertexCount: 54
@@ -1055,473 +1238,14 @@ entities:
                 ignoreScissor: false
                 ignoreEvents: true
               text:
-                font: []
-                text: SAIR
+                font: [Fonte/BoldPixels.ttf]
+                text: "SAIR"
                 fontSize: 28
-                multiline: true
-                maxTextSize: 100
-                fixedWidth: false
-                fixedHeight: false
-                pivotBaseline: false
-                pivotCentered: false
-      - type: Entity
-        entity: 1017
-        name: VolumeTexto
-        components:
-          transform:
-            position: [440, 488, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            worldPosition: [440, 488, 0]
-            worldRotation: [1, 0, 0, 0]
-            worldScale: [1, 1, 1]
-            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [440, 488, 0, 1]]
-            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [440, 488, 0, 1]]
-            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
-          ui:
-            primitiveType: triangles
-            vertexCount: 36
-            aabb:
-              min: [0, 0, 0]
-              max: [80, 20, 0]
-            worldAABB:
-              min: [440, 488, 0]
-              max: [520, 508, 0]
-            texture:
-              textureType: 2D
-              source: id
-              id: font|24#7
-              minFilter: linear
-              magFilter: linear
-              wrapU: repeat
-              wrapV: repeat
-              releaseDataAfterLoad: false
-            color: [1, 1, 1, 1]
-            automaticFlipY: true
-            flipY: false
-            pointerMoved: false
-            focused: false
-          uilayout:
-            width: 80
-            height: 24
-            anchorPointLeft: 0.5
-            anchorPointTop: 0.5
-            anchorPointRight: 0.5
-            anchorPointBottom: 0.5
-            anchorOffsetLeft: -40
-            anchorOffsetTop: -12
-            anchorOffsetRight: 40
-            anchorOffsetBottom: 12
-            positionOffset: [0, 140]
-            pivot: [0, 0]
-            anchorPreset: CENTER
-            usingAnchors: true
-            panel: 0
-            containerBoxIndex: -1
-            scissor: [50.000015, 49.999996, 960, 653]
-            ignoreScissor: false
-            ignoreEvents: false
-          text:
-            font: []
-            text: VOLUME
-            fontSize: 24
-            multiline: true
-            maxTextSize: 100
-            fixedWidth: false
-            fixedHeight: false
-            pivotBaseline: false
-            pivotCentered: false
-      - type: Entity
-        entity: 1018
-        name: VolumeMenos
-        components:
-          transform:
-            position: [286, 526, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            worldPosition: [286, 526, 0]
-            worldRotation: [1, 0, 0, 0]
-            worldScale: [1, 1, 1]
-            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [286, 526, 0, 1]]
-            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [286, 526, 0, 1]]
-            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
-          ui:
-            primitiveType: triangles
-            vertexCount: 54
-            aabb:
-              min: [0, 0, 0]
-              max: [48, 48, 0]
-            worldAABB:
-              min: [286, 526, 0]
-              max: [334, 574, 0]
-            texture: ~
-            color: [0.25, 0.2, 0.17, 1]
-            automaticFlipY: true
-            flipY: false
-            pointerMoved: false
-            focused: false
-          button:
-            label: 1019
-            textureNormal: ~
-            textureHovered: ~
-            texturePressed: ~
-            textureDisabled: ~
-            colorNormal: [0.25, 0.2, 0.17, 1]
-            colorHovered: [0.91, 0.667, 0.235, 1]
-            colorPressed: [0.6, 0.44, 0.15, 1]
-            colorDisabled: [1, 1, 1, 1]
-            scaleHovered: 1.05
-            scalePressed: 1
-            transitionTime: 0
-            disabled: false
-            focusable: true
-          uilayout:
-            width: 48
-            height: 48
-            anchorPointLeft: 0.5
-            anchorPointTop: 0.5
-            anchorPointRight: 0.5
-            anchorPointBottom: 0.5
-            anchorOffsetLeft: -24
-            anchorOffsetTop: -24
-            anchorOffsetRight: 24
-            anchorOffsetBottom: 24
-            positionOffset: [-170, 190]
-            pivot: [0, 0]
-            anchorPreset: CENTER
-            usingAnchors: true
-            panel: 0
-            containerBoxIndex: -1
-            scissor: [50.000015, 49.999996, 960, 653]
-            ignoreScissor: false
-            ignoreEvents: false
-          image:
-            patchMarginLeft: 0
-            patchMarginRight: 0
-            patchMarginTop: 0
-            patchMarginBottom: 0
-            textureScaleFactor: 0
-        children:
-          - type: Entity
-            entity: 1019
-            name: Texto
-            components:
-              transform:
-                position: [20, 8, 0]
-                rotation: [1, 0, 0, 0]
-                scale: [1, 1, 1]
-                worldPosition: [306, 534, 0]
-                worldRotation: [1, 0, 0, 0]
-                worldScale: [1, 1, 1]
-                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [20, 8, 0, 1]]
-                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [306, 534, 0, 1]]
-                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-                visible: true
-                billboardRotation: [1, 0, 0, 0]
-                billboard: false
-                fakeBillboard: false
-                cylindricalBillboard: false
-              ui:
-                primitiveType: triangles
-                vertexCount: 6
-                aabb:
-                  min: [0, 0, 0]
-                  max: [8, 18.333334, 0]
-                worldAABB:
-                  min: [306, 534, 0]
-                  max: [314, 552.3333, 0]
-                texture:
-                  textureType: 2D
-                  source: id
-                  id: font|32#10
-                  minFilter: linear
-                  magFilter: linear
-                  wrapU: repeat
-                  wrapV: repeat
-                  releaseDataAfterLoad: false
-                color: [1, 1, 1, 1]
-                automaticFlipY: true
-                flipY: false
-                pointerMoved: false
-                focused: false
-              uilayout:
-                width: 8
-                height: 32
-                anchorPointLeft: 0.5
-                anchorPointTop: 0.5
-                anchorPointRight: 0.5
-                anchorPointBottom: 0.5
-                anchorOffsetLeft: -4
-                anchorOffsetTop: -16
-                anchorOffsetRight: 4
-                anchorOffsetBottom: 16
-                positionOffset: [0, 0]
-                pivot: [0, 0]
-                anchorPreset: CENTER
-                usingAnchors: true
-                panel: 0
-                containerBoxIndex: -1
-                scissor: [50.000015, 49.999996, 960, 653]
-                ignoreScissor: false
-                ignoreEvents: true
-              text:
-                font: []
-                text: "-"
-                fontSize: 32
-                multiline: true
-                maxTextSize: 100
-                fixedWidth: false
-                fixedHeight: false
-                pivotBaseline: false
-                pivotCentered: false
-      - type: Entity
-        entity: 1020
-        name: VolumeBarra
-        components:
-          transform:
-            position: [360, 538, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            worldPosition: [360, 538, 0]
-            worldRotation: [1, 0, 0, 0]
-            worldScale: [1, 1, 1]
-            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [360, 538, 0, 1]]
-            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [360, 538, 0, 1]]
-            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
-          ui:
-            primitiveType: triangles
-            vertexCount: 54
-            aabb:
-              min: [0, 0, 0]
-              max: [240, 24, 0]
-            worldAABB:
-              min: [360, 538, 0]
-              max: [600, 562, 0]
-            texture: ~
-            color: [0.25, 0.2, 0.17, 1]
-            automaticFlipY: true
-            flipY: false
-            pointerMoved: false
-            focused: false
-          progressbar:
-            fill: 0
-            type: horizontal
-            value: 1
-            fillMarginLeft: 0
-            fillMarginRight: 0
-            fillMarginTop: 0
-            fillMarginBottom: 0
-          uilayout:
-            width: 240
-            height: 24
-            anchorPointLeft: 0.5
-            anchorPointTop: 0.5
-            anchorPointRight: 0.5
-            anchorPointBottom: 0.5
-            anchorOffsetLeft: -120
-            anchorOffsetTop: -12
-            anchorOffsetRight: 120
-            anchorOffsetBottom: 12
-            positionOffset: [0, 190]
-            pivot: [0, 0]
-            anchorPreset: CENTER
-            usingAnchors: true
-            panel: 0
-            containerBoxIndex: -1
-            scissor: [410, 587.99994, 240, 24]
-            ignoreScissor: false
-            ignoreEvents: false
-          image:
-            patchMarginLeft: 0
-            patchMarginRight: 0
-            patchMarginTop: 0
-            patchMarginBottom: 0
-            textureScaleFactor: 0
-          script:
-            scripts:
-              - type: lua
-                path: ui/VolumeControl.lua
-                className: VolumeControl
-                enabled: true
-                properties:
-                  - name: downButton
-                    displayName: Botao -
-                    type: EntityReference
-                    ptrTypeName: Button
-                    value: 1018
-                    defaultValue: 0
-                  - name: upButton
-                    displayName: Botao +
-                    type: EntityReference
-                    ptrTypeName: Button
-                    value: 1021
-                    defaultValue: 0
-                  - name: step
-                    displayName: Passo (0 a 1)
-                    type: Float
-                    value: 0.1
-                    defaultValue: 0.1
-      - type: Entity
-        entity: 1021
-        name: VolumeMais
-        components:
-          transform:
-            position: [626, 526, 0]
-            rotation: [1, 0, 0, 0]
-            scale: [1, 1, 1]
-            worldPosition: [626, 526, 0]
-            worldRotation: [1, 0, 0, 0]
-            worldScale: [1, 1, 1]
-            localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [626, 526, 0, 1]]
-            modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [626, 526, 0, 1]]
-            normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            visible: true
-            billboardRotation: [1, 0, 0, 0]
-            billboard: false
-            fakeBillboard: false
-            cylindricalBillboard: false
-          ui:
-            primitiveType: triangles
-            vertexCount: 54
-            aabb:
-              min: [0, 0, 0]
-              max: [48, 48, 0]
-            worldAABB:
-              min: [626, 526, 0]
-              max: [674, 574, 0]
-            texture: ~
-            color: [0.25, 0.2, 0.17, 1]
-            automaticFlipY: true
-            flipY: false
-            pointerMoved: false
-            focused: false
-          button:
-            label: 1022
-            textureNormal: ~
-            textureHovered: ~
-            texturePressed: ~
-            textureDisabled: ~
-            colorNormal: [0.25, 0.2, 0.17, 1]
-            colorHovered: [0.91, 0.667, 0.235, 1]
-            colorPressed: [0.6, 0.44, 0.15, 1]
-            colorDisabled: [1, 1, 1, 1]
-            scaleHovered: 1.05
-            scalePressed: 1
-            transitionTime: 0
-            disabled: false
-            focusable: true
-          uilayout:
-            width: 48
-            height: 48
-            anchorPointLeft: 0.5
-            anchorPointTop: 0.5
-            anchorPointRight: 0.5
-            anchorPointBottom: 0.5
-            anchorOffsetLeft: -24
-            anchorOffsetTop: -24
-            anchorOffsetRight: 24
-            anchorOffsetBottom: 24
-            positionOffset: [170, 190]
-            pivot: [0, 0]
-            anchorPreset: CENTER
-            usingAnchors: true
-            panel: 0
-            containerBoxIndex: -1
-            scissor: [50.000015, 49.999996, 960, 653]
-            ignoreScissor: false
-            ignoreEvents: false
-          image:
-            patchMarginLeft: 0
-            patchMarginRight: 0
-            patchMarginTop: 0
-            patchMarginBottom: 0
-            textureScaleFactor: 0
-        children:
-          - type: Entity
-            entity: 1022
-            name: Texto
-            components:
-              transform:
-                position: [17, 8, 0]
-                rotation: [1, 0, 0, 0]
-                scale: [1, 1, 1]
-                worldPosition: [643, 534, 0]
-                worldRotation: [1, 0, 0, 0]
-                worldScale: [1, 1, 1]
-                localMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [17, 8, 0, 1]]
-                modelMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [643, 534, 0, 1]]
-                normalMatrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-                visible: true
-                billboardRotation: [1, 0, 0, 0]
-                billboard: false
-                fakeBillboard: false
-                cylindricalBillboard: false
-              ui:
-                primitiveType: triangles
-                vertexCount: 6
-                aabb:
-                  min: [0, 0, 0]
-                  max: [15, 24.333334, 0]
-                worldAABB:
-                  min: [643, 534, 0]
-                  max: [658, 558.3333, 0]
-                texture:
-                  textureType: 2D
-                  source: id
-                  id: font|32#10
-                  minFilter: linear
-                  magFilter: linear
-                  wrapU: repeat
-                  wrapV: repeat
-                  releaseDataAfterLoad: false
-                color: [1, 1, 1, 1]
-                automaticFlipY: true
-                flipY: false
-                pointerMoved: false
-                focused: false
-              uilayout:
-                width: 15
-                height: 32
-                anchorPointLeft: 0.5
-                anchorPointTop: 0.5
-                anchorPointRight: 0.5
-                anchorPointBottom: 0.5
-                anchorOffsetLeft: -7
-                anchorOffsetTop: -16
-                anchorOffsetRight: 8
-                anchorOffsetBottom: 16
-                positionOffset: [0, 0]
-                pivot: [0, 0]
-                anchorPreset: CENTER
-                usingAnchors: true
-                panel: 0
-                containerBoxIndex: -1
-                scissor: [50.000015, 49.999996, 960, 653]
-                ignoreScissor: false
-                ignoreEvents: true
-              text:
-                font: []
-                text: +
-                fontSize: 32
-                multiline: true
-                maxTextSize: 100
-                fixedWidth: false
-                fixedHeight: false
-                pivotBaseline: false
-                pivotCentered: false
-shaderKeysHash: 877b5add91ac1ddec00742f356568ba4228a03ca
+shaderKeys:
+  - type: ui
+    properties: 2
+  - type: ui
+    properties: 8
+  - type: ui
+    properties: 9
+  - type: blit

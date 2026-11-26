@@ -22,6 +22,7 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | Arma secundária (Escopeta, se tiver pego) | K |
 | Faca (corpo a corpo, mesma mira dos tiros) | L |
 | Dash (na direção segurada; sem direção = para frente) | E |
+| Pausar (continuar, som, menu, sair) | Esc / P |
 | Mirar para cima | segurar W / ↑ (andando = diagonal) |
 | Mirar para baixo | no ar, segurar S / ↓ (andando = diagonal) |
 
@@ -52,6 +53,18 @@ A faca dá **2 de dano** (mata qualquer inimigo num golpe); a área de acerto é
 | `scripts/game/Combat.lua` | categorias de colisão e regras de combate compartilhadas |
 | `scripts/itens/Itens.lua` | itens que caem dos inimigos (chances, cores e efeitos) |
 
+## Menus
+O jogo abre no **Menu** (`Menu.scene`, script `ui/MainMenu.lua`):
+- **JOGAR** começa uma corrida nova (cena `Corrida`).
+- **SOM** liga/desliga o som do jogo todo (`ui/SoundToggle.lua` + `game/Settings.lua`); a escolha vale para todas as cenas.
+- **SAIR** fecha o jogo.
+
+Na partida, **Esc** ou **P** abre a pausa (dentro do `HUD.scene`, `ui/PauseMenu.lua`): CONTINUAR, SOM, MENU, SAIR.
+
+Ao perder todas as vidas aparece a tela de **GAME OVER** (fundo preto, `ui/GameOverMenu.lua` no `HUD.scene`) com o resumo da pontuação e dois botões: **REINICIAR** (corrida nova) e **MENU** (volta ao menu inicial). O jogo não reinicia sozinho enquanto essa tela existir na cena.
+
+Todo caminho que troca de cena chama `Combat.clearRegistries()` antes, para nenhum inimigo da cena anterior sobrar no registro (causa do crash ao reiniciar).
+
 ## Vidas, pontuação e progressão
 - Começa com 3 vidas. Pontos = **abates** (500 por inimigo) **+ distância** (10 pontos por metro; 1 m = 32 px andados para a direita). Durante a corrida, PONTOS mostra só os abates e os metros ficam no canto superior direito; a distância só entra na pontuação no fim: no GAME OVER, PONTOS passa a mostrar o total e aparece o resumo (abates + distância = total).
 - Morrer (encostar em inimigo, levar tiro ou cair do mapa) tira 1 vida (pontos e distância são mantidos); o jogador renasce na superfície segura mais próxima com 2 s de invencibilidade.
@@ -81,10 +94,10 @@ Cada inimigo abatido sorteia no máximo 1 item; o jogador pega encostando. O ite
 |---|---|---|---|
 | Pisa Macio | garrafa (`assets/Itens/pisa_macio.png`) | 10% | +1 vida (até o máximo inicial) |
 | Escopeta | mosquete (`assets/Itens/escopeta.png`) | 3% | arma secundária na tecla K: 5 projéteis em leque, alcance curto, 10 disparos (pegar outra recarrega) |
-| Charuto | quadrado preto (sem arte ainda) | 5% | 10 s de tiro automático e rápido segurando J |
+| Charuto | charuto (`assets/Itens/charuto.png`) | 5% | 10 s de tiro automático e rápido segurando J |
 | Caranguejo | caranguejo (`assets/Itens/caranguejo.png`) | 0,67% | 15 s de imortalidade e dano x2 |
 
-As imagens de `assets/Itens/` são geradas a partir das artes originais do Edu (`assets/PisaMacio.png`, `Musket.png`, `Kraby1.png`) por `python tools/montar_sprites_itens.py`, já no tamanho do jogo. Os efeitos temporários acabam ao morrer; a arma secundária fica até acabar a munição. Chances, durações e desenhos ficam no topo de `scripts/itens/Itens.lua`.
+As imagens de `assets/Itens/` são geradas a partir das artes originais do Edu (`assets/PisaMacio.png`, `Musket.png`, `Kraby1.png`, `Charuto.png`) por `python tools/montar_sprites_itens.py`, já no tamanho do jogo. Os efeitos temporários acabam ao morrer; a arma secundária fica até acabar a munição. Chances, durações e desenhos ficam no topo de `scripts/itens/Itens.lua`.
 
 ## Mapa procedural (protótipo)
 - Cada tela (1280 px) é montada com **4 módulos de 320 px** sorteados de `scripts/level/Chunks.lua` (buracos, plataformas, degraus, caixas, grupos de inimigos...). A corrida começa sempre por uma tela segura.

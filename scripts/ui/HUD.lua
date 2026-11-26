@@ -8,7 +8,9 @@
 --     PONTOS passa a mostrar o total
 --   * vidas: uma garrafa de Tipu por vida (assets/HUD/vida_tipu.png)
 --   * municao da Escopeta: um cartucho por disparo (assets/HUD/municao_slug.png)
---   * GAME OVER: mostra o resumo (abates + distancia = total)
+--   * GAME OVER: mostra o resumo (abates + distancia = total) sobre o fundo
+--     preto da tela de game over (ui/GameOverMenu.lua, com os botoes) e
+--     esconde o que fica por cima dele (metros, cartuchos)
 -- Os icones e os textos novos sao criados aqui (Image/Text da engine); se nao
 -- der para criar, volta aos textos simples. Todos os textos usam a fonte
 -- pixelada "Fonte do HUD". Icones gerados por tools/montar_icones_hud.py.
@@ -55,7 +57,7 @@ function HUD:init()
 
     -- distancia (canto superior direito) e resumo do game over (centro)
     self.distanceText = self:makeText("TOP_RIGHT", -32, 24, 32, { 1, 0.85, 0.25, 1 })
-    self.summaryText = self:makeText("CENTER", 0, 80, 28, { 1, 1, 1, 1 })
+    self.summaryText = self:makeText("CENTER", 0, -40, 28, { 1, 1, 1, 1 })
     if self.summaryText then self.summaryText.visible = false end
 
     self.shown = {}
@@ -130,6 +132,9 @@ function HUD:refresh()
         if not self.distanceText then text = text .. string.format("   %d m", GameState.distance) end
         self.scoreText.text = text
     end
+    if self.distanceText and self:changed("distanceShown", not GameState.gameOver) then
+        self.distanceText.visible = not GameState.gameOver
+    end
     if self.distanceText and self:changed("distance", GameState.distance) then
         self.distanceText.text = string.format("%d m", GameState.distance)
     end
@@ -150,6 +155,7 @@ function HUD:refresh()
 
     -- municao: pistola infinita; Escopeta = cartuchos (ou texto, sem icone)
     local shells = (Itens.secondaryWeapon == "escopeta") and Itens.secondaryAmmo or 0
+    if GameState.gameOver then shells = 0 end   -- cartuchos ficariam por cima do fundo preto
     if self:changed("shells", shells) then
         local ammo = "PISTOLA INF"
         if self.useAmmoIcons and self:showIcons(self.ammoIcons, shells, self.ammoIcon, self.ammoIconWidth,

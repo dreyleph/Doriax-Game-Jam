@@ -809,7 +809,8 @@ function Player:updateLifeState(dt)
     if self.stateTimer <= 0 then
         if self.state == "dead" then
             self:respawn()
-        elseif self.state == "gameover" then
+        elseif self.state == "gameover" and not GameState.gameOverMenu then
+            -- sem tela de game over (ui/GameOverMenu.lua) na cena: recomeca sozinho
             Combat.restartLevel()
         end
     end
