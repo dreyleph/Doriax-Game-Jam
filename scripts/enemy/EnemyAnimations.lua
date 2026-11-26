@@ -1,4 +1,5 @@
 -- EnemyAnimations.lua
+-- (O atirador usa a arte do Enemy2: ver EnemyAnimations2.lua.)
 -- Animacoes do inimigo comum (assets/Enemy1/), quadros de 128x128, virado
 -- para a DIREITA (a esquerda e espelhada). Tudo no atlas "Inimigo-Atlas.png"
 -- (1024x256, 8 colunas), montado por tools/montar_atlas_inimigo.py:
