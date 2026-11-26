@@ -1,4 +1,6 @@
-# Doriax Game Jam – 184X
+# Batalha Pela Capital
+
+Jogo da Doriax Game Jam – 184X
 
 Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cristóvão (Sergipe) dos anos 184X.
 

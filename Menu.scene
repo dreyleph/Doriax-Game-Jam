@@ -53,8 +53,8 @@ entities:
         color: [1, 0.85, 0.25, 1]
       text:
         font: [Fonte/BoldPixels.ttf]
-        text: "MENU"
-        fontSize: 96
+        text: "BATALHA PELA CAPITAL"
+        fontSize: 72
   - type: Entity
     entity: 1003
     name: BotaoJogar
