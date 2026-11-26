@@ -110,6 +110,12 @@ function Player:init()
             self.meleeSound:loadSound("melee_sound.wav")
             self.meleeSound:setVolume(1)
         end)
+
+        self.backgroundMusic = Sound(self.scene)
+        self.backgroundMusic:loadSound("background_music.wav")
+        self.backgroundMusic:setVolume(0.12)
+        self.backgroundMusic:setLooping(true)
+        self.backgroundMusic:play()
     end
 
     GameState.startLives = self.startLives
