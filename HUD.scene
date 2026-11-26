@@ -42,12 +42,6 @@ entities:
                 ptrTypeName: Text
                 value: 1004
                 defaultValue: 0
-              - name: pausedText
-                displayName: Texto de pausa
-                type: EntityReference
-                ptrTypeName: Text
-                value: 1005
-                defaultValue: 0
               - name: scoreDigits
                 displayName: Digitos da pontuacao
                 type: Int
@@ -107,8 +101,8 @@ entities:
         text: GAME OVER
         fontSize: 80
   - type: Entity
-    entity: 1005
-    name: Pausado
+    entity: 1010
+    name: MenuPausa
     components:
       transform:
         position: [0, 0, 0]
@@ -116,14 +110,344 @@ entities:
         scale: [1, 1, 1]
         visible: false
       uilayout:
+        width: 960
+        height: 720
         anchorPreset: CENTER
         usingAnchors: true
       ui:
-        color: [1, 1, 1, 1]
-      text:
-        text: PAUSED
-        fontSize: 80
+        color: [0, 0, 0, 0.6]
+      image:
+        patchMarginLeft: 0
+      script:
+        scripts:
+          - type: lua
+            path: ui/PauseMenu.lua
+            className: PauseMenu
+            enabled: true
+            properties:
+              - name: continueButton
+                displayName: Botao Continuar
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1011
+                defaultValue: 0
+              - name: menuButton
+                displayName: Botao Menu
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1013
+                defaultValue: 0
+              - name: quitButton
+                displayName: Botao Sair
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1015
+                defaultValue: 0
+    children:
+      - type: Entity
+        entity: 1005
+        name: Pausado
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, -200]
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: PAUSED
+            fontSize: 80
+      - type: Entity
+        entity: 1011
+        name: BotaoContinuar
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 260
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, -80]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1012
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1012
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                text: CONTINUAR
+                fontSize: 28
+      - type: Entity
+        entity: 1013
+        name: BotaoMenu
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 260
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, -10]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1014
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1014
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                text: MENU
+                fontSize: 28
+      - type: Entity
+        entity: 1015
+        name: BotaoSair
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 260
+            height: 56
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 60]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1016
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1016
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                text: SAIR
+                fontSize: 28
+      - type: Entity
+        entity: 1017
+        name: VolumeTexto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 140]
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: VOLUME
+            fontSize: 24
+      - type: Entity
+        entity: 1018
+        name: VolumeMenos
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 48
+            height: 48
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [-170, 190]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1019
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1019
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                text: "-"
+                fontSize: 32
+      - type: Entity
+        entity: 1020
+        name: VolumeBarra
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 240
+            height: 24
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [0, 190]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          progressbar:
+            value: 1
+          script:
+            scripts:
+              - type: lua
+                path: ui/VolumeControl.lua
+                className: VolumeControl
+                enabled: true
+                properties:
+                  - name: downButton
+                    displayName: Botao -
+                    type: EntityReference
+                    ptrTypeName: Button
+                    value: 1018
+                    defaultValue: 0
+                  - name: upButton
+                    displayName: Botao +
+                    type: EntityReference
+                    ptrTypeName: Button
+                    value: 1021
+                    defaultValue: 0
+                  - name: step
+                    displayName: Passo (0 a 1)
+                    type: Float
+                    value: 0.1
+                    defaultValue: 0.1
+      - type: Entity
+        entity: 1021
+        name: VolumeMais
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            width: 48
+            height: 48
+            anchorPreset: CENTER
+            usingAnchors: true
+            positionOffset: [170, 190]
+          ui:
+            color: [0.25, 0.2, 0.17, 1]
+          image:
+            patchMarginLeft: 0
+          button:
+            label: 1022
+            colorNormal: [0.25, 0.2, 0.17, 1]
+            colorHovered: [0.91, 0.667, 0.235, 1]
+            colorPressed: [0.6, 0.44, 0.15, 1]
+            scaleHovered: 1.05
+        children:
+          - type: Entity
+            entity: 1022
+            name: Texto
+            components:
+              transform:
+                position: [0, 0, 0]
+                rotation: [1, 0, 0, 0]
+                scale: [1, 1, 1]
+                visible: true
+              uilayout:
+                anchorPreset: CENTER
+                usingAnchors: true
+                ignoreEvents: true
+              ui:
+                color: [1, 1, 1, 1]
+              text:
+                text: +
+                fontSize: 32
 shaderKeys:
   - type: ui
     properties: 2
+  - type: ui
+    properties: 8
   - type: blit

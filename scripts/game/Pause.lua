@@ -21,4 +21,10 @@ function Pause.toggle()
     gameScene:getPhysicsSystem().paused = Pause.paused
 end
 
+-- Saindo da fase (ex.: voltar ao menu): a cena vai ser destruida
+function Pause.leave()
+    gameScene = nil
+    Pause.paused = false
+end
+
 return Pause
