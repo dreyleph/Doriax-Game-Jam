@@ -15,7 +15,7 @@
 --
 -- Ligacoes com os outros scripts:
 --   Enemy:die        -> Itens.tryDrop(scene, x, yDoPe)
---   Player:init      -> Itens.reset()
+--   Player:init      -> Itens.reset(scene) (tambem carrega os sons dos itens)
 --   Player:hurt      -> Itens.clearEffects()
 --   Player:onFixedUpdate -> Itens.update(player, dt) e Itens.fireModifiers(...)
 --   Player (tecla K) -> Itens.secondaryWeapon ("escopeta" ou nil) e Itens.useSecondaryAmmo()
@@ -46,6 +46,7 @@ Itens.TYPES = {
         id = "caranguejo", name = "Caranguejo", chance = 0.0067,
         color = { 1.00, 0.50, 0.00 },
         sprite = { path = "Itens/caranguejo.png", w = 52, h = 46 },
+        sound = "Sons/caranguejo.wav",   -- comendo
         apply = function(player)
             Itens.crabTimer = Itens.CRAB_DURATION
             -- usa a invencibilidade do Player (pisca); cair no buraco ainda mata
@@ -65,6 +66,7 @@ Itens.TYPES = {
     {
         id = "charuto", name = "Charuto", chance = 0.05,
         color = { 0.05, 0.05, 0.05 },
+        sound = "Sons/charuto.wav",      -- acendendo / fumando
         apply = function(player)
             Itens.cigarTimer = Itens.CIGAR_DURATION
         end,
@@ -73,6 +75,7 @@ Itens.TYPES = {
         id = "pisa_macio", name = "Pisa Macio", chance = 0.10,
         color = { 1.00, 0.90, 0.10 },
         sprite = { path = "Itens/pisa_macio.png", w = 38, h = 48 },
+        sound = "Sons/beber.wav",        -- bebendo
         apply = function(player)
             GameState.lives = math.min(GameState.lives + 1, GameState.startLives)
         end,
@@ -80,6 +83,7 @@ Itens.TYPES = {
 }
 
 local drops = {}         -- itens no chao: { sprites, entities, type, x, y, halfW, timeLeft }
+local sounds = {}        -- som ao pegar o item: caminho -> Sound (da cena atual)
 Itens.cigarTimer = 0
 Itens.crabTimer = 0
 Itens.secondaryWeapon = nil   -- slot de arma secundaria (nil = vazio)
@@ -87,9 +91,21 @@ Itens.secondaryAmmo = 0
 
 -- Estado -------------------------------------------------------------------
 
--- Chamado a cada (re)inicio da fase: a cena antiga ja destruiu as entidades
-function Itens.reset()
+-- Chamado a cada (re)inicio da fase: a cena antiga ja destruiu as entidades.
+-- scene: cena da fase, onde os sons dos itens sao carregados ja no inicio
+-- (carregar so na hora de pegar atrasaria o som)
+function Itens.reset(scene)
     drops = {}
+    sounds = {}
+    if scene then
+        for _, t in ipairs(Itens.TYPES) do
+            if t.sound and not sounds[t.sound] then
+                local sound = Sound(scene)
+                sound:loadSound(t.sound)
+                sounds[t.sound] = sound
+            end
+        end
+    end
     Itens.clearEffects()
     Itens.secondaryWeapon = nil
     Itens.secondaryAmmo = 0
@@ -229,6 +245,8 @@ function Itens.update(player, dt, px, py, halfW, halfH)
 
         if touching then
             d.type.apply(player)
+            local sound = d.type.sound and sounds[d.type.sound]
+            if sound then sound:play() end
             Log.print("Pegou item: " .. d.type.name)
             removeDrop(i)
         elseif d.timeLeft <= 0 or behindCamera then

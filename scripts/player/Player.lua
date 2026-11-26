@@ -104,7 +104,7 @@ function Player:init()
     Combat.resetLevelState()
     Combat.registerPlayer(self)
     Pause.setGameScene(self.scene)
-    Itens.reset()
+    Itens.reset(self.scene)
     EnemyShots.reset()
 
     if self.scene then

@@ -63,7 +63,7 @@ A faca dá **2 de dano** (mata qualquer inimigo num golpe); a área de acerto é
   **parado** = `Idle-Sheet` inteira em loop contínuo a 8 fps (começa assim que ele para e a cabeça não para de mexer); parado atirando = `IdleShooting-Sheet`; andando = `Running-Sheet`; andando atirando = `Running&Shooting-Sheet`; **pulo** = `Jumping-Sheet` (3 quadros, uma vez, o último fica até pousar).
   O jogo usa um atlas único, `assets/John Drinkwater/Jogador-Atlas.png`, gerado a partir dessas sheets por `python tools/montar_atlas_jogador.py` (rode de novo quando a arte mudar). Trocar de imagem durante o jogo fazia o personagem sumir/"bugar" por alguns quadros.
 - Ainda sem arte: **dano** (o jogador some na hora ao levar dano; quando a sheet chegar, já há lugar para ela em `PlayerAnimations.lua`), pulo atirando (usa o pulo) e reviver (usa o parado).
-- **Som do tiro**: `assets/Sons/tiro.wav`, tocado a cada tiro (J) e, mais grave, na Escopeta (K). É gerado a partir do original `assets/Sons/tiro_original.mp3` por `python tools/montar_som_tiro.py` (corta o silêncio do começo e a cauda longa; requer `pip install miniaudio`). Volume na propriedade "Som do tiro: volume" do Jogador.
+- **Som do tiro**: `assets/Sons/tiro.wav`, tocado a cada tiro (J) e, mais grave, na Escopeta (K). É gerado a partir do original `assets/Sons/tiro_original.mp3` por `python tools/montar_sons.py` (corta o silêncio do começo e a cauda longa; requer `pip install miniaudio`). Volume na propriedade "Som do tiro: volume" do Jogador.
 - Ao morrer, o jogador reaparece na superfície mais próxima (chão, bloco ou plataforma), longe da borda e dentro da tela; fica ~1 s parado revivendo e depois volta ao controle, ainda invencível por 2 s.
 
 ## Inimigos
@@ -83,6 +83,8 @@ Cada inimigo abatido sorteia no máximo 1 item; o jogador pega encostando. O ite
 | Escopeta | mosquete (`assets/Itens/escopeta.png`) | 3% | arma secundária na tecla K: 5 projéteis em leque, alcance curto, 10 disparos (pegar outra recarrega) |
 | Charuto | quadrado preto (sem arte ainda) | 5% | 10 s de tiro automático e rápido segurando J |
 | Caranguejo | caranguejo (`assets/Itens/caranguejo.png`) | 0,67% | 15 s de imortalidade e dano x2 |
+
+Ao pegar um item toca o som dele (`assets/Sons/`): Charuto = `charuto.wav` (fumando), Pisa Macio = `beber.wav` (glub glub), Caranguejo = `caranguejo.wav` (comendo); a Escopeta não tem som. Os `.wav` são cortados e com volume igualado a partir dos `*_original.mp3` por `python tools/montar_sons.py`; o som de cada item fica no campo `sound` em `Itens.TYPES`.
 
 As imagens de `assets/Itens/` são geradas a partir das artes originais do Edu (`assets/PisaMacio.png`, `Musket.png`, `Kraby1.png`) por `python tools/montar_sprites_itens.py`, já no tamanho do jogo. Os efeitos temporários acabam ao morrer; a arma secundária fica até acabar a munição. Chances, durações e desenhos ficam no topo de `scripts/itens/Itens.lua`.
 
