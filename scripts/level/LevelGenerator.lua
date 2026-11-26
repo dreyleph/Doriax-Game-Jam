@@ -56,6 +56,10 @@ local TEX = {
     right    = { path = "Terreno/terreno_dir.png",  w = 32,  h = 640 },  -- borda direita
     scaffold = { path = "Terreno/andaime.png",      w = 251, h = 64  },  -- piso de andaime
 }
+-- Inimigos de um trecho novo nascem aos poucos (no maximo isso por frame):
+-- criar 10+ bundles no mesmo frame dava um engasgo. O trecho e gerado bem a
+-- frente da tela, entao da tempo de sobra.
+local ENEMY_SPAWNS_PER_FRAME = 2
 local EDGE_WIDTH = 32
 local PLATFORM_THICKNESS = 32
 -- o desenho do andaime e mais alto que a colisao: o topo coincide (onde se
@@ -82,6 +86,7 @@ function LevelGenerator:init()
     self.nextX = 0          -- onde comeca o proximo trecho
     self.generated = 0      -- quantos trechos (telas) ja foram gerados
     self.lastModule = nil
+    self.spawnQueue = {}    -- inimigos sorteados esperando para nascer (ver spawnQueued)
     -- superficies de apoio para o jogador renascer (so desta cena)
     Run.clearSurfaces(SceneManager.currentSceneId)
 
@@ -116,8 +121,23 @@ end
 
 function LevelGenerator:onUpdate()
     self:fillAhead()
+    self:spawnQueued()
     self:removeBehind()
     self:cleanupEnemies()
+end
+
+-- Cria alguns dos inimigos que estao na fila (os primeiros sorteados primeiro)
+function LevelGenerator:spawnQueued()
+    local made = 0
+    while made < ENEMY_SPAWNS_PER_FRAME and #self.spawnQueue > 0 do
+        local q = table.remove(self.spawnQueue, 1)
+        if not q.chunk.removed and #self.enemies < self.maxAliveEnemies then
+            local root, inst = Combat.spawnEnemy(self.scene, q.x, q.y, q.overrides)
+            q.chunk.enemies[#q.chunk.enemies + 1] = root
+            self.enemies[#self.enemies + 1] = { root = root, inst = inst }
+            made = made + 1
+        end
+    end
 end
 
 -- Libera da cena os inimigos abatidos e elimina (sem dar pontos) os que
@@ -419,7 +439,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
         local count, shooterRatio, speed = self:difficultyAt(self.generated)
         chunk.difficulty = { enemies = count, shooters = shooterRatio, speed = speed }
         local made, tries = 0, 0
-        while made < count and tries < count * 3 and #self.enemies < self.maxAliveEnemies do
+        while made < count and tries < count * 3 and #self.enemies + #self.spawnQueue < self.maxAliveEnemies do
             tries = tries + 1
             local ex, ey, patrol
             local e = candidates[made + 1]
@@ -431,9 +451,10 @@ function LevelGenerator:spawnChunk(modules, isStart)
             end
             if ex then
                 local shooter = math.random() < shooterRatio
-                local root, inst = Combat.spawnEnemy(self.scene, ex, ey, enemyOverrides(patrol, shooter, speed))
-                chunk.enemies[#chunk.enemies + 1] = root
-                self.enemies[#self.enemies + 1] = { root = root, inst = inst }
+                -- nasce nos proximos frames (spawnQueued), nao todos de uma vez
+                self.spawnQueue[#self.spawnQueue + 1] = {
+                    chunk = chunk, x = ex, y = ey, overrides = enemyOverrides(patrol, shooter, speed),
+                }
                 made = made + 1
             end
         end
@@ -445,6 +466,7 @@ function LevelGenerator:spawnChunk(modules, isStart)
 end
 
 function LevelGenerator:destroyChunk(chunk)
+    chunk.removed = true   -- inimigos ainda na fila deste trecho nao nascem mais
     Run.removeSurfaces(chunk)
     -- os inimigos nao sao destruidos aqui: cleanupEnemies cuida deles
     -- (quem ficou para tras ja foi eliminado; quem esta perseguindo continua)

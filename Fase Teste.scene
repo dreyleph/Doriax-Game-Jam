@@ -1284,11 +1284,26 @@ entities:
                 type: Float
                 value: 0.5
                 defaultValue: 0.5
-              - name: knifeDamage
-                displayName: "Faca: dano"
+              - name: knifePower
+                displayName: "Faca: dano (2 = mata qualquer inimigo)"
                 type: Int
-                value: 1
-                defaultValue: 1
+                value: 2
+                defaultValue: 2
+              - name: knifeArea
+                displayName: "Faca: tamanho de cada bloco de acerto (px)"
+                type: Float
+                value: 56
+                defaultValue: 56
+              - name: knifeDeflect
+                displayName: "Faca: rebate tiros inimigos"
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: deflectSpeed
+                displayName: "Faca: velocidade do tiro rebatido (x)"
+                type: Float
+                value: 1.5
+                defaultValue: 1.5
               - name: allowDiagonal
                 displayName: Permitir tiro na diagonal
                 type: Bool
@@ -1589,6 +1604,26 @@ entities:
                 type: Float
                 value: 300
                 defaultValue: 300
+              - name: variant
+                displayName: Tipo (soldado ou atirador)
+                type: String
+                value: soldado
+                defaultValue: soldado
+              - name: fireInterval
+                displayName: "Atirador: intervalo entre tiros (s)"
+                type: Float
+                value: 1.6
+                defaultValue: 1.6
+              - name: shotSpeed
+                displayName: "Atirador: velocidade do tiro (px/s)"
+                type: Float
+                value: 380
+                defaultValue: 380
+              - name: shotMaxAngle
+                displayName: "Atirador: mira ate (graus da horizontal)"
+                type: Float
+                value: 35
+                defaultValue: 35
               - name: patrolDistance
                 displayName: Patrulha sem gerador (px)
                 type: Float
@@ -1602,8 +1637,8 @@ entities:
               - name: health
                 displayName: Vida (tiros para eliminar)
                 type: Int
-                value: 1
-                defaultValue: 1
+                value: 2
+                defaultValue: 2
               - name: gravityScale
                 displayName: Escala da gravidade
                 type: Float
@@ -1818,6 +1853,26 @@ entities:
                 type: Float
                 value: 300
                 defaultValue: 300
+              - name: variant
+                displayName: Tipo (soldado ou atirador)
+                type: String
+                value: soldado
+                defaultValue: soldado
+              - name: fireInterval
+                displayName: "Atirador: intervalo entre tiros (s)"
+                type: Float
+                value: 1.6
+                defaultValue: 1.6
+              - name: shotSpeed
+                displayName: "Atirador: velocidade do tiro (px/s)"
+                type: Float
+                value: 380
+                defaultValue: 380
+              - name: shotMaxAngle
+                displayName: "Atirador: mira ate (graus da horizontal)"
+                type: Float
+                value: 35
+                defaultValue: 35
               - name: patrolDistance
                 displayName: Patrulha sem gerador (px)
                 type: Float
@@ -1831,8 +1886,8 @@ entities:
               - name: health
                 displayName: Vida (tiros para eliminar)
                 type: Int
-                value: 1
-                defaultValue: 1
+                value: 2
+                defaultValue: 2
               - name: gravityScale
                 displayName: Escala da gravidade
                 type: Float
@@ -1900,4 +1955,4 @@ entities:
               - [18, -50]
               - [18, 50]
               - [-18, 50]
-shaderKeysHash: f183308e5c17407e0096445aaee45d3e680b6a0a
+shaderKeysHash: 1c0c31d5ab3d367187af7ade0e3f2a5c66b51202
