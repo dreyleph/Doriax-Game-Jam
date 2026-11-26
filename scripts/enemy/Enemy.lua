@@ -17,7 +17,7 @@
 --   soldado  : persegue e machuca encostando. 2 de vida (2 tiros; a faca mata).
 --   atirador : ao ver o jogador para, mira e atira (game/EnemyShots.lua) de
 --              tempos em tempos; nao persegue, so se aproxima devagar se o
---              jogador sair da visao. 1 de vida. Desenho avermelhado.
+--              jogador sair da visao. 1 de vida. Arte do Enemy2.
 -- O gerador escolhe o tipo e deixa os inimigos mais rapidos/agressivos com a
 -- distancia (overrides em Combat.spawnEnemy).
 --
@@ -26,8 +26,9 @@
 -- Numa cena sem gerador (ex.: Fase Teste) usa a faixa "Patrulha sem gerador"
 -- em volta do ponto inicial (e nao muda de nivel).
 --
--- Desenho: sprite filho criado aqui (atlas assets/Enemy1/Inimigo-Atlas.png,
--- animacoes em EnemyAnimations.lua). O retangulo do proprio bundle fica
+-- Desenho: sprite filho criado aqui. Soldado: atlas assets/Enemy1/Inimigo-Atlas.png
+-- (EnemyAnimations.lua); atirador: assets/Enemy2/Inimigo2-Atlas.png
+-- (EnemyAnimations2.lua, com mira e disparo). O retangulo do proprio bundle fica
 -- transparente: no editor ele mostra o tamanho da hitbox.
 --
 -- Shapes esperados no Body2D do inimigo (bundles/Inimigo.bundle):
@@ -40,6 +41,7 @@ local Itens = require("itens.Itens")
 local Run = require("game.Run")
 local Animator = require("game.Animator")
 local EnemyAnimations = require("enemy.EnemyAnimations")
+local EnemyAnimations2 = require("enemy.EnemyAnimations2")
 local EnemyShots = require("game.EnemyShots")
 
 local Enemy = {
@@ -110,6 +112,7 @@ function Enemy:init()
     self.facing = (self.startDirection >= 0) and 1 or -1
     self.hp = self.health
     self.fireTimer = 0
+    self.shootAnimTimer = 0   -- > 0: tocando a animacao de disparo
     self.flashTimer = 0       -- > 0: piscando porque levou um tiro
     self.dead = false
     self.touchingPlayer = 0   -- contatos ativos entre a area de dano e o jogador
@@ -153,11 +156,11 @@ function Enemy:createVisual()
     end)
     self.object:addChild(sprite)
     self.visual = sprite
-    -- atirador: avermelhado, para diferenciar ate ter arte propria
-    self.baseColor = self.isShooter and { 1.0, 0.55, 0.5 } or { 1, 1, 1 }
+    self.baseColor = { 1, 1, 1 }
     self:applyColor(1)
     self.visualKey = nil
-    self.animator = Animator.new(sprite, EnemyAnimations)
+    -- cada tipo tem a sua arte: soldado = Enemy1, atirador = Enemy2
+    self.animator = Animator.new(sprite, self.isShooter and EnemyAnimations2 or EnemyAnimations)
     self:updateVisual(0, "idle")
 end
 
@@ -557,12 +560,14 @@ function Enemy:shootStep(x, y, lo, hi, dt)
         return 0, "idle"
     end
     self.fireTimer = self.fireTimer - dt
+    if self.shootAnimTimer > 0 then self.shootAnimTimer = self.shootAnimTimer - dt end
     if sees then
         if self.fireTimer <= 0 then
             self:fireAt(Combat.getPlayer(), x, y)
             self.fireTimer = self.fireInterval
         end
-        return 0, "idle"
+        -- disparo logo depois do tiro; no resto do tempo fica mirando
+        return 0, self.shootAnimTimer > 0 and "shoot" or "aim"
     end
     local vx, stopped = stepTowards(x, self.facing, self.wanderSpeed * 1.5, lo, hi, dt)
     return vx, stopped and "idle" or "walk"
@@ -577,6 +582,12 @@ function Enemy:fireAt(player, x, y)
     local maxA = math.rad(self.shotMaxAngle)
     local a = math.max(-maxA, math.min(maxA, math.atan(dy, math.max(dx, 1))))
     EnemyShots.spawn(self.scene, mx, my, self.facing * math.cos(a), math.sin(a), self.shotSpeed)
+    -- animacao de disparo do comeco a cada tiro
+    if self.animator then
+        self.animator:play("shoot", true)
+        local def = self.animator.current or {}
+        self.shootAnimTimer = (def.count or 1) / (def.fps or 12)
+    end
 end
 
 -- Area de dano encostou / deixou de encostar em algo

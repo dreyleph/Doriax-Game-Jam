@@ -1,29 +1,39 @@
 # montar_atlas_inimigo.py
-# Junta as sprite sheets do inimigo comum (assets/Enemy1/) numa unica imagem
-# (atlas), uma animacao por linha, como o atlas do jogador
+# Junta as sprite sheets de cada inimigo numa unica imagem (atlas), uma
+# animacao por linha, como o atlas do jogador
 # (ver montar_atlas_jogador.py: trocar de textura em jogo faz o sprite "bugar").
+#   assets/Enemy1/ -> Inimigo-Atlas.png   (soldado,  scripts/enemy/EnemyAnimations.lua)
+#   assets/Enemy2/ -> Inimigo2-Atlas.png  (atirador, scripts/enemy/EnemyAnimations2.lua)
 #
-# Quando a arte mudar ou chegar sheet nova: edite LINHAS, rode
+# Quando a arte mudar ou chegar sheet nova: edite ATLAS, rode
 #   python tools/montar_atlas_inimigo.py
-# e ajuste "first" (linha * COLUNAS) em scripts/enemy/EnemyAnimations.lua.
+# e ajuste "first" (linha * COLUNAS) no EnemyAnimations correspondente.
 # Requer Pillow (pip install pillow).
 import os
 from PIL import Image
 
-PASTA = os.path.join(os.path.dirname(__file__), "..", "assets", "Enemy1")
+ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
 QUADRO = 128
 COLUNAS = 8
-LINHAS = [
-    ("Runing-Sheet.png", 8),   # linha 0 -> first = 0  andando / correndo
-    ("Idle-Sheet.png", 1),     # linha 1 -> first = 8  parado
+ATLAS = [
+    ("Enemy1", "Inimigo-Atlas.png", [
+        ("Runing-Sheet.png", 8),    # linha 0 -> first = 0   andando / correndo
+        ("Idle-Sheet.png", 1),      # linha 1 -> first = 8   parado
+    ]),
+    ("Enemy2", "Inimigo2-Atlas.png", [
+        ("Runnig-Sheet2.png", 8),   # linha 0 -> first = 0   andando / correndo
+        ("Idle-Sheet2.png", 1),     # linha 1 -> first = 8   parado
+        ("Shooting.png", 4),        # linha 2 -> first = 16  atirando
+    ]),
 ]
-SAIDA = "Inimigo-Atlas.png"
 
-atlas = Image.new("RGBA", (COLUNAS * QUADRO, len(LINHAS) * QUADRO), (0, 0, 0, 0))
-for linha, (arquivo, quadros) in enumerate(LINHAS):
-    img = Image.open(os.path.join(PASTA, arquivo)).convert("RGBA")
-    if quadros > COLUNAS or img.width < quadros * QUADRO or img.height < QUADRO:
-        raise SystemExit("%s: tamanho inesperado %dx%d" % (arquivo, img.width, img.height))
-    atlas.paste(img.crop((0, 0, quadros * QUADRO, QUADRO)), (0, linha * QUADRO))
-atlas.save(os.path.join(PASTA, SAIDA))
-print("Gerado %s (%dx%d)" % (SAIDA, atlas.width, atlas.height))
+for pasta, saida, linhas in ATLAS:
+    dir_ = os.path.join(ASSETS, pasta)
+    atlas = Image.new("RGBA", (COLUNAS * QUADRO, len(linhas) * QUADRO), (0, 0, 0, 0))
+    for linha, (arquivo, quadros) in enumerate(linhas):
+        img = Image.open(os.path.join(dir_, arquivo)).convert("RGBA")
+        if quadros > COLUNAS or img.width < quadros * QUADRO or img.height < QUADRO:
+            raise SystemExit("%s/%s: tamanho inesperado %dx%d" % (pasta, arquivo, img.width, img.height))
+        atlas.paste(img.crop((0, 0, quadros * QUADRO, QUADRO)), (0, linha * QUADRO))
+    atlas.save(os.path.join(dir_, saida))
+    print("Gerado %s/%s (%dx%d)" % (pasta, saida, atlas.width, atlas.height))
