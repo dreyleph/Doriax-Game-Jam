@@ -166,6 +166,13 @@ end
 function Combat.restartLevel()
     if restarting then return end
     restarting = true
+    -- Os registros sao do modulo e sobrevivem a troca de cena: sem limpar,
+    -- inimigos da corrida anterior ficam aqui apontando para a cena destruida.
+    -- Como os ids de entidade se repetem na cena nova, isEntityCreated() passa
+    -- e ler target.body.position derruba o editor (access violation em
+    -- Body2D::getPosition, que o pcall nao consegue segurar).
+    hittables = {}
+    oneWayUsers = {}
     SceneManager.loadScene(SceneManager.currentSceneId)
 end
 
