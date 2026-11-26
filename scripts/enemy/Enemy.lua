@@ -37,6 +37,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Pause = require("game.Pause")
 local Itens = require("itens.Itens")
 local Run = require("game.Run")
 local Animator = require("game.Animator")
@@ -420,6 +421,7 @@ function Enemy:chaseLevels(x, lo, hi, here, target, px, dt)
 end
 
 function Enemy:onFixedUpdate()
+    if Pause.paused then return end
     if self.dead then return end
     local dt = Engine.updateTime
 

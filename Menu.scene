@@ -1,0 +1,301 @@
+id: 2184184004
+name: Menu
+scene:
+  backgroundColor: [0.08, 0.065, 0.055, 1]
+  lightState: off
+  enableUIEvents: not_set
+sceneType: scene_ui
+mainCamera: 0
+visibilityInherited: true
+entities:
+  - type: Entity
+    entity: 1001
+    name: Menu
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      script:
+        scripts:
+          - type: lua
+            path: ui/MainMenu.lua
+            className: MainMenu
+            enabled: true
+            properties:
+              - name: playButton
+                displayName: Botao Jogar
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1003
+                defaultValue: 0
+              - name: quitButton
+                displayName: Botao Sair
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1005
+                defaultValue: 0
+  - type: Entity
+    entity: 1002
+    name: Titulo
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, -220]
+      ui:
+        color: [1, 0.85, 0.25, 1]
+      text:
+        text: MENU
+        fontSize: 96
+  - type: Entity
+    entity: 1003
+    name: BotaoJogar
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 260
+        height: 56
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, -60]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      button:
+        label: 1004
+        colorNormal: [0.25, 0.2, 0.17, 1]
+        colorHovered: [0.91, 0.667, 0.235, 1]
+        colorPressed: [0.6, 0.44, 0.15, 1]
+        scaleHovered: 1.05
+    children:
+      - type: Entity
+        entity: 1004
+        name: Texto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            ignoreEvents: true
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: JOGAR
+            fontSize: 28
+  - type: Entity
+    entity: 1005
+    name: BotaoSair
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 260
+        height: 56
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, 20]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      button:
+        label: 1006
+        colorNormal: [0.25, 0.2, 0.17, 1]
+        colorHovered: [0.91, 0.667, 0.235, 1]
+        colorPressed: [0.6, 0.44, 0.15, 1]
+        scaleHovered: 1.05
+    children:
+      - type: Entity
+        entity: 1006
+        name: Texto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            ignoreEvents: true
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: SAIR
+            fontSize: 28
+  - type: Entity
+    entity: 1007
+    name: VolumeTexto
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, 120]
+      ui:
+        color: [1, 1, 1, 1]
+      text:
+        text: VOLUME
+        fontSize: 24
+  - type: Entity
+    entity: 1008
+    name: VolumeMenos
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 48
+        height: 48
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [-170, 170]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      button:
+        label: 1009
+        colorNormal: [0.25, 0.2, 0.17, 1]
+        colorHovered: [0.91, 0.667, 0.235, 1]
+        colorPressed: [0.6, 0.44, 0.15, 1]
+        scaleHovered: 1.05
+    children:
+      - type: Entity
+        entity: 1009
+        name: Texto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            ignoreEvents: true
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: "-"
+            fontSize: 32
+  - type: Entity
+    entity: 1010
+    name: VolumeBarra
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 240
+        height: 24
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [0, 170]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      progressbar:
+        value: 1
+      script:
+        scripts:
+          - type: lua
+            path: ui/VolumeControl.lua
+            className: VolumeControl
+            enabled: true
+            properties:
+              - name: downButton
+                displayName: Botao -
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1008
+                defaultValue: 0
+              - name: upButton
+                displayName: Botao +
+                type: EntityReference
+                ptrTypeName: Button
+                value: 1011
+                defaultValue: 0
+              - name: step
+                displayName: Passo (0 a 1)
+                type: Float
+                value: 0.1
+                defaultValue: 0.1
+  - type: Entity
+    entity: 1011
+    name: VolumeMais
+    components:
+      transform:
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        visible: true
+      uilayout:
+        width: 48
+        height: 48
+        anchorPreset: CENTER
+        usingAnchors: true
+        positionOffset: [170, 170]
+      ui:
+        color: [0.25, 0.2, 0.17, 1]
+      image:
+        patchMarginLeft: 0
+      button:
+        label: 1012
+        colorNormal: [0.25, 0.2, 0.17, 1]
+        colorHovered: [0.91, 0.667, 0.235, 1]
+        colorPressed: [0.6, 0.44, 0.15, 1]
+        scaleHovered: 1.05
+    children:
+      - type: Entity
+        entity: 1012
+        name: Texto
+        components:
+          transform:
+            position: [0, 0, 0]
+            rotation: [1, 0, 0, 0]
+            scale: [1, 1, 1]
+            visible: true
+          uilayout:
+            anchorPreset: CENTER
+            usingAnchors: true
+            ignoreEvents: true
+          ui:
+            color: [1, 1, 1, 1]
+          text:
+            text: +
+            fontSize: 32
+shaderKeys:
+  - type: ui
+    properties: 2
+  - type: ui
+    properties: 8
+  - type: blit

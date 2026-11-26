@@ -22,6 +22,7 @@
 
 local Combat = require("game.Combat")
 local GameState = require("game.GameState")
+local Pause = require("game.Pause")
 local Run = require("game.Run")
 local Itens = require("itens.Itens")
 local EnemyShots = require("game.EnemyShots")
@@ -98,6 +99,7 @@ function Player:init()
 
     Combat.resetLevelState()
     Combat.registerPlayer(self)
+    Pause.setGameScene(self.scene)
     Itens.reset()
     EnemyShots.reset()
 
@@ -768,6 +770,7 @@ function Player:updateLifeState(dt)
 end
 
 function Player:onFixedUpdate()
+    if Pause.paused then return end
     local dt = Engine.updateTime
     EnemyShots.update(dt, self)   -- tiros dos inimigos andam mesmo com o jogador morto/revivendo
     if self:updateLifeState(dt) then return end
