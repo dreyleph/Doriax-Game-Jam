@@ -26,6 +26,8 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | Mirar para baixo | no ar, segurar S / ↓ (andando = diagonal) |
 
 Matar um inimigo com a faca zera a espera de 1 s do dash e, se for no ar, libera um pulo extra (até encostar no chão).
+
+**Rastro do dash (afterimage):** durante o impulso do dash ficam para trás cópias azuladas e transparentes do John (mesmo quadro da animação), a primeira no ponto onde o dash começou; cada uma some em 0,3 s. As cópias são criadas uma vez no início e reusadas (sem engasgo). Propriedades do Jogador: `Dash: rastro (afterimage)` (liga/desliga), `Dash: intervalo entre copias do rastro (s)`, `Dash: quanto cada copia demora para sumir (s)` e `Dash: opacidade inicial do rastro (0-1)`.
 A faca dá **2 de dano** (mata qualquer inimigo num golpe); a área de acerto é feita de blocos de 56 px (frente: 1 bloco; cima/baixo: 3). O golpe mostra um efeito de corte (pacote `assets/SLASH VFX/`: arco largo para a frente, arco fino para cima/baixo) no tamanho da área de acerto. As sheets usadas ficam em `assets/VFX/` e são geradas por `python tools/montar_vfx_faca.py`.
 
 **Rebater tiros:** enquanto o golpe da faca dura, um tiro inimigo que encostar na área do golpe volta pelo mesmo caminho (na direção de quem atirou), 1,5x mais rápido e amarelo. O tiro rebatido não machuca o John e dá o dano da faca no inimigo que acertar. Propriedades do Jogador: `Faca: rebate tiros inimigos` (liga/desliga) e `Faca: velocidade do tiro rebatido (x)`. Os tiros inimigos agora têm 16 px.

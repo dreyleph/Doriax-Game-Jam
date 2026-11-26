@@ -51,6 +51,10 @@ local Player = {
         { name = "dashCarryKeep", displayName = "Dash: embalo horizontal mantido ao fim (0-1)", type = "float", default = 0.7 },
         { name = "dashCarryDrag", displayName = "Dash: quanto o embalo freia no chao", type = "float", default = 10.0 },
         { name = "dashAirDrag",   displayName = "Dash: quanto o embalo freia no ar",   type = "float", default = 0.8 },
+        { name = "dashGhosts",    displayName = "Dash: rastro (afterimage)",    type = "bool",  default = true },
+        { name = "dashGhostEvery", displayName = "Dash: intervalo entre copias do rastro (s)", type = "float", default = 0.03 },
+        { name = "dashGhostLife", displayName = "Dash: quanto cada copia demora para sumir (s)", type = "float", default = 0.3 },
+        { name = "dashGhostAlpha", displayName = "Dash: opacidade inicial do rastro (0-1)", type = "float", default = 0.55 },
         { name = "dashUpKeep",    displayName = "Dash: velocidade vertical mantida ao subir (0-1)", type = "float", default = 0.5 },
         { name = "knifeCooldown", displayName = "Faca: intervalo entre golpes (s)", type = "float", default = 0.25 },
         { name = "knifeTime",     displayName = "Faca: duracao do golpe (s)",   type = "float", default = 0.5 },
@@ -155,7 +159,13 @@ function Player:init()
     if self.scene then
         if not pcall(function() self:prepareSlashFx() end) then self.slashFxSprites = nil end
     end
+    -- rastro do dash: copias criadas ja no inicio (ver prepareGhosts)
+    self.ghosts, self.ghostTimer = nil, 0
+    if self.scene and self.visual and self.dashGhosts then
+        if not pcall(function() self:prepareGhosts() end) then self.ghosts = nil end
+    end
     RegisterEngineEvent(self, "onFixedUpdate")
+    RegisterEngineEvent(self, "onUpdate")
 end
 
 -- Plataformas atravessaveis -------------------------------------------------
@@ -446,6 +456,107 @@ function Player:startDash(dirX, aimUp, aimDown)
 end
 
 -- Fim do impulso (ou cancelado por um pulo). Retorna a velocidade vertical que fica.
+-- Rastro do dash (afterimage) ---------------------------------------------
+-- Durante o impulso do dash, a cada "dashGhostEvery" segundos fica para tras
+-- uma copia do desenho do John (mesmo quadro da animacao, mesmo lado),
+-- azulada e transparente, que some aos poucos em "dashGhostLife". A primeira
+-- copia sai no ponto onde o dash comecou, entao o borrao marca o comeco do
+-- caminho.
+-- Como a faca: as copias sao criadas UMA vez (no init) e reusadas. Sao filhas
+-- do Jogador e ficam antes do JogadorVisual na hierarquia, para serem
+-- desenhadas ATRAS do John; como o pai anda, a posicao delas e corrigida a
+-- cada frame (onUpdate, depois da fisica) para ficarem paradas no mundo.
+local GHOST_COUNT = 8
+local GHOST_TINT = { 0.55, 0.8, 1.0 }   -- azulado claro
+
+function Player:prepareGhosts()
+    local def = PlayerAnimations[PlayerAnimations.default or "idle"] or {}
+    local texture = def.texture
+    local w, h = self.visual.width or 128, self.visual.height or 128
+    self.ghosts = {}
+    for i = 1, GHOST_COUNT do
+        local sprite = Sprite(self.scene)
+        sprite.entityOwned = false   -- fica ate a cena acabar
+        sprite:setSize(math.floor(w + 0.5), math.floor(h + 0.5))
+        pcall(function()
+            local mat = sprite.material
+            local t = mat.baseColorTexture
+            t.minFilter = TextureFilter.NEAREST
+            t.magFilter = TextureFilter.NEAREST
+            mat.baseColorTexture = t
+            sprite.material = mat
+        end)
+        if texture then sprite:setTexture(texture) end
+        pcall(function() sprite.transparent = true end)
+        sprite.visible = false
+        self.object:addChild(sprite)
+        sprite:moveToBottom()       -- antes do JogadorVisual: desenhado atras
+        self.ghosts[i] = { sprite = sprite, life = 0, x = 0, y = 0, w = w, h = h }
+    end
+    self.nextGhost = 1
+end
+
+-- Deixa uma copia no lugar do desenho atual do John
+function Player:spawnGhost()
+    if not self.ghosts or not self.animator or not self.animator.current then return end
+    local g = self.ghosts[self.nextGhost]
+    self.nextGhost = self.nextGhost % #self.ghosts + 1
+    local pos = self.body.position
+    local f = self.facing
+    local def = self.animator.current
+    local ox = self.visualOffsetX + (def.offsetX or 0)
+    local oy = self.visualOffsetY + (def.offsetY or 0)
+    g.x, g.y = pos.x + ox * f, pos.y + oy      -- centro do desenho, no mundo
+    g.f = f
+    g.life = self.dashGhostLife
+    local u, v, uw, vh = Animator.frameRect(def, math.max(self.animator.frame, 0))
+    g.sprite:setTextureRect(u, v, uw, vh)
+    g.sprite.scale = Vector3(f, 1, 1)
+    self:placeGhost(g, pos)
+    g.sprite.visible = true
+end
+
+function Player:placeGhost(g, pos)
+    -- pivo no canto inferior esquerdo, posicao relativa ao Jogador (pai)
+    local a = math.max(0, g.life / math.max(self.dashGhostLife, 0.01)) * self.dashGhostAlpha
+    g.sprite.color = Vector4(GHOST_TINT[1], GHOST_TINT[2], GHOST_TINT[3], a)
+    g.sprite.position = Vector3(g.x - pos.x - g.f * g.w / 2, g.y - pos.y - g.h / 2, 0)
+end
+
+-- Por frame desenhado (depois da fisica): copias somem e ficam paradas no mundo
+function Player:onUpdate()
+    local ghosts = self.ghosts
+    if not ghosts then return end
+    local dt = Engine.deltatime or 0
+    local pos
+    for _, g in ipairs(ghosts) do
+        if g.life > 0 then
+            g.life = g.life - dt
+            if g.life <= 0 then
+                g.sprite.visible = false
+            else
+                pos = pos or self.body.position
+                self:placeGhost(g, pos)
+            end
+        end
+    end
+end
+
+-- Chamado a cada passo fisico durante o impulso do dash
+function Player:updateDashGhosts(dt, starting)
+    if not self.ghosts or not self.dashGhosts then return end
+    if starting then
+        self.ghostTimer = 0
+        self:spawnGhost()           -- borrao no comeco do caminho
+        return
+    end
+    self.ghostTimer = self.ghostTimer + dt
+    if self.ghostTimer >= self.dashGhostEvery then
+        self.ghostTimer = self.ghostTimer - self.dashGhostEvery
+        self:spawnGhost()
+    end
+end
+
 function Player:endDash()
     self.dashTimer = 0
     self.body.gravityScale = self.gravityScale
@@ -709,9 +820,11 @@ function Player:onFixedUpdate()
     -- Dash (E)
     if dashPressed and self.dashCooldownTimer <= 0 then
         self:startDash(dir, up, down)
+        self:updateDashGhosts(dt, true)
     end
     if self.dashTimer > 0 then
         vx, vy = self.dashVX, self.dashVY
+        self:updateDashGhosts(dt, false)
         self.dashTimer = self.dashTimer - dt
         if self.dashTimer <= 0 then vy = self:endDash() end
     elseif self.dashCarry ~= 0 then
