@@ -1269,6 +1269,26 @@ entities:
                 type: Float
                 value: 0.8
                 defaultValue: 0.8
+              - name: dashGhosts
+                displayName: "Dash: rastro (afterimage)"
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: dashGhostEvery
+                displayName: "Dash: intervalo entre copias do rastro (s)"
+                type: Float
+                value: 0.03
+                defaultValue: 0.03
+              - name: dashGhostLife
+                displayName: "Dash: quanto cada copia demora para sumir (s)"
+                type: Float
+                value: 0.3
+                defaultValue: 0.3
+              - name: dashGhostAlpha
+                displayName: "Dash: opacidade inicial do rastro (0-1)"
+                type: Float
+                value: 0.55
+                defaultValue: 0.55
               - name: dashUpKeep
                 displayName: "Dash: velocidade vertical mantida ao subir (0-1)"
                 type: Float
@@ -1955,4 +1975,4 @@ entities:
               - [18, -50]
               - [18, 50]
               - [-18, 50]
-shaderKeysHash: 1c0c31d5ab3d367187af7ade0e3f2a5c66b51202
+shaderKeysHash: 7e66cf19f2d5f03baa5388ad86d85489203711c4

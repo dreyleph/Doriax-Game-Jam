@@ -104,6 +104,14 @@ function Player:init()
     Itens.reset()
     EnemyShots.reset()
 
+    if self.scene then
+        pcall(function()
+            self.meleeSound = Sound(self.scene)
+            self.meleeSound:loadSound("melee_sound.wav")
+            self.meleeSound:setVolume(1)
+        end)
+    end
+
     GameState.startLives = self.startLives
     if GameState.needsNewGame then
         GameState.newGame()
@@ -309,6 +317,14 @@ function Player:stab(aimUp, aimDown, moving)
     local _, _, dx, dy = self:aim(aimUp, aimDown, moving)
     local half = self.knifeArea / 2
     self:clearSlash()
+
+    if self.meleeSound then
+        pcall(function()
+            self.meleeSound:stop()
+            self.meleeSound:seek(0)
+            self.meleeSound:play()
+        end)
+    end
 
     -- o golpe guarda o deslocamento de cada bloco de acerto em relacao ao
     -- jogador e o acompanha; o desenho e um efeito so, sobre a area toda
