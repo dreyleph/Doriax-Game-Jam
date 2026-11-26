@@ -181,7 +181,9 @@ function Combat.restartLevel()
     if restarting then return end
     restarting = true
     -- loadScene e adiado para o proximo frame; os scripts da cena nova se
-    -- registram de novo no init deles
+    -- registram de novo no init deles. Sem limpar, um id de entidade da cena
+    -- antiga que se repete na nova faz ler target.body.position da cena
+    -- destruida (access violation em Body2D::getPosition, ver clearRegistries)
     Combat.clearRegistries()
     SceneManager.loadScene(SceneManager.currentSceneId)
 end
