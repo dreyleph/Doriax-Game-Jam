@@ -22,6 +22,7 @@ Jogo de plataforma run and gun 2D inspirado em Metal Slug, ambientado na São Cr
 | Arma secundária (Escopeta, se tiver pego) | K |
 | Faca (corpo a corpo, mesma mira dos tiros) | L |
 | Dash (na direção segurada; sem direção = para frente) | E |
+| Pausar (continuar, som, menu, sair) | Esc / P |
 | Mirar para cima | segurar W / ↑ (andando = diagonal) |
 | Mirar para baixo | no ar, segurar S / ↓ (andando = diagonal) |
 
@@ -51,6 +52,18 @@ A faca dá **2 de dano** (mata qualquer inimigo num golpe); a área de acerto é
 | `scripts/camera/CameraFollow.lua` | câmera lateral |
 | `scripts/game/Combat.lua` | categorias de colisão e regras de combate compartilhadas |
 | `scripts/itens/Itens.lua` | itens que caem dos inimigos (chances, cores e efeitos) |
+
+## Menus
+O jogo abre no **Menu** (`Menu.scene`, script `ui/MainMenu.lua`):
+- **JOGAR** começa uma corrida nova (cena `Corrida`).
+- **SOM** liga/desliga o som do jogo todo (`ui/SoundToggle.lua` + `game/Settings.lua`); a escolha vale para todas as cenas.
+- **SAIR** fecha o jogo.
+
+Na partida, **Esc** ou **P** abre a pausa (dentro do `HUD.scene`, `ui/PauseMenu.lua`): CONTINUAR, SOM, MENU, SAIR.
+
+Ao perder todas as vidas aparece a tela de **GAME OVER** (fundo preto, `ui/GameOverMenu.lua` no `HUD.scene`) com o resumo da pontuação e dois botões: **REINICIAR** (corrida nova) e **MENU** (volta ao menu inicial). O jogo não reinicia sozinho enquanto essa tela existir na cena.
+
+Todo caminho que troca de cena chama `Combat.clearRegistries()` antes, para nenhum inimigo da cena anterior sobrar no registro (causa do crash ao reiniciar).
 
 ## Vidas, pontuação e progressão
 - Começa com 3 vidas. Pontos = **abates** (500 por inimigo) **+ distância** (10 pontos por metro; 1 m = 32 px andados para a direita). Durante a corrida, PONTOS mostra só os abates e os metros ficam no canto superior direito; a distância só entra na pontuação no fim: no GAME OVER, PONTOS passa a mostrar o total e aparece o resumo (abates + distância = total).
