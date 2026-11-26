@@ -55,7 +55,10 @@ local Player = {
         { name = "knifeCooldown", displayName = "Faca: intervalo entre golpes (s)", type = "float", default = 0.25 },
         { name = "knifeTime",     displayName = "Faca: duracao do golpe (s)",   type = "float", default = 0.5 },
         { name = "knifePower",    displayName = "Faca: dano (2 = mata qualquer inimigo)", type = "int", default = 2 },
-        { name = "knifeSize",     displayName = "Faca: tamanho de cada bloco de acerto (px)", type = "float", default = 44.0 },
+        -- "knifeArea" substitui "knifeSize" (o valor 44 ficou gravado na cena)
+        { name = "knifeArea",     displayName = "Faca: tamanho de cada bloco de acerto (px)", type = "float", default = 56.0 },
+        { name = "knifeDeflect",  displayName = "Faca: rebate tiros inimigos", type = "bool", default = true },
+        { name = "deflectSpeed",  displayName = "Faca: velocidade do tiro rebatido (x)", type = "float", default = 1.5 },
         { name = "allowDiagonal", displayName = "Permitir tiro na diagonal",    type = "bool",  default = true },
         { name = "startLives",        displayName = "Vidas iniciais",                     type = "int",   default = 3 },
         { name = "respawnFreezeTime", displayName = "Animacao de reviver, parado (s)",  type = "float", default = 1.0 },
@@ -147,6 +150,10 @@ function Player:init()
     if self.visual then
         self.animator = Animator.new(self.visual, PlayerAnimations)
         self:updateVisual(0, false)
+    end
+    -- efeito da faca: sprites criados ja no inicio (ver prepareSlashFx)
+    if self.scene then
+        if not pcall(function() self:prepareSlashFx() end) then self.slashFxSprites = nil end
     end
     RegisterEngineEvent(self, "onFixedUpdate")
 end
@@ -284,7 +291,7 @@ end
 
 function Player:stab(aimUp, aimDown, moving)
     local _, _, dx, dy = self:aim(aimUp, aimDown, moving)
-    local half = self.knifeSize / 2
+    local half = self.knifeArea / 2
     self:clearSlash()
 
     -- o golpe guarda o deslocamento de cada bloco de acerto em relacao ao
@@ -310,34 +317,75 @@ end
 
 -- Sprite do efeito: centro (cx, cy) relativo ao jogador; espelhado conforme
 -- o lado/direcao do golpe
+-- Os dois sprites do efeito (frente e cima/baixo) sao criados UMA vez, no
+-- init, e so aparecem/somem a cada golpe. Criar o sprite e chamar setTexture
+-- a cada golpe fazia a engine recarregar a imagem do disco (a ultima copia
+-- tinha sido destruida no golpe anterior) e o jogo "engasgava" por um instante.
+function Player:prepareSlashFx()
+    self.slashFxSprites = {}
+    for kind, def in pairs(SLASH_FX) do
+        local sprite = Sprite(self.scene)
+        sprite.entityOwned = false   -- fica ate a cena acabar
+        sprite:setSize(math.floor(def.frameW / 2 + 0.5), math.floor(def.frameH / 2 + 0.5))
+        local animator = Animator.new(sprite, {
+            default = "slash",
+            slash = {
+                texture = def.texture, sheetW = def.sheetW, sheetH = def.sheetH,
+                frameW = def.frameW, frameH = def.frameH, first = 0, count = 6,
+                fps = 6 / math.max(self.knifeTime, 0.05), loop = false,
+            },
+        })
+        sprite.visible = false
+        self.slashFxSprites[kind] = { sprite = sprite, animator = animator }
+    end
+end
+
+-- Mostra o efeito do golpe: centro (cx, cy) relativo ao jogador; espelhado
+-- conforme o lado/direcao do golpe
 function Player:createSlashFx(dx, dy, cx, cy, areaW, areaH)
-    local def = (dy == 0) and SLASH_FX.front or SLASH_FX.vertical
+    if not self.slashFxSprites then self:prepareSlashFx() end
+    local kind = (dy == 0) and "front" or "vertical"
+    local def = SLASH_FX[kind]
+    local fxs = self.slashFxSprites[kind]
+    -- esconde o outro (golpe novo antes do anterior acabar)
+    for k, other in pairs(self.slashFxSprites) do
+        if k ~= kind then other.sprite.visible = false end
+    end
     -- setSize so aceita inteiros (numero quebrado da erro e o golpe nao sai)
     local w, h = math.floor(areaW * def.widen + 0.5), math.floor(areaH + 0.5)
-    local sprite = Sprite(self.scene)
-    sprite.entityOwned = false   -- destruido por este script
+    local sprite = fxs.sprite
     sprite:setSize(w, h)
     local sx = (dy == 0) and ((dx >= 0) and 1 or -1) or self.facing
     local sy = (dy > 0) and -1 or 1
     sprite.scale = Vector3(sx, sy, 1)
-    local animator = Animator.new(sprite, {
-        default = "slash",
-        slash = {
-            texture = def.texture, sheetW = def.sheetW, sheetH = def.sheetH,
-            frameW = def.frameW, frameH = def.frameH, first = 0, count = 6,
-            fps = 6 / math.max(self.knifeTime, 0.05), loop = false,
-        },
-    })
-    return { sprite = sprite, entity = sprite.entity, animator = animator,
+    fxs.animator:play("slash", true)   -- recomeca do primeiro quadro
+    sprite.visible = true
+    return { sprite = sprite, animator = fxs.animator,
              cx = cx, cy = cy, sx = sx, sy = sy, w = w, h = h }
+end
+
+-- Areas do golpe ativo (centro e meia-largura), usadas pelo EnemyShots para
+-- rebater tiros. nil quando nao ha golpe ou a opcao esta desligada.
+function Player:deflectZones()
+    local slash = self.slash
+    if not slash or not self.knifeDeflect or self.state ~= "alive" then return nil end
+    local pos = self.body.position
+    local zones = {}
+    for _, b in ipairs(slash.blocks) do
+        zones[#zones + 1] = { x = pos.x + b.offsetX, y = pos.y + b.offsetY, half = slash.half }
+    end
+    return zones
+end
+
+-- Dano e velocidade do tiro rebatido
+function Player:deflectInfo()
+    return self.knifePower * Itens.damageMultiplier(), self.deflectSpeed
 end
 
 function Player:clearSlash()
     if not self.slash then return end
     local fx = self.slash.fx
-    if fx and self.scene:isEntityCreated(fx.entity) then
-        self.scene:destroyEntity(fx.entity)
-    end
+    if fx then fx.sprite.visible = false end
     self.slash = nil
 end
 

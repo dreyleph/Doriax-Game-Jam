@@ -741,11 +741,21 @@ entities:
                 type: Int
                 value: 2
                 defaultValue: 2
-              - name: knifeSize
+              - name: knifeArea
                 displayName: "Faca: tamanho de cada bloco de acerto (px)"
                 type: Float
-                value: 44
-                defaultValue: 44
+                value: 56
+                defaultValue: 56
+              - name: knifeDeflect
+                displayName: "Faca: rebate tiros inimigos"
+                type: Bool
+                value: true
+                defaultValue: true
+              - name: deflectSpeed
+                displayName: "Faca: velocidade do tiro rebatido (x)"
+                type: Float
+                value: 1.5
+                defaultValue: 1.5
               - name: allowDiagonal
                 displayName: Permitir tiro na diagonal
                 type: Bool
@@ -1006,4 +1016,4 @@ entities:
                 type: Float
                 value: 150
                 defaultValue: 150
-shaderKeysHash: 09aea808cdc1bb7d6bbf51fa80949420c2daa446
+shaderKeysHash: 4369175d642264cfe82e8db613684df25c9e3931
