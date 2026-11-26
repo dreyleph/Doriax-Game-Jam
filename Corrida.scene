@@ -736,11 +736,16 @@ entities:
                 type: Float
                 value: 0.5
                 defaultValue: 0.5
-              - name: knifeDamage
-                displayName: "Faca: dano"
+              - name: knifePower
+                displayName: "Faca: dano (2 = mata qualquer inimigo)"
                 type: Int
-                value: 1
-                defaultValue: 1
+                value: 2
+                defaultValue: 2
+              - name: knifeSize
+                displayName: "Faca: tamanho de cada bloco de acerto (px)"
+                type: Float
+                value: 44
+                defaultValue: 44
               - name: allowDiagonal
                 displayName: Permitir tiro na diagonal
                 type: Bool
@@ -935,31 +940,56 @@ entities:
                 type: Int
                 value: 2
                 defaultValue: 2
-              - name: enemyChance
-                displayName: Chance extra de inimigo (0 a 1)
+              - name: startEnemies
+                displayName: "Progressao: inimigos na 1a tela"
+                type: Float
+                value: 1
+                defaultValue: 1
+              - name: enemiesPerScreen
+                displayName: "Progressao: inimigos a mais por tela"
                 type: Float
                 value: 0.5
                 defaultValue: 0.5
-              - name: enemyChanceRamp
-                displayName: Aumento da chance por tela
-                type: Float
-                value: 0.03
-                defaultValue: 0.03
-              - name: minEnemies
-                displayName: Inimigos garantidos por tela
+              - name: maxEnemiesPerScreen
+                displayName: "Progressao: maximo de inimigos por tela"
                 type: Int
-                value: 2
-                defaultValue: 2
-              - name: minEnemiesEvery
-                displayName: +1 inimigo garantido a cada N telas
+                value: 12
+                defaultValue: 12
+              - name: maxAliveEnemies
+                displayName: "Progressao: maximo de inimigos vivos"
+                type: Int
+                value: 30
+                defaultValue: 30
+              - name: shooterFromScreen
+                displayName: "Progressao: atiradores a partir da tela"
                 type: Int
                 value: 3
                 defaultValue: 3
-              - name: minEnemiesMax
-                displayName: Maximo de inimigos garantidos
-                type: Int
-                value: 6
-                defaultValue: 6
+              - name: shooterStartRatio
+                displayName: "Progressao: proporcao inicial de atiradores"
+                type: Float
+                value: 0.2
+                defaultValue: 0.2
+              - name: shooterRatioPerScreen
+                displayName: "Progressao: atiradores a mais por tela"
+                type: Float
+                value: 0.03
+                defaultValue: 0.03
+              - name: shooterMaxRatio
+                displayName: "Progressao: proporcao maxima de atiradores"
+                type: Float
+                value: 0.5
+                defaultValue: 0.5
+              - name: speedPerScreen
+                displayName: "Progressao: velocidade a mais por tela (0.04 = 4%)"
+                type: Float
+                value: 0.04
+                defaultValue: 0.04
+              - name: maxSpeedMult
+                displayName: "Progressao: velocidade maxima (x)"
+                type: Float
+                value: 1.8
+                defaultValue: 1.8
               - name: terrainLayer
                 displayName: Camada do terreno (entidade pai)
                 type: EntityReference
@@ -976,4 +1006,4 @@ entities:
                 type: Float
                 value: 150
                 defaultValue: 150
-shaderKeysHash: f790e4ef9fffdbfa63256c6a156a78b26af5d647
+shaderKeysHash: 09aea808cdc1bb7d6bbf51fa80949420c2daa446

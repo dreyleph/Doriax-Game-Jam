@@ -127,4 +127,6 @@ entities:
 shaderKeys:
   - type: ui
     properties: 2
+  - type: ui
+    properties: 9
   - type: blit

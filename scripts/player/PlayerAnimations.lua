@@ -43,9 +43,10 @@ end
 return {
     default = "idle",
 
-    -- Parado: Idle-Sheet inteira em loop. Fica 2,5 s no quadro de repouso e
-    -- entao leva o cantil a boca e bebe (quadros 1 a 6, ~0,8 s)
-    idle       = anim(24, 7, 8, true, -1, { durations = { 2.5, 0.12, 0.12, 0.14, 0.16, 0.16, 0.18 } }),
+    -- Parado: Idle-Sheet inteira em loop continuo (a cabeca nao para de
+    -- mexer), comecando assim que ele para. Para segurar o repouso antes de
+    -- cada gole, troque por: durations = { 2.5, 0.12, 0.12, 0.14, 0.16, 0.16, 0.18 }
+    idle       = anim(24, 7, 8, true, -1),
     idle_shoot = anim(0, 5, 15, true, -1, { fallback = "idle" }),
 
     run       = anim(8, 8, 12, true, 2, { sync = "corrida", fallback = "idle" }),

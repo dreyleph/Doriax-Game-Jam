@@ -13,6 +13,14 @@
 -- Encostar no jogador tira uma vida dele; tiros/faca o eliminam (conforme
 -- "Vida") e somam "Pontos ao abater" a pontuacao.
 --
+-- Variantes ("Tipo"):
+--   soldado  : persegue e machuca encostando. 2 de vida (2 tiros; a faca mata).
+--   atirador : ao ver o jogador para, mira e atira (game/EnemyShots.lua) de
+--              tempos em tempos; nao persegue, so se aproxima devagar se o
+--              jogador sair da visao. 1 de vida. Desenho avermelhado.
+-- O gerador escolhe o tipo e deixa os inimigos mais rapidos/agressivos com a
+-- distancia (overrides em Combat.spawnEnemy).
+--
 -- Onde pode andar: no modo corrida usa as superficies registradas pelo gerador
 -- (Run.surfaceSpan: o trecho continuo de chao/bloco/plataforma sob os pes).
 -- Numa cena sem gerador (ex.: Fase Teste) usa a faixa "Patrulha sem gerador"
@@ -32,6 +40,7 @@ local Itens = require("itens.Itens")
 local Run = require("game.Run")
 local Animator = require("game.Animator")
 local EnemyAnimations = require("enemy.EnemyAnimations")
+local EnemyShots = require("game.EnemyShots")
 
 local Enemy = {
     properties = {
@@ -47,9 +56,13 @@ local Enemy = {
         { name = "canChangeLevel", displayName = "Perseguindo: pula e desce niveis",  type = "bool",  default = true },
         { name = "jumpSpeed",      displayName = "Velocidade do pulo (px/s)",         type = "float", default = 860.0 },
         { name = "jumpForwardSpeed", displayName = "Velocidade para frente no pulo (px/s)", type = "float", default = 300.0 },
+        { name = "variant",        displayName = "Tipo (soldado ou atirador)",        type = "string", default = "soldado" },
+        { name = "fireInterval",   displayName = "Atirador: intervalo entre tiros (s)", type = "float", default = 1.6 },
+        { name = "shotSpeed",      displayName = "Atirador: velocidade do tiro (px/s)", type = "float", default = 380.0 },
+        { name = "shotMaxAngle",   displayName = "Atirador: mira ate (graus da horizontal)", type = "float", default = 35.0 },
         { name = "patrolDistance", displayName = "Patrulha sem gerador (px)",         type = "float", default = 160.0 },
         { name = "startDirection", displayName = "Direcao inicial (-1 ou 1)",         type = "int",   default = -1 },
-        { name = "health",         displayName = "Vida (tiros para eliminar)",        type = "int",   default = 1 },
+        { name = "health",         displayName = "Vida (tiros para eliminar)",        type = "int",   default = 2 },
         { name = "gravityScale",   displayName = "Escala da gravidade",               type = "float", default = 3.0 },
         { name = "scoreValue",     displayName = "Pontos ao abater",                  type = "int",   default = 500 },
         { name = "fallLimitY",     displayName = "Y limite (abaixo disso some)",      type = "float", default = -400.0 },
@@ -93,8 +106,11 @@ function Enemy:init()
     else
         self.startX = self.object.position.x
     end
+    self.isShooter = self.variant == "atirador"
     self.facing = (self.startDirection >= 0) and 1 or -1
     self.hp = self.health
+    self.fireTimer = 0
+    self.flashTimer = 0       -- > 0: piscando porque levou um tiro
     self.dead = false
     self.touchingPlayer = 0   -- contatos ativos entre a area de dano e o jogador
 
@@ -137,9 +153,18 @@ function Enemy:createVisual()
     end)
     self.object:addChild(sprite)
     self.visual = sprite
+    -- atirador: avermelhado, para diferenciar ate ter arte propria
+    self.baseColor = self.isShooter and { 1.0, 0.55, 0.5 } or { 1, 1, 1 }
+    self:applyColor(1)
     self.visualKey = nil
     self.animator = Animator.new(sprite, EnemyAnimations)
     self:updateVisual(0, "idle")
+end
+
+function Enemy:applyColor(alpha)
+    if not self.visual then return end
+    local c = self.baseColor or { 1, 1, 1 }
+    self.visual.color = Vector4(c[1], c[2], c[3], alpha)
 end
 
 -- O sprite tem o pivo no canto inferior esquerdo: para centralizar e espelhar
@@ -401,6 +426,10 @@ function Enemy:onFixedUpdate()
         Combat.playerHit()
     end
     if self.dropTimer > 0 then self.dropTimer = self.dropTimer - dt end
+    if self.flashTimer > 0 then
+        self.flashTimer = self.flashTimer - dt
+        self:applyColor((self.flashTimer > 0 and math.floor(self.flashTimer * 30) % 2 == 0) and 0.35 or 1)
+    end
 
     local pos = self.body.position
     if pos.y < self.fallLimitY then
@@ -444,7 +473,17 @@ function Enemy:onFixedUpdate()
     end
 
     if self.state == "alert" then
-        if self.stateTimer <= 0 then self:setState("chase") end
+        if self.stateTimer <= 0 then
+            if self.isShooter then
+                self:setState("shoot")
+                self.fireTimer = 0.15   -- primeiro tiro logo depois do susto
+            else
+                self:setState("chase")
+            end
+        end
+
+    elseif self.state == "shoot" then
+        vx, anim = self:shootStep(x, y, lo, hi, dt)
 
     elseif self.state == "chase" then
         local tracking, dx = self:keepsTrack(x, y)
@@ -506,6 +545,40 @@ function Enemy:onFixedUpdate()
     self:updateVisual(dt, anim)
 end
 
+-- Atirador: parado mirando enquanto ve o jogador; perdeu de vista, anda
+-- devagar na direcao dele; sumiu por loseTime, desiste. Retorna vx, animacao.
+function Enemy:shootStep(x, y, lo, hi, dt)
+    local tracking, dx = self:keepsTrack(x, y)
+    if math.abs(dx) > 1 then self.facing = sign(dx) end
+    local sees = self:seesPlayer(x, y)
+    if tracking and sees then self.lostTimer = 0 else self.lostTimer = self.lostTimer + dt end
+    if not tracking and self.lostTimer >= self.loseTime then
+        self:setState("pause", self.pauseTime)
+        return 0, "idle"
+    end
+    self.fireTimer = self.fireTimer - dt
+    if sees then
+        if self.fireTimer <= 0 then
+            self:fireAt(Combat.getPlayer(), x, y)
+            self.fireTimer = self.fireInterval
+        end
+        return 0, "idle"
+    end
+    local vx, stopped = stepTowards(x, self.facing, self.wanderSpeed * 1.5, lo, hi, dt)
+    return vx, stopped and "idle" or "walk"
+end
+
+-- Tiro na direcao do jogador, com o angulo limitado (atira "para a frente")
+function Enemy:fireAt(player, x, y)
+    if not player or not player.body then return end
+    local mx, my = x + self.facing * (HALF_W + 6), y + 14
+    local pp = player.body.position
+    local dx, dy = math.abs(pp.x - mx), pp.y - my
+    local maxA = math.rad(self.shotMaxAngle)
+    local a = math.max(-maxA, math.min(maxA, math.atan(dy, math.max(dx, 1))))
+    EnemyShots.spawn(self.scene, mx, my, self.facing * math.cos(a), math.sin(a), self.shotSpeed)
+end
+
 -- Area de dano encostou / deixou de encostar em algo
 function Enemy:onSensorBegin(sensorBody, sensorShape, visitorBody, visitorShape)
     if self.dead or sensorBody.entity ~= self.entity then return end
@@ -528,6 +601,16 @@ function Enemy:takeHit(damage)
     self.hp = self.hp - damage
     if self.hp <= 0 then
         self:die()
+    else
+        self.flashTimer = 0.2   -- pisca: levou o tiro mas continua
+        -- levou tiro sem estar alerta: vira para o jogador e reage
+        if self.state == "wander" or self.state == "pause" then
+            local p = Combat.getPlayer()
+            local pos = self.body.position
+            if p and p.body then self.facing = sign(p.body.position.x - pos.x) end
+            self:setState("alert", self.alertTime)
+            self.lostTimer = 0
+        end
     end
 end
 

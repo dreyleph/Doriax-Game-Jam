@@ -7,8 +7,15 @@
 --   * nunca o mesmo modulo duas vezes seguidas
 --   * no maximo 1 modulo "plano" por tela
 --   * modulos mais dificeis so a partir do nivel minimo (nivel = telas geradas / 2)
---   * numero minimo garantido de inimigos por tela, crescendo com a distancia;
---     os demais pontos de inimigo aparecem por chance (tambem crescente)
+--
+-- Progressao (estilo Vampire Survivors / Risk of Rain): a dificuldade sobe com
+-- a distancia, tela a tela (LevelGenerator:difficultyAt), ate ficar impossivel:
+--   * inimigos por tela: comeca com "Inimigos na 1a tela" e cresce
+--     "Inimigos a mais por tela" ate o maximo; se os pontos de inimigo dos
+--     modulos nao bastam, os extras surgem em lugares sorteados do trecho
+--   * atiradores: a partir de uma tela, numa proporcao crescente
+--   * todos ficam mais rapidos/agressivos (velocidade, susto menor, atiram
+--     mais rapido) ate um limite
 --
 -- Chao, blocos e plataformas sao criados por codigo: um corpo de colisao
 -- invisivel + o desenho por cima, recortado das texturas de assets/Terreno/
@@ -25,11 +32,16 @@ local LevelGenerator = {
         { name = "seed",            displayName = "Semente (0 = aleatoria)",            type = "int",   default = 0 },
         { name = "chunkWidth",      displayName = "Largura da tela/trecho (px)",        type = "float", default = 1280.0 },
         { name = "chunksAhead",     displayName = "Trechos gerados a frente da tela",   type = "int",   default = 2 },
-        { name = "enemyChance",     displayName = "Chance extra de inimigo (0 a 1)",    type = "float", default = 0.5 },
-        { name = "enemyChanceRamp", displayName = "Aumento da chance por tela",         type = "float", default = 0.03 },
-        { name = "minEnemies",      displayName = "Inimigos garantidos por tela",       type = "int",   default = 2 },
-        { name = "minEnemiesEvery", displayName = "+1 inimigo garantido a cada N telas", type = "int",   default = 3 },
-        { name = "minEnemiesMax",   displayName = "Maximo de inimigos garantidos",      type = "int",   default = 6 },
+        { name = "startEnemies",    displayName = "Progressao: inimigos na 1a tela",          type = "float", default = 1.0 },
+        { name = "enemiesPerScreen", displayName = "Progressao: inimigos a mais por tela",    type = "float", default = 0.5 },
+        { name = "maxEnemiesPerScreen", displayName = "Progressao: maximo de inimigos por tela", type = "int", default = 12 },
+        { name = "maxAliveEnemies", displayName = "Progressao: maximo de inimigos vivos",     type = "int",   default = 30 },
+        { name = "shooterFromScreen", displayName = "Progressao: atiradores a partir da tela", type = "int", default = 3 },
+        { name = "shooterStartRatio", displayName = "Progressao: proporcao inicial de atiradores", type = "float", default = 0.2 },
+        { name = "shooterRatioPerScreen", displayName = "Progressao: atiradores a mais por tela", type = "float", default = 0.03 },
+        { name = "shooterMaxRatio", displayName = "Progressao: proporcao maxima de atiradores", type = "float", default = 0.5 },
+        { name = "speedPerScreen",  displayName = "Progressao: velocidade a mais por tela (0.04 = 4%)", type = "float", default = 0.04 },
+        { name = "maxSpeedMult",    displayName = "Progressao: velocidade maxima (x)",        type = "float", default = 1.8 },
         { name = "terrainLayer",    displayName = "Camada do terreno (entidade pai)",   type = "Object" },
         { name = "groundDepth",     displayName = "Espessura do chao (px)",             type = "float", default = 600.0 },
         { name = "enemyBehindMargin", displayName = "Inimigo some quando fica atras da tela (px)", type = "float", default = 150.0 },
@@ -174,7 +186,7 @@ end
 function LevelGenerator:makePiece(list, tex, x0, y0, w, h, u, uw, vh)
     local sprite = Sprite(self.scene)
     sprite.entityOwned = false
-    sprite:setSize(w, h)
+    sprite:setSize(math.floor(w + 0.5), math.floor(h + 0.5))   -- setSize so aceita inteiros
     -- pixel art: filtro "nearest" (pixels nitidos) antes de escolher a imagem
     if not self.filterFailed then
         local ok = pcall(function()
@@ -247,7 +259,7 @@ function LevelGenerator:makeBlock(x0, y0, w, h, isPlatform)
     -- Quem destroi os blocos e o gerador, em destroyChunk.
     sprite.entityOwned = false
 
-    sprite:setSize(w, h)
+    sprite:setSize(math.floor(w + 0.5), math.floor(h + 0.5))   -- setSize so aceita inteiros
     sprite.visible = false      -- o desenho e feito pelas pecas texturizadas
     sprite.position = Vector3(x0, y0, 0)
     if self.terrainLayer then
@@ -306,12 +318,51 @@ local function mergeRanges(ranges)
     return out
 end
 
-function LevelGenerator:guaranteedEnemies()
-    local extra = 0
-    if self.minEnemiesEvery > 0 then
-        extra = math.floor(self.generated / self.minEnemiesEvery)
+-- Dificuldade da tela "screen" (1 = primeira tela com inimigos, logo depois
+-- da tela inicial). Retorna quantos inimigos, proporcao de atiradores e o
+-- multiplicador de velocidade/agressividade.
+function LevelGenerator:difficultyAt(screen)
+    local n = math.floor(self.startEnemies + (screen - 1) * self.enemiesPerScreen + 1e-6)
+    n = math.max(0, math.min(self.maxEnemiesPerScreen, n))
+    local shooters = 0
+    if screen >= self.shooterFromScreen then
+        shooters = math.min(self.shooterMaxRatio,
+            self.shooterStartRatio + (screen - self.shooterFromScreen) * self.shooterRatioPerScreen)
     end
-    return math.min(self.minEnemiesMax, self.minEnemies + extra)
+    local speed = math.min(self.maxSpeedMult, 1 + (screen - 1) * self.speedPerScreen)
+    return n, shooters, speed
+end
+
+-- Propriedades de um inimigo novo conforme a dificuldade
+local function enemyOverrides(patrol, shooter, speed)
+    local o = {
+        patrolDistance = patrol,
+        variant = shooter and "atirador" or "soldado",
+        health = shooter and 1 or 2,
+        wanderSpeed = 60 * speed,
+        chaseSpeed = 190 * speed,
+        jumpForwardSpeed = 300 * math.min(speed, 1.3),
+        alertTime = 0.35 / speed,
+        visionRange = 420 + 120 * (speed - 1),
+        loseTime = 1.5 * speed,
+    }
+    if shooter then
+        o.fireInterval = math.max(0.7, 1.6 / speed)
+        o.shotSpeed = 380 * math.min(speed, 1.4)
+    end
+    return o
+end
+
+-- Pontos extras de inimigo (quando os dos modulos nao bastam): lugares
+-- sorteados nas superficies do trecho, longe das bordas
+function LevelGenerator:randomSpawnPoint(chunk)
+    local options = {}
+    for _, s in ipairs(Run.surfaces) do
+        if s.owner == chunk and s.x1 - s.x0 >= 90 then options[#options + 1] = s end
+    end
+    if #options == 0 then return nil end
+    local s = options[math.random(#options)]
+    return s.x0 + 35 + math.random() * (s.x1 - s.x0 - 70), s.top
 end
 
 function LevelGenerator:spawnChunk(modules, isStart)
@@ -358,20 +409,32 @@ function LevelGenerator:spawnChunk(modules, isStart)
         Run.addSurface(g[1], g[2], top, chunk)
     end
 
-    -- Inimigos: embaralha os pontos; os primeiros "garantidos" sempre aparecem,
-    -- os demais por chance
+    -- Inimigos conforme a dificuldade desta tela: primeiro nos pontos dos
+    -- modulos (embaralhados); se faltar, em pontos sorteados do trecho
     if not isStart then
         for i = #candidates, 2, -1 do
             local j = math.random(i)
             candidates[i], candidates[j] = candidates[j], candidates[i]
         end
-        local guaranteed = self:guaranteedEnemies()
-        local chance = math.min(1, self.enemyChance + self.generated * self.enemyChanceRamp)
-        for i, e in ipairs(candidates) do
-            if i <= guaranteed or math.random() < chance then
-                local root, inst = Combat.spawnEnemy(self.scene, e[1], e[2], { patrolDistance = e[3] })
+        local count, shooterRatio, speed = self:difficultyAt(self.generated)
+        chunk.difficulty = { enemies = count, shooters = shooterRatio, speed = speed }
+        local made, tries = 0, 0
+        while made < count and tries < count * 3 and #self.enemies < self.maxAliveEnemies do
+            tries = tries + 1
+            local ex, ey, patrol
+            local e = candidates[made + 1]
+            if e then
+                ex, ey, patrol = e[1], e[2], e[3]
+            else
+                ex, ey = self:randomSpawnPoint(chunk)
+                patrol = 60
+            end
+            if ex then
+                local shooter = math.random() < shooterRatio
+                local root, inst = Combat.spawnEnemy(self.scene, ex, ey, enemyOverrides(patrol, shooter, speed))
                 chunk.enemies[#chunk.enemies + 1] = root
                 self.enemies[#self.enemies + 1] = { root = root, inst = inst }
+                made = made + 1
             end
         end
     end

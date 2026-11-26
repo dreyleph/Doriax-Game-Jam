@@ -1,6 +1,8 @@
 -- Itens.lua
 -- Itens que caem dos inimigos (require("itens.Itens")).
--- Graficos provisorios: quadrados coloridos.
+-- Desenho: arte do Edu (assets/Itens/, gerada por tools/montar_sprites_itens.py
+-- a partir dos originais em assets/). Item sem arte (Charuto) ainda e um
+-- quadrado colorido.
 --
 --   Pisa Macio       (amarelo)   10%  -> recupera 1 vida (ate o maximo de vidas iniciais)
 --   Charuto          (preto)      5%  -> tiro automatico e mais rapido ao segurar J (por um tempo)
@@ -43,6 +45,7 @@ Itens.TYPES = {
     {
         id = "caranguejo", name = "Caranguejo", chance = 0.0067,
         color = { 1.00, 0.50, 0.00 },
+        sprite = { path = "Itens/caranguejo.png", w = 52, h = 46 },
         apply = function(player)
             Itens.crabTimer = Itens.CRAB_DURATION
             -- usa a invencibilidade do Player (pisca); cair no buraco ainda mata
@@ -52,7 +55,8 @@ Itens.TYPES = {
     {
         id = "escopeta", name = "Escopeta", chance = 0.03,
         color = { 0.15, 0.40, 1.00 },
-        blocks = 2,   -- dois quadrados lado a lado
+        blocks = 2,   -- sem arte: dois quadrados lado a lado
+        sprite = { path = "Itens/escopeta.png", w = 72, h = 38 },   -- arte: mosquete
         apply = function(player)
             Itens.secondaryWeapon = "escopeta"
             Itens.secondaryAmmo = Itens.SHOTGUN_AMMO   -- pegar outra recarrega
@@ -68,6 +72,7 @@ Itens.TYPES = {
     {
         id = "pisa_macio", name = "Pisa Macio", chance = 0.10,
         color = { 1.00, 0.90, 0.10 },
+        sprite = { path = "Itens/pisa_macio.png", w = 38, h = 48 },
         apply = function(player)
             GameState.lives = math.min(GameState.lives + 1, GameState.startLives)
         end,
@@ -110,8 +115,37 @@ function Itens.rollType()
     return nil
 end
 
+-- Sprite com a arte do item, no tamanho da imagem (1 pixel da imagem = 1 px
+-- no mundo) e com filtro "nearest" (pixels nitidos)
+local function artSprite(scene, art)
+    local sprite = Sprite(scene)
+    sprite.entityOwned = false   -- destruido por este modulo
+    sprite:setSize(art.w, art.h)
+    pcall(function()
+        local mat = sprite.material
+        local t = mat.baseColorTexture
+        t.minFilter = TextureFilter.NEAREST
+        t.magFilter = TextureFilter.NEAREST
+        mat.baseColorTexture = t
+        sprite.material = mat
+    end)
+    sprite:setTexture(art.path)
+    return sprite
+end
+
 -- x = centro, y = pe de quem dropou
 function Itens.spawn(scene, itemType, x, y)
+    local art = itemType.sprite
+    if art then
+        local sprite = artSprite(scene, art)
+        sprite.position = Vector3(x - art.w / 2, y, 0)   -- canto inferior esquerdo, apoiado no chao
+        drops[#drops + 1] = {
+            scene = scene, sprites = { sprite }, entities = { sprite.entity }, type = itemType,
+            x = x, y = y, halfW = art.w / 2, halfH = art.h / 2, timeLeft = Itens.LIFETIME,
+        }
+        return
+    end
+
     local s = Itens.SIZE
     local n = itemType.blocks or 1
     local width = n * s + (n - 1) * Itens.BLOCK_GAP
@@ -131,7 +165,7 @@ function Itens.spawn(scene, itemType, x, y)
 
     drops[#drops + 1] = {
         scene = scene, sprites = sprites, entities = entities, type = itemType,
-        x = x, y = y, halfW = width / 2, timeLeft = Itens.LIFETIME,
+        x = x, y = y, halfW = width / 2, halfH = s / 2, timeLeft = Itens.LIFETIME,
     }
 end
 
@@ -181,12 +215,12 @@ function Itens.update(player, dt, px, py, halfW, halfH)
     if Itens.cigarTimer > 0 then Itens.cigarTimer = math.max(Itens.cigarTimer - dt, 0) end
     if Itens.crabTimer > 0 then Itens.crabTimer = math.max(Itens.crabTimer - dt, 0) end
 
-    local half = Itens.SIZE / 2
     for i = #drops, 1, -1 do
         local d = drops[i]
         d.timeLeft = d.timeLeft - dt
 
         -- centro do item
+        local half = d.halfH or Itens.SIZE / 2
         local cx, cy = d.x, d.y + half
         local touching = player
             and math.abs(px - cx) <= halfW + d.halfW

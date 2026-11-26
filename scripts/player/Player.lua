@@ -24,6 +24,7 @@ local Combat = require("game.Combat")
 local GameState = require("game.GameState")
 local Run = require("game.Run")
 local Itens = require("itens.Itens")
+local EnemyShots = require("game.EnemyShots")
 local Animator = require("game.Animator")
 local PlayerAnimations = require("player.PlayerAnimations")
 
@@ -53,7 +54,8 @@ local Player = {
         { name = "dashUpKeep",    displayName = "Dash: velocidade vertical mantida ao subir (0-1)", type = "float", default = 0.5 },
         { name = "knifeCooldown", displayName = "Faca: intervalo entre golpes (s)", type = "float", default = 0.25 },
         { name = "knifeTime",     displayName = "Faca: duracao do golpe (s)",   type = "float", default = 0.5 },
-        { name = "knifeDamage",   displayName = "Faca: dano",                   type = "int",   default = 1 },
+        { name = "knifePower",    displayName = "Faca: dano (2 = mata qualquer inimigo)", type = "int", default = 2 },
+        { name = "knifeSize",     displayName = "Faca: tamanho de cada bloco de acerto (px)", type = "float", default = 44.0 },
         { name = "allowDiagonal", displayName = "Permitir tiro na diagonal",    type = "bool",  default = true },
         { name = "startLives",        displayName = "Vidas iniciais",                     type = "int",   default = 3 },
         { name = "respawnFreezeTime", displayName = "Animacao de reviver, parado (s)",  type = "float", default = 1.0 },
@@ -90,6 +92,7 @@ function Player:init()
     Combat.resetLevelState()
     Combat.registerPlayer(self)
     Itens.reset()
+    EnemyShots.reset()
 
     GameState.startLives = self.startLives
     if GameState.needsNewGame then
@@ -253,12 +256,25 @@ end
 
 -- Faca ------------------------------------------------------------------
 -- Golpe corpo a corpo na mesma direcao da mira dos tiros. A area de acerto e
--- um quadrado do tamanho de um item, encostado no jogador.
--- Blocos (quadrados do tamanho de um item) em volta do jogador, em unidades
+-- feita de blocos quadrados de "Faca: tamanho" px, encostados no jogador.
+-- Dano 2: mata qualquer inimigo com um golpe.
+-- Blocos em volta do jogador, em unidades
 -- de "um bloco para o lado / para cima": (-1, 1) = diagonal superior esquerda.
 --   cima (reto ou diagonal)  -> os 3 de cima
 --   baixo (reto ou diagonal) -> os 3 de baixo
 --   frente (esquerda/direita) -> so o bloco da frente
+-- Efeito visual do golpe (assets/VFX/, gerado por tools/montar_vfx_faca.py a
+-- partir do pacote "SLASH VFX"): 6 quadros tocados uma vez durante o golpe,
+-- no tamanho da area de acerto. A arte da frente e um arco aberto para a
+-- direita; a de cima/baixo, um arco fino com a barriga para baixo (para cima
+-- ela e espelhada na vertical).
+-- O desenho tem o tamanho da area de acerto (a da frente um pouco mais larga,
+-- "widen", porque o arco e mais largo que alto).
+local SLASH_FX = {
+    front = { texture = "VFX/faca_frente.png", sheetW = 720, sheetH = 88, frameW = 120, frameH = 88, widen = 1.35 },
+    vertical = { texture = "VFX/faca_cima.png", sheetW = 1536, sheetH = 88, frameW = 256, frameH = 88, widen = 1.0 },
+}
+
 local function slashBlocks(dx, dy)
     if dy > 0 then return { { -1, 1 }, { 0, 1 }, { 1, 1 } } end
     if dy < 0 then return { { -1, -1 }, { 0, -1 }, { 1, -1 } } end
@@ -268,43 +284,64 @@ end
 
 function Player:stab(aimUp, aimDown, moving)
     local _, _, dx, dy = self:aim(aimUp, aimDown, moving)
-    local half = Itens.SIZE / 2
+    local half = self.knifeSize / 2
     self:clearSlash()
 
-    -- o golpe guarda o deslocamento de cada bloco em relacao ao jogador e o acompanha
+    -- o golpe guarda o deslocamento de cada bloco de acerto em relacao ao
+    -- jogador e o acompanha; o desenho e um efeito so, sobre a area toda
     local blocks = {}
+    local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
     for _, b in ipairs(slashBlocks(dx, dy)) do
-        local sprite = Sprite(self.scene)
-        sprite.entityOwned = false   -- destruido por este script
-        sprite:setSize(half * 2, half * 2)
-        sprite.color = Vector4(1, 1, 1, 0.8)
-        blocks[#blocks + 1] = {
-            sprite = sprite, entity = sprite.entity,
-            offsetX = b[1] * (HALF_W + half), offsetY = b[2] * (HALF_H + half),
-        }
+        local ox, oy = b[1] * (HALF_W + half), b[2] * (HALF_H + half)
+        blocks[#blocks + 1] = { offsetX = ox, offsetY = oy }
+        minX, maxX = math.min(minX, ox - half), math.max(maxX, ox + half)
+        minY, maxY = math.min(minY, oy - half), math.max(maxY, oy + half)
     end
 
     self.slash = {
         blocks = blocks, half = half,
         timeLeft = self.knifeTime,
         hit = {},   -- inimigos ja acertados por este golpe (cada um so leva 1 vez)
+        fx = self:createSlashFx(dx, dy, (minX + maxX) / 2, (minY + maxY) / 2, maxX - minX, maxY - minY),
     }
     self.shootAnimTimer = self.shootAnimTime
     self:updateSlash(0)
 end
 
+-- Sprite do efeito: centro (cx, cy) relativo ao jogador; espelhado conforme
+-- o lado/direcao do golpe
+function Player:createSlashFx(dx, dy, cx, cy, areaW, areaH)
+    local def = (dy == 0) and SLASH_FX.front or SLASH_FX.vertical
+    -- setSize so aceita inteiros (numero quebrado da erro e o golpe nao sai)
+    local w, h = math.floor(areaW * def.widen + 0.5), math.floor(areaH + 0.5)
+    local sprite = Sprite(self.scene)
+    sprite.entityOwned = false   -- destruido por este script
+    sprite:setSize(w, h)
+    local sx = (dy == 0) and ((dx >= 0) and 1 or -1) or self.facing
+    local sy = (dy > 0) and -1 or 1
+    sprite.scale = Vector3(sx, sy, 1)
+    local animator = Animator.new(sprite, {
+        default = "slash",
+        slash = {
+            texture = def.texture, sheetW = def.sheetW, sheetH = def.sheetH,
+            frameW = def.frameW, frameH = def.frameH, first = 0, count = 6,
+            fps = 6 / math.max(self.knifeTime, 0.05), loop = false,
+        },
+    })
+    return { sprite = sprite, entity = sprite.entity, animator = animator,
+             cx = cx, cy = cy, sx = sx, sy = sy, w = w, h = h }
+end
+
 function Player:clearSlash()
     if not self.slash then return end
-    for _, b in ipairs(self.slash.blocks) do
-        if self.scene:isEntityCreated(b.entity) then
-            self.scene:destroyEntity(b.entity)
-        end
+    local fx = self.slash.fx
+    if fx and self.scene:isEntityCreated(fx.entity) then
+        self.scene:destroyEntity(fx.entity)
     end
     self.slash = nil
 end
 
 -- Golpe ativo: segue o jogador e acerta quem encostar enquanto durar
--- (desenho provisorio: quadrados brancos, ate ter arte)
 function Player:updateSlash(dt)
     local slash = self.slash
     if not slash then return end
@@ -316,12 +353,19 @@ function Player:updateSlash(dt)
 
     local pos = self.body.position
     local half = slash.half
-    local damage = self.knifeDamage * Itens.damageMultiplier()
+    local damage = self.knifePower * Itens.damageMultiplier()
     local kills = 0
     for _, b in ipairs(slash.blocks) do
         local cx, cy = pos.x + b.offsetX, pos.y + b.offsetY
-        b.sprite.position = Vector3(cx - half, cy - half, 0)   -- canto inferior esquerdo
         kills = kills + Combat.hitArea(self.scene, cx, cy, half, half, damage, slash.hit)
+    end
+    -- efeito: acompanha o jogador (pivo no canto inferior esquerdo, entao a
+    -- posicao leva o espelhamento em conta para ficar centrado na area)
+    local fx = slash.fx
+    if fx then
+        fx.animator:update(dt)
+        local x, y = pos.x + fx.cx, pos.y + fx.cy
+        fx.sprite.position = Vector3(x - fx.sx * fx.w / 2, y - fx.sy * fx.h / 2, 0)
     end
     if kills > 0 then
         self.dashCooldownTimer = 0   -- matou com a faca: dash liberado de novo
@@ -566,6 +610,7 @@ end
 
 function Player:onFixedUpdate()
     local dt = Engine.updateTime
+    EnemyShots.update(dt, self)   -- tiros dos inimigos andam mesmo com o jogador morto/revivendo
     if self:updateLifeState(dt) then return end
 
     if self.dropTimer > 0 then self.dropTimer = self.dropTimer - dt end
@@ -696,6 +741,7 @@ function Player:onFixedUpdate()
     -- Itens: efeitos temporarios e coleta
     local pos = self.body.position
     Itens.update(self, dt, pos.x, pos.y, HALF_W, HALF_H)
+    GameState.updateDistance(pos.x)
 
     self:updateVisual(dt, dir ~= 0)
 
