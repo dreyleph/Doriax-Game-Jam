@@ -28,6 +28,7 @@ local Itens = require("itens.Itens")
 local EnemyShots = require("game.EnemyShots")
 local Animator = require("game.Animator")
 local PlayerAnimations = require("player.PlayerAnimations")
+local TextureKeeper = require("game.TextureKeeper")
 
 local Player = {
     properties = {
@@ -160,6 +161,9 @@ function Player:init()
     -- efeito da faca: sprites criados ja no inicio (ver prepareSlashFx)
     if self.scene then
         if not pcall(function() self:prepareSlashFx() end) then self.slashFxSprites = nil end
+        -- itens e inimigos aparecem/somem o tempo todo: deixa as imagens
+        -- deles carregadas para nao ler do disco no meio da partida
+        TextureKeeper.keepGameplayTextures(self.scene)
     end
     -- rastro do dash: copias criadas ja no inicio (ver prepareGhosts)
     self.ghosts, self.ghostTimer = nil, 0

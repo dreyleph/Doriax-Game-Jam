@@ -21,20 +21,32 @@ local Run = {
 Run.surfaces = {}
 Run.surfacesSceneId = nil
 
+-- Muda sempre que a lista de superficies muda: invalida o cache dos trechos
+-- emendados (Run.surfaceSpan), que a IA dos inimigos consulta muitas vezes
+-- por passo de fisica
+Run.surfacesVersion = 0
+
 function Run.clearSurfaces(sceneId)
     Run.surfaces = {}
     Run.surfacesSceneId = sceneId
+    Run.surfacesVersion = Run.surfacesVersion + 1
 end
 
 function Run.addSurface(x0, x1, top, owner, platform)
     if x1 - x0 <= 0 then return end
     Run.surfaces[#Run.surfaces + 1] = { x0 = x0, x1 = x1, top = top, owner = owner, platform = platform == true }
+    Run.surfacesVersion = Run.surfacesVersion + 1
 end
 
 function Run.removeSurfaces(owner)
+    local removed = false
     for i = #Run.surfaces, 1, -1 do
-        if Run.surfaces[i].owner == owner then table.remove(Run.surfaces, i) end
+        if Run.surfaces[i].owner == owner then
+            table.remove(Run.surfaces, i)
+            removed = true
+        end
     end
+    if removed then Run.surfacesVersion = Run.surfacesVersion + 1 end
 end
 
 -- Ponto mais proximo de x em cima de uma superficie, a pelo menos "margin" px
@@ -72,6 +84,10 @@ function Run.surfaceSpan(x, feetY, tolerance)
         end
     end
     if not found then return nil end
+    -- o trecho emendado so depende da superficie achada: guarda ate a lista mudar
+    if found.spanVersion == Run.surfacesVersion then
+        return found.spanX0, found.spanX1, found.top, found.platform
+    end
     local x0, x1, top = found.x0, found.x1, found.top
     local grew = true
     while grew do
@@ -83,6 +99,7 @@ function Run.surfaceSpan(x, feetY, tolerance)
             end
         end
     end
+    found.spanX0, found.spanX1, found.spanVersion = x0, x1, Run.surfacesVersion
     return x0, x1, top, found.platform
 end
 

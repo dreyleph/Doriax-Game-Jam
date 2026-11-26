@@ -61,7 +61,9 @@ function Combat.hitArea(scene, cx, cy, halfW, halfH, damage, alreadyHit)
     for _, t in ipairs(targets) do
         local target = t.target
         local ok, p = false, nil
-        -- o gerador destroi inimigos sem tirar do registro: ignora (e limpa) esses
+        -- defesa extra: entidade que nao existe mais e tirada do registro.
+        -- (o pcall NAO protege de um Body2D de outra cena; por isso o registro
+        -- e limpo na troca de cena, ver Combat.clearRegistries)
         if scene:isEntityCreated(t.entity) and target.body then
             ok, p = pcall(function() return target.body.position end)
         end
@@ -149,7 +151,7 @@ end
 
 -- Chamado pelo Player:init a cada (re)inicio da cena
 -- (o registro de inimigos nao e limpo aqui: os inimigos podem iniciar antes
--- do jogador, e cada um se registra de novo com o id da sua entidade)
+-- do jogador. Quem limpa e Combat.restartLevel, antes de trocar a cena)
 function Combat.resetLevelState()
     restarting = false
 end
@@ -162,17 +164,27 @@ function Combat.playerHit()
     end
 end
 
+-- Esquece todos os inimigos/jogador registrados. O estado do Lua (e este
+-- modulo) sobrevive a troca de cena, mas os objetos registrados apontam para a
+-- cena antiga, que a engine apaga. Sem limpar, um id de entidade da cena antiga
+-- que existir de novo na cena nova faz Combat.hitArea/oneWayFilter lerem
+-- "target.body.position" de um Body2D cuja cena ja foi liberada: isso e um
+-- acesso invalido de memoria dentro da engine (crash), que pcall nao segura.
+function Combat.clearRegistries()
+    hittables = {}
+    oneWayUsers = {}
+    player = nil
+end
+
 -- Recarrega a fase atual (usado no game over)
 function Combat.restartLevel()
     if restarting then return end
     restarting = true
-    -- Os registros sao do modulo e sobrevivem a troca de cena: sem limpar,
-    -- inimigos da corrida anterior ficam aqui apontando para a cena destruida.
-    -- Como os ids de entidade se repetem na cena nova, isEntityCreated() passa
-    -- e ler target.body.position derruba o editor (access violation em
-    -- Body2D::getPosition, que o pcall nao consegue segurar).
-    hittables = {}
-    oneWayUsers = {}
+    -- loadScene e adiado para o proximo frame; os scripts da cena nova se
+    -- registram de novo no init deles. Sem limpar, um id de entidade da cena
+    -- antiga que se repete na nova faz ler target.body.position da cena
+    -- destruida (access violation em Body2D::getPosition, ver clearRegistries)
+    Combat.clearRegistries()
     SceneManager.loadScene(SceneManager.currentSceneId)
 end
 
