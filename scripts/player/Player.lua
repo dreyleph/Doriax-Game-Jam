@@ -111,13 +111,14 @@ function Player:init()
         pcall(function()
             self.meleeSound = Sound(self.scene)
             self.meleeSound:loadSound("melee_sound.wav")
-            self.meleeSound:setVolume(1)
+            -- no Lua, volume/looping sao propriedades (nao existem setVolume/setLooping)
+            self.meleeSound.volume = 1
         end)
 
         self.backgroundMusic = Sound(self.scene)
         self.backgroundMusic:loadSound("background_music.wav")
-        self.backgroundMusic:setVolume(0.12)
-        self.backgroundMusic:setLooping(true)
+        self.backgroundMusic.volume = 0.12
+        self.backgroundMusic.looping = true
         self.backgroundMusic:play()
     end
 
@@ -346,11 +347,10 @@ function Player:stab(aimUp, aimDown, moving)
     self:clearSlash()
 
     if self.meleeSound then
-        pcall(function()
-            self.meleeSound:stop()
-            self.meleeSound:seek(0)
-            self.meleeSound:play()
-        end)
+        -- cada play() abre uma voz nova (stop + play no mesmo quadro nao
+        -- reinicia: o play cancela o stop e o seek voltava a voz antiga,
+        -- tocando o golpe dobrado)
+        pcall(function() self.meleeSound:play() end)
     end
 
     -- o golpe guarda o deslocamento de cada bloco de acerto em relacao ao
