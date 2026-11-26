@@ -1,8 +1,8 @@
 -- Itens.lua
 -- Itens que caem dos inimigos (require("itens.Itens")).
 -- Desenho: arte do Edu (assets/Itens/, gerada por tools/montar_sprites_itens.py
--- a partir dos originais em assets/). Item sem arte (Charuto) ainda e um
--- quadrado colorido.
+-- a partir dos originais em assets/). Item sem arte ainda e um quadrado
+-- colorido (campo "color").
 --
 --   Pisa Macio       (amarelo)   10%  -> recupera 1 vida (ate o maximo de vidas iniciais)
 --   Charuto          (preto)      5%  -> tiro automatico e mais rapido ao segurar J (por um tempo)
@@ -65,6 +65,7 @@ Itens.TYPES = {
     {
         id = "charuto", name = "Charuto", chance = 0.05,
         color = { 0.05, 0.05, 0.05 },
+        sprite = { path = "Itens/charuto.png", w = 39, h = 48 },
         apply = function(player)
             Itens.cigarTimer = Itens.CIGAR_DURATION
         end,

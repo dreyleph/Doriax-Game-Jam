@@ -80,10 +80,10 @@ Cada inimigo abatido sorteia no máximo 1 item; o jogador pega encostando. O ite
 |---|---|---|---|
 | Pisa Macio | garrafa (`assets/Itens/pisa_macio.png`) | 10% | +1 vida (até o máximo inicial) |
 | Escopeta | mosquete (`assets/Itens/escopeta.png`) | 3% | arma secundária na tecla K: 5 projéteis em leque, alcance curto, 10 disparos (pegar outra recarrega) |
-| Charuto | quadrado preto (sem arte ainda) | 5% | 10 s de tiro automático e rápido segurando J |
+| Charuto | charuto (`assets/Itens/charuto.png`) | 5% | 10 s de tiro automático e rápido segurando J |
 | Caranguejo | caranguejo (`assets/Itens/caranguejo.png`) | 0,67% | 15 s de imortalidade e dano x2 |
 
-As imagens de `assets/Itens/` são geradas a partir das artes originais do Edu (`assets/PisaMacio.png`, `Musket.png`, `Kraby1.png`) por `python tools/montar_sprites_itens.py`, já no tamanho do jogo. Os efeitos temporários acabam ao morrer; a arma secundária fica até acabar a munição. Chances, durações e desenhos ficam no topo de `scripts/itens/Itens.lua`.
+As imagens de `assets/Itens/` são geradas a partir das artes originais do Edu (`assets/PisaMacio.png`, `Musket.png`, `Kraby1.png`, `Charuto.png`) por `python tools/montar_sprites_itens.py`, já no tamanho do jogo. Os efeitos temporários acabam ao morrer; a arma secundária fica até acabar a munição. Chances, durações e desenhos ficam no topo de `scripts/itens/Itens.lua`.
 
 ## Mapa procedural (protótipo)
 - Cada tela (1280 px) é montada com **4 módulos de 320 px** sorteados de `scripts/level/Chunks.lua` (buracos, plataformas, degraus, caixas, grupos de inimigos...). A corrida começa sempre por uma tela segura.
